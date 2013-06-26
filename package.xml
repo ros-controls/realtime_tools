@@ -1,6 +1,6 @@
 <package>
   <name>realtime_tools</name>
-  <version>1.0.0</version>
+  <version>1.8.0</version>
   <description>This package contains a set of tools that can be used from a hard
     realtime thread, without breaking the realtime behavior.  The
     tools currently only provides the realtime publisher, which makes
