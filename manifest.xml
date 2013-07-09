@@ -6,7 +6,7 @@
     it possible to publish messages to a ROS topic from a realtime
     thread. We plan to add a basic implementation of a realtime
     buffer, to make it possible to get data from a (non-realtime)
-    topic callback into tha realtime loop. Once the lockfree buffer is
+    topic callback into the realtime loop. Once the lockfree buffer is
     created, the realtime publisher will start using it, which will
     result in major API changes for the realtime publisher (removal of
     all lock methods).
