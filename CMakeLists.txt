@@ -14,7 +14,6 @@ else()
   find_package(catkin REQUIRED COMPONENTS roscpp rospy)
 
   include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
-  add_library(${PROJECT_NAME} src/realtime_clock.cpp)
 
   # Declare catkin package
   catkin_package(
@@ -23,6 +22,8 @@ else()
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
     )
+
+  add_library(${PROJECT_NAME} src/realtime_clock.cpp)
 
   # Install
   install(DIRECTORY include/${PROJECT_NAME}/

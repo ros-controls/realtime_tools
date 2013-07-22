@@ -49,7 +49,7 @@ class RealtimeBuffer
 {
  public:
   RealtimeBuffer()
-    :new_data_available_(false), running_(true)
+    : new_data_available_(false)
   {
     // allocate memory
     non_realtime_data_ = new T();
@@ -64,9 +64,29 @@ class RealtimeBuffer
       delete realtime_data_;
   }
 
+  RealtimeBuffer(RealtimeBuffer &source)
+  {
+    // Copy the data from old RTB to new RTB
+    writeFromNonRT(*source.readFromNonRT());
+  }
+
+  /*!
+   * @brief Custom assignment operator
+   */
+  RealtimeBuffer &operator =(const RealtimeBuffer& source)
+  {
+    if (this == &source)
+      return *this;
+
+    // Copy the data from old RTB to new RTB
+    writeFromNonRT(*source.readFromNonRT());
+
+    return *this;
+  }
 
   T* readFromRT()
   {
+    // Check if the data is currently being written to (is locked)
     if (mutex_.try_lock())
     {
       // swap pointers
@@ -82,7 +102,16 @@ class RealtimeBuffer
     return realtime_data_;
   }
 
+  T* readFromNonRT() const
+  {
+    boost::mutex::scoped_lock lock(mutex_);
 
+    // the non-realtime version is the most up to date
+    if (new_data_available_)
+      return non_realtime_data_;
+    else
+      return realtime_data_;
+  }
 
   void writeFromNonRT(const T& data)
   {
@@ -96,7 +125,6 @@ class RealtimeBuffer
     // release lock
     mutex_.unlock();
   }
-
 
   void initRT(const T& data)
   {
@@ -118,9 +146,9 @@ class RealtimeBuffer
   T* realtime_data_;
   T* non_realtime_data_;
   bool new_data_available_;
-  bool running_;
-  boost::mutex mutex_;
 
+  // Set as mutable so that readFromRT() can be performed on a const buffer
+  mutable boost::mutex mutex_;
 
 }; // class
 }// namespace
