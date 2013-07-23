@@ -92,9 +92,9 @@ class RealtimeBuffer
       // swap pointers
       if (new_data_available_)
       {
-	T* tmp = realtime_data_;
+        T* tmp = realtime_data_;
 	realtime_data_ = non_realtime_data_;
-	non_realtime_data_ = tmp;
+        non_realtime_data_ = tmp;
 	new_data_available_ = false;
       }
       mutex_.unlock();
@@ -106,7 +106,6 @@ class RealtimeBuffer
   {
     boost::mutex::scoped_lock lock(mutex_);
 
-    // the non-realtime version is the most up to date
     if (new_data_available_)
       return non_realtime_data_;
     else
@@ -147,7 +146,7 @@ class RealtimeBuffer
   T* non_realtime_data_;
   bool new_data_available_;
 
-  // Set as mutable so that readFromRT() can be performed on a const buffer
+  // Set as mutable so that readFromNonRT() can be performed on a const buffer
   mutable boost::mutex mutex_;
 
 }; // class
