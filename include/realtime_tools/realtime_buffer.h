@@ -66,6 +66,10 @@ class RealtimeBuffer
 
   RealtimeBuffer(RealtimeBuffer &source)
   {
+    // allocate memory
+    non_realtime_data_ = new T();
+    realtime_data_ = new T();
+
     // Copy the data from old RTB to new RTB
     writeFromNonRT(*source.readFromNonRT());
   }
