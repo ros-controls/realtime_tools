@@ -1,0 +1,123 @@
+///////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2008, Willow Garage, Inc.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//   * Redistributions of source code must retain the above copyright notice,
+//     this list of conditions and the following disclaimer.
+//   * Redistributions in binary form must reproduce the above copyright
+//     notice, this list of conditions and the following disclaimer in the
+//     documentation and/or other materials provided with the distribution.
+//   * Neither the name of hiDOF, Inc. nor the names of its
+//     contributors may be used to endorse or promote products derived from
+//     this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//////////////////////////////////////////////////////////////////////////////
+
+/// \author Stuart Glaser
+
+#ifndef REALTIME_TOOLS_REALTIME_SERVER_GOAL_HANDLE_H
+#define REALTIME_TOOLS_REALTIME_SERVER_GOAL_HANDLE_H
+
+// Standard
+#include <inttypes.h>
+
+// Boost
+#include <boost/shared_ptr.hpp>
+
+// Actionlib
+#include <actionlib/server/action_server.h>
+
+namespace realtime_tools
+{
+
+template <class Action>
+class RealtimeServerGoalHandle
+{
+private:
+  ACTION_DEFINITION(Action);
+
+  typedef actionlib::ServerGoalHandle<Action> GoalHandle;
+  typedef boost::shared_ptr<Result> ResultPtr;
+
+  uint8_t state_;
+
+  bool req_abort_;
+  bool req_succeed_;
+  ResultConstPtr req_result_;
+
+public:
+  GoalHandle gh_;
+  ResultPtr preallocated_result_;  // Preallocated so it can be used in realtime
+
+  RealtimeServerGoalHandle(GoalHandle &gh, const ResultPtr &preallocated_result = ResultPtr((Result*)NULL))
+    : req_abort_(false),
+      req_succeed_(false),
+      gh_(gh),
+      preallocated_result_(preallocated_result)
+  {
+    if (!preallocated_result_)
+      preallocated_result_.reset(new Result);
+  }
+
+  void setAborted(ResultConstPtr result = ResultConstPtr((Result*)NULL))
+  {
+    if (!req_succeed_ && !req_abort_)
+    {
+      req_result_ = result;
+      req_abort_ = true;
+    }
+  }
+
+  void setSucceeded(ResultConstPtr result = ResultConstPtr((Result*)NULL))
+  {
+    if (!req_succeed_ && !req_abort_)
+    {
+      req_result_ = result;
+      req_succeed_ = true;
+    }
+  }
+
+  bool valid()
+  {
+    return gh_.getGoal() != NULL;
+  }
+
+  void runNonRealtime(const ros::TimerEvent &te)
+  {
+    using namespace actionlib_msgs;
+    if (valid())
+    {
+      actionlib_msgs::GoalStatus gs = gh_.getGoalStatus();
+      if (req_abort_ && gs.status == GoalStatus::ACTIVE)
+      {
+        if (req_result_)
+          gh_.setAborted(*req_result_);
+        else
+          gh_.setAborted();
+      }
+      else if (req_succeed_ && gs.status == GoalStatus::ACTIVE)
+      {
+        if (req_result_)
+          gh_.setSucceeded(*req_result_);
+        else
+          gh_.setSucceeded();
+      }
+    }
+  }
+};
+
+} // namespace
+
+#endif // header guard
