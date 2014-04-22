@@ -36,8 +36,8 @@
  * Author: Wim Meeussen
  */
 
-#ifndef REALTIME_TOOLS_REALTIME_BUFFER
-#define REALTIME_TOOLS_REALTIME_BUFFER
+#ifndef REALTIME_TOOLS__REALTIME_BUFFER_H_
+#define REALTIME_TOOLS__REALTIME_BUFFER_H_
 
 #include <boost/thread/mutex.hpp>
 

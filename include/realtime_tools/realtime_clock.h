@@ -36,8 +36,8 @@
  * Author: Wim Meeussen
  */
 
-#ifndef REALTIME_TOOLS_REALTIME_CLOCK
-#define REALTIME_TOOLS_REALTIME_CLOCK
+#ifndef REALTIME_TOOLS__REALTIME_CLOCK_H_
+#define REALTIME_TOOLS__REALTIME_CLOCK_H_
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread.hpp>

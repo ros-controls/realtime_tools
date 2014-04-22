@@ -19,7 +19,6 @@ else()
 
   # Declare catkin package
   catkin_package(
-    DEPENDS boost
     CATKIN_DEPENDS roscpp rospy
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}

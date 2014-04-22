@@ -29,8 +29,8 @@
 
 // Author: Stuart Glaser
 
-#ifndef REALTIME_BOX_H__
-#define REALTIME_BOX_H__
+#ifndef REALTIME_TOOLS__REALTIME_BOX_H__
+#define REALTIME_TOOLS__REALTIME_BOX_H__
 
 #include <string>
 #include <ros/node_handle.h>
