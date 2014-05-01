@@ -1,40 +1,29 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(realtime_tools)
 
-if(USE_ROSBUILD)
+# Load catkin and all dependencies required for this package
+find_package(catkin REQUIRED COMPONENTS roscpp rospy)
 
-  include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-  rosbuild_init()
-  rosbuild_add_boost_directories()
-  rosbuild_add_library(${PROJECT_NAME} src/realtime_clock.cpp)
+find_package(Boost COMPONENTS thread)
 
-else()
+include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
-  # Load catkin and all dependencies required for this package
-  find_package(catkin REQUIRED COMPONENTS roscpp rospy)
+# Declare catkin package
+catkin_package(
+  CATKIN_DEPENDS roscpp rospy
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  )
 
-  find_package(Boost COMPONENTS thread)
+add_library(${PROJECT_NAME} src/realtime_clock.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-  include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+# Install
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-  # Declare catkin package
-  catkin_package(
-    CATKIN_DEPENDS roscpp rospy
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME}
-    )
+install(TARGETS ${PROJECT_NAME}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
-  add_library(${PROJECT_NAME} src/realtime_clock.cpp)
-  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-
-  # Install
-  install(DIRECTORY include/${PROJECT_NAME}/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-
-  install(TARGETS ${PROJECT_NAME}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
-
-  install(DIRECTORY scripts/
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-endif()
+install(DIRECTORY scripts/
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
