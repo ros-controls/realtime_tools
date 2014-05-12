@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.0 (2014-05-12)
+------------------
 * Remove rosbuild artifacts.
 * Cleaned up CMake and removed unnecessary dependencies
 * Contributors: Adolfo Rodriguez Tsouroukdissian, Dave Coleman
