@@ -72,7 +72,7 @@ private:
   // Protects access to the thing in the box.  This mutex is
   // guaranteed to be locked for no longer than the duration of the
   // copy, so as long as the copy is realtime safe and the OS has
-  // priority inversion for mutexes, this lock can be safely locked
+  // priority inheritance for mutexes, this lock can be safely locked
   // from within realtime.
   boost::mutex thing_lock_RT_;
 };
