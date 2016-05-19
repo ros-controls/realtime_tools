@@ -125,7 +125,7 @@ public:
         else
           gh_.setSucceeded();
       }
-      if (req_feedback_)
+      if (req_feedback_ && gs.status == GoalStatus::ACTIVE)
       {
         gh_.publishFeedback(*req_feedback_);
       }
