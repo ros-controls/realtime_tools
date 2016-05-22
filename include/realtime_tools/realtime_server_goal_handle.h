@@ -50,25 +50,31 @@ private:
 
   typedef actionlib::ServerGoalHandle<Action> GoalHandle;
   typedef boost::shared_ptr<Result> ResultPtr;
+  typedef boost::shared_ptr<Feedback> FeedbackPtr;
 
   uint8_t state_;
 
   bool req_abort_;
   bool req_succeed_;
   ResultConstPtr req_result_;
+  FeedbackConstPtr req_feedback_;
 
 public:
   GoalHandle gh_;
   ResultPtr preallocated_result_;  // Preallocated so it can be used in realtime
+  FeedbackPtr preallocated_feedback_;  // Preallocated so it can be used in realtime
 
-  RealtimeServerGoalHandle(GoalHandle &gh, const ResultPtr &preallocated_result = ResultPtr((Result*)NULL))
+  RealtimeServerGoalHandle(GoalHandle &gh, const ResultPtr &preallocated_result = ResultPtr((Result*)NULL), const FeedbackPtr &preallocated_feedback = FeedbackPtr((Feedback*)NULL))
     : req_abort_(false),
       req_succeed_(false),
       gh_(gh),
-      preallocated_result_(preallocated_result)
+      preallocated_result_(preallocated_result),
+      preallocated_feedback_(preallocated_feedback)
   {
     if (!preallocated_result_)
       preallocated_result_.reset(new Result);
+    if (!preallocated_feedback_)
+      preallocated_feedback_.reset(new Feedback);
   }
 
   void setAborted(ResultConstPtr result = ResultConstPtr((Result*)NULL))
@@ -87,6 +93,11 @@ public:
       req_result_ = result;
       req_succeed_ = true;
     }
+  }
+
+  void setFeedback(FeedbackConstPtr feedback = FeedbackConstPtr((Feedback*)NULL))
+  {
+    req_feedback_ = feedback;
   }
 
   bool valid()
@@ -113,6 +124,10 @@ public:
           gh_.setSucceeded(*req_result_);
         else
           gh_.setSucceeded();
+      }
+      if (req_feedback_ && gs.status == GoalStatus::ACTIVE)
+      {
+        gh_.publishFeedback(*req_feedback_);
       }
     }
   }
