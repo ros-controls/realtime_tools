@@ -2,6 +2,10 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+* Add feedback sending capability to RealtimeServerGoalHandle.
+* Contributors: Bence Magyar, Miguel Prada
+
 1.9.1 (2015-04-30)
 ------------------
 * RealtimeBox: Fix member doc
