@@ -56,6 +56,18 @@ class RealtimeBuffer
     realtime_data_ = new T();
   }
 
+  /**
+   * @brief Constructor for objects that don't have
+   * a default constructor
+   * @param data The object to use as default value
+   */
+  RealtimeBuffer(const T& data)
+  {
+    // allocate memory
+    non_realtime_data_ = new T(data);
+    realtime_data_ = new T(data);
+  }
+
   ~RealtimeBuffer()
   {
     if (non_realtime_data_)
