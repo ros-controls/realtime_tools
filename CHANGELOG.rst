@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.0 (2017-06-28)
+-------------------
 * Added constructor in RTB for objects without default constructor
 * Add feedback sending capability to RealtimeServerGoalHandle.
 * Contributors: Bence Magyar, Aris Synodinos, Miguel Prada, graiola
