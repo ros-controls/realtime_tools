@@ -1,5 +1,4 @@
 # Travis Continuous Integration Configuration File For ROS Control Projects
-# Author: Dave Coleman
 sudo: required
 dist: trusty
 language: generic
@@ -7,8 +6,9 @@ language: generic
 notifications:
   email:
     recipients:
-      - davetcoleman@gmail.com
-      - adolfo.rodriguez@pal-robotics.com
+      - enrique.fernandez.perdomo@gmail.com
+      - bence.magyar.robotics@gmail.com
+      - gennaro.raiola@gmail.com
     on_success: change #[always|never|change] # default: change
     on_failure: change #[always|never|change] # default: always
 
@@ -19,10 +19,10 @@ env:
   matrix:
     - ROS_DISTRO=kinetic ROS_REPO=ros
     - ROS_DISTRO=kinetic ROS_REPO=ros-shadow-fixed
-    - ROS_DISTRO=lunar   ROS_REPO=ros-shadow-fixed UPSTREAM_WORKSPACE=debian
+    - ROS_DISTRO=lunar   ROS_REPO=ros-shadow-fixed
 matrix:
   allow_failures:
-    - env: ROS_DISTRO=lunar   ROS_REPO=ros-shadow-fixed UPSTREAM_WORKSPACE=debian
+    - env: ROS_DISTRO=lunar   ROS_REPO=ros-shadow-fixed
   
 install:
   - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
