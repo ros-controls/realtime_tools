@@ -55,6 +55,7 @@ private:
   uint8_t state_;
 
   bool req_abort_;
+  bool req_cancel_;
   bool req_succeed_;
   ResultConstPtr req_result_;
   FeedbackConstPtr req_feedback_;
@@ -66,6 +67,7 @@ public:
 
   RealtimeServerGoalHandle(GoalHandle &gh, const ResultPtr &preallocated_result = ResultPtr((Result*)NULL), const FeedbackPtr &preallocated_feedback = FeedbackPtr((Feedback*)NULL))
     : req_abort_(false),
+      req_cancel_(false),
       req_succeed_(false),
       gh_(gh),
       preallocated_result_(preallocated_result),
@@ -79,16 +81,25 @@ public:
 
   void setAborted(ResultConstPtr result = ResultConstPtr((Result*)NULL))
   {
-    if (!req_succeed_ && !req_abort_)
+    if (!req_succeed_ && !req_abort_ && !req_cancel_)
     {
       req_result_ = result;
       req_abort_ = true;
     }
   }
 
+  void setCanceled(ResultConstPtr result = ResultConstPtr((Result*)NULL))
+  {
+    if (!req_succeed_ && !req_abort_ && !req_cancel_)
+    {
+      req_result_ = result;
+      req_cancel_ = true;
+    }
+  }
+
   void setSucceeded(ResultConstPtr result = ResultConstPtr((Result*)NULL))
   {
-    if (!req_succeed_ && !req_abort_)
+    if (!req_succeed_ && !req_abort_ && !req_cancel_)
     {
       req_result_ = result;
       req_succeed_ = true;
@@ -111,14 +122,23 @@ public:
     if (valid())
     {
       actionlib_msgs::GoalStatus gs = gh_.getGoalStatus();
-      if (req_abort_ && gs.status == GoalStatus::ACTIVE)
+      if (req_abort_ && (gs.status == GoalStatus::ACTIVE ||
+                         gs.status == GoalStatus::PREEMPTING))
       {
         if (req_result_)
           gh_.setAborted(*req_result_);
         else
           gh_.setAborted();
       }
-      else if (req_succeed_ && gs.status == GoalStatus::ACTIVE)
+      else if (req_cancel_ && gs.status == GoalStatus::PREEMPTING)
+      {
+        if (req_result_)
+          gh_.setCanceled(*req_result_);
+        else
+          gh_.setCanceled();
+      }
+      else if (req_succeed_ && (gs.status == GoalStatus::ACTIVE ||
+                                gs.status == GoalStatus::PREEMPTING))
       {
         if (req_result_)
           gh_.setSucceeded(*req_result_);
