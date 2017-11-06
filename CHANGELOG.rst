@@ -2,6 +2,12 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updated RT goal handle to handle cancel requests (`#22 <https://github.com/ros-controls/realtime_tools/issues/22>`_)
+* switch to industrial_ci (`#20 <https://github.com/ros-controls/realtime_tools/issues/20>`_)
+* Contributors: Mathias Lüdtke, Nick Lamprianidis
+
 1.10.0 (2017-06-28)
 -------------------
 * Added constructor in RTB for objects without default constructor
