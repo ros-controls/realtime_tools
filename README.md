@@ -1,7 +1,9 @@
 realtime_tools
 ===========
 
-See [ros_control documentation](http://ros.org/wiki/ros_control) on ros.org
+See [ros_control](http://wiki.ros.org/ros_control) and [realtime_tools](http://wiki.ros.org/realtime_tools) documentation on ros.org
+
+
 
 ### Build Status
 
