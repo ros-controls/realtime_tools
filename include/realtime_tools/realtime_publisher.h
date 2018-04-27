@@ -37,7 +37,6 @@
  */
 #ifndef REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 #define REALTIME_TOOLS__REALTIME_PUBLISHER_H_
-#define NON_POLLING
 
 #include <string>
 #include <ros/node_handle.h>
