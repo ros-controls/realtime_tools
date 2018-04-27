@@ -37,6 +37,7 @@
  */
 #ifndef REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 #define REALTIME_TOOLS__REALTIME_PUBLISHER_H_
+#define NON_POLLING
 
 #include <string>
 #include <ros/node_handle.h>
@@ -63,13 +64,21 @@ public:
    * \param latched . optional argument (defaults to false) to specify is publisher is latched or not
    */
   RealtimePublisher(const ros::NodeHandle &node, const std::string &topic, int queue_size, bool latched=false)
-    : topic_(topic), node_(node), is_running_(false), keep_running_(false), turn_(REALTIME)
+    : topic_(topic), node_(node), is_running_(false), keep_running_(false), 
+#ifdef NON_POLLING
+    ulock_(msg_mutex_, boost::defer_lock_t()),
+#endif
+    turn_(REALTIME)
   {
     construct(queue_size, latched);
   }
 
   RealtimePublisher()
-    : is_running_(false), keep_running_(false), turn_(REALTIME)
+    : is_running_(false), keep_running_(false),
+#ifdef NON_POLLING
+    ulock_(msg_mutex_, boost::defer_lock_t()),
+#endif 
+    turn_(REALTIME)
   {
   }
 
@@ -107,7 +116,11 @@ public:
    */
   bool trylock()
   {
+#ifdef NON_POLLING
+    if (ulock_.try_lock())
+#else
     if (msg_mutex_.try_lock())
+#endif
     {
       if (turn_ == REALTIME)
       {
@@ -134,10 +147,7 @@ public:
   void unlockAndPublish()
   {
     turn_ = NON_REALTIME;
-    msg_mutex_.unlock();
-#ifdef NON_POLLING
-    updated_cond_.notify_one();
-#endif
+    unlock();
   }
 
   /**  \brief Get the data lock form non-realtime
@@ -149,7 +159,7 @@ public:
   void lock()
   {
 #ifdef NON_POLLING
-    msg_mutex_.lock();
+    ulock_.lock();
 #else
     // never actually block on the lock
     while (!msg_mutex_.try_lock())
@@ -162,7 +172,12 @@ public:
    */
   void unlock()
   {
+#ifdef NON_POLLING
+    ulock_.unlock();
+    updated_cond_.notify_one();
+#else
     msg_mutex_.unlock();
+#endif
   }
 
 private:
@@ -176,6 +191,17 @@ private:
 
   bool is_running() const { return is_running_; }
 
+  void waitForTurn(void)
+  {
+#ifdef NON_POLLING
+    updated_cond_.wait(ulock_);
+#else
+    unlock();
+    usleep(500);
+    lock();
+#endif
+  }
+
   void publishingLoop()
   {
     is_running_ = true;
@@ -188,15 +214,8 @@ private:
       // Locks msg_ and copies it
       lock();
       while (turn_ != NON_REALTIME && keep_running_)
-      {
-#ifdef NON_POLLING
-	updated_cond_.wait(lock);
-#else
-	unlock();
-	usleep(500);
-	lock();
-#endif
-      }
+        waitForTurn();
+
       outgoing = msg_;
       turn_ = REALTIME;
 
@@ -220,6 +239,7 @@ private:
   boost::mutex msg_mutex_;  // Protects msg_
 
 #ifdef NON_POLLING
+  boost::unique_lock<boost::mutex> ulock_;
   boost::condition_variable updated_cond_;
 #endif
 
