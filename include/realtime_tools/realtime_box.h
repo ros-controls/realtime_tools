@@ -41,7 +41,7 @@ namespace realtime_tools {
 
 /*!
 
-  Strongly suggested that you use a boost::shared_ptr in this box to
+  Strongly suggested that you use an std::shared_ptr in this box to
   guarantee realtime safety.
 
  */
