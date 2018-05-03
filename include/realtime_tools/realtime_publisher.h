@@ -227,6 +227,10 @@ private:
   int turn_;  // Who's turn is it to use msg_?
 };
 
+#include <memory>
+template <class Msg>
+using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg> >;
+
 }
 
 #endif
