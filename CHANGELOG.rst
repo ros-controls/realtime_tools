@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.0 (2018-05-19)
+-------------------
 * Add RealtimePublisherSharedPtr<T>
 * boost::shared_ptr -> std::shared_ptr
 * Contributors: Bence Magyar
