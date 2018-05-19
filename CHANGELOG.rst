@@ -2,6 +2,12 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add RealtimePublisherSharedPtr<T>
+* boost::shared_ptr -> std::shared_ptr
+* Contributors: Bence Magyar
+
 1.11.0 (2017-11-06)
 -------------------
 * Updated RT goal handle to handle cancel requests (`#22 <https://github.com/ros-controls/realtime_tools/issues/22>`_)
