@@ -76,7 +76,7 @@ class RealtimeBuffer
       delete realtime_data_;
   }
 
-  RealtimeBuffer(RealtimeBuffer &source)
+  RealtimeBuffer(const RealtimeBuffer &source)
   {
     // allocate memory
     non_realtime_data_ = new T();
