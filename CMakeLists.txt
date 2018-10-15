@@ -21,6 +21,7 @@ endif()
 
 add_library(${PROJECT_NAME} src/realtime_clock.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 # Install
 install(DIRECTORY include/${PROJECT_NAME}/
