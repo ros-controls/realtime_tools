@@ -37,6 +37,8 @@
  */
 
 #include <realtime_tools/realtime_clock.h>
+#include <chrono>
+#include <thread>
 
 namespace realtime_tools
 {
@@ -126,7 +128,7 @@ namespace realtime_tools
     mutex_.lock();
 #else
     while (!mutex_.try_lock())
-      usleep(500);
+      std::this_thread::sleep_for(std::chrono::microseconds(500));
 #endif
   }
 
