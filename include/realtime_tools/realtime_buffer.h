@@ -40,11 +40,8 @@
 #define REALTIME_TOOLS__REALTIME_BUFFER_H_
 
 #include <boost/thread/mutex.hpp>
-
-#ifdef _WIN32
-  #include <chrono>
-  #include <thread>
-#endif
+#include <chrono>
+#include <thread>
 
 namespace realtime_tools
 {
@@ -160,11 +157,7 @@ class RealtimeBuffer
 #else
     while (!mutex_.try_lock())
     {
-#ifdef _WIN32
       std::this_thread::sleep_for(std::chrono::microseconds(500));
-#else
-      usleep(500);
-#endif
     }
 #endif
   }

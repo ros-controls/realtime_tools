@@ -44,11 +44,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition.hpp>
-
-#ifdef _WIN32
-  #include <chrono>
-  #include <thread>
-#endif
+#include <chrono>
+#include <thread>
 
 namespace realtime_tools {
 
@@ -84,11 +81,7 @@ public:
     stop();
     while (is_running())
     {
-#ifdef _WIN32
       std::this_thread::sleep_for(std::chrono::microseconds(100));
-#else
-      usleep(100);
-#endif
     }
 
     publisher_.shutdown();
@@ -165,11 +158,7 @@ public:
     // never actually block on the lock
     while (!msg_mutex_.try_lock())
     {
-#ifdef _WIN32
       std::this_thread::sleep_for(std::chrono::microseconds(200));
-#else
-      usleep(200);
-#endif
     }
 #endif
   }
@@ -210,13 +199,7 @@ private:
         updated_cond_.wait(lock);
 #else
         unlock();
-
-#ifdef _WIN32
         std::this_thread::sleep_for(std::chrono::microseconds(500));
-#else
-        usleep(500);
-#endif
-
         lock();
 #endif
       }
