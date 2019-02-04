@@ -44,6 +44,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition.hpp>
+#include <chrono>
+#include <thread>
 
 namespace realtime_tools {
 
@@ -78,7 +80,9 @@ public:
   {
     stop();
     while (is_running())
-      usleep(100);
+    {
+      std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
 
     publisher_.shutdown();
   }
@@ -153,7 +157,9 @@ public:
 #else
     // never actually block on the lock
     while (!msg_mutex_.try_lock())
-      usleep(200);
+    {
+      std::this_thread::sleep_for(std::chrono::microseconds(200));
+    }
 #endif
   }
 
@@ -190,11 +196,11 @@ private:
       while (turn_ != NON_REALTIME && keep_running_)
       {
 #ifdef NON_POLLING
-	updated_cond_.wait(lock);
+        updated_cond_.wait(lock);
 #else
-	unlock();
-	usleep(500);
-	lock();
+        unlock();
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
+        lock();
 #endif
       }
       outgoing = msg_;
