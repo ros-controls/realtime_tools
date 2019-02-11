@@ -2,6 +2,14 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* -- No functionality changes
+* Update README.md
+* Update wiki link + add realtime_tools wiki
+* Add Gennaro and Bence as maintainers
+* Contributors: Bence Magyar
+
 1.11.0 (2017-11-06)
 -------------------
 * Updated RT goal handle to handle cancel requests (`#22 <https://github.com/ros-controls/realtime_tools/issues/22>`_)
