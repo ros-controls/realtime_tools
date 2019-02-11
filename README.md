@@ -7,7 +7,7 @@ See [ros_control](http://wiki.ros.org/ros_control) and [realtime_tools](http://w
 
 ### Build Status
 
-[![Build Status](https://travis-ci.org/ros-controls/realtime_tools.png?branch=kinetic-devel)](https://travis-ci.org/ros-controls/realtime_tools)
+[![Build Status](https://travis-ci.org/ros-controls/realtime_tools.png?branch=melodic-devel)](https://travis-ci.org/ros-controls/realtime_tools)
 
 ## Publication
 
