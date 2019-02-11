@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.1 (2019-02-11)
+-------------------
 * -- No functionality changes
 * Update README.md
 * Update wiki link + add realtime_tools wiki
