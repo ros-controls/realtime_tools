@@ -2,6 +2,15 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update readme
+* use this_thread::sleep_for instead of usleep (`#32 <https://github.com/ros-controls/realtime_tools/issues/32>`_)
+* specify RUNTIME DESTINATION for libraries (`#33 <https://github.com/ros-controls/realtime_tools/issues/33>`_)
+  needed for exporting DLLs on Windows
+* Made RealtimeBuffer's copy-constructor const
+* Contributors: Bence Magyar, Gennaro Raiola, James Xu, Mathias Lüdtke, Matt Reynolds
+
 1.12.0 (2018-05-19)
 -------------------
 * Add RealtimePublisherSharedPtr<T>
