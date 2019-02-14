@@ -47,8 +47,8 @@ private:
   ACTION_DEFINITION(Action);
 
   typedef actionlib::ServerGoalHandle<Action> GoalHandle;
-  typedef std::shared_ptr<Result> ResultPtr;
-  typedef std::shared_ptr<Feedback> FeedbackPtr;
+  typedef boost::shared_ptr<Result> ResultPtr;
+  typedef boost::shared_ptr<Feedback> FeedbackPtr;
 
   uint8_t state_;
 
