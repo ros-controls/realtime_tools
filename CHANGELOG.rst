@@ -2,6 +2,11 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix actionlib regression
+* Contributors: Bence Magyar
+
 1.13.0 (2019-02-11)
 -------------------
 * Update readme
