@@ -179,7 +179,6 @@ private:
     thread_ = boost::thread(&RealtimePublisher::publishingLoop, this);
   }
 
-
   bool is_running() const { return is_running_; }
 
   void publishingLoop()
@@ -191,12 +190,17 @@ private:
     {
       Msg outgoing;
 
+	{
       // Locks msg_ and copies it
+#ifdef NON_POLLING
+      boost::unique_lock<boost::mutex> lk(msg_mutex_);
+#else
       lock();
+#endif
       while (turn_ != NON_REALTIME && keep_running_)
       {
 #ifdef NON_POLLING
-        updated_cond_.wait(lock);
+        updated_cond_.wait(lk);
 #else
         unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(500));
@@ -206,7 +210,10 @@ private:
       outgoing = msg_;
       turn_ = REALTIME;
 
+#ifndef NON_POLLING
       unlock();
+#endif
+	}
 
       // Sends the outgoing message
       if (keep_running_)
