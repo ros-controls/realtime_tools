@@ -33,7 +33,6 @@
 #define REALTIME_TOOLS__REALTIME_BOX_H__
 
 #include <string>
-#include <ros/node_handle.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 
