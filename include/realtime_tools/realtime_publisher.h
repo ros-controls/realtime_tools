@@ -65,13 +65,13 @@ public:
    * \param latched . optional argument (defaults to false) to specify is publisher is latched or not
    */
   RealtimePublisher(const ros::NodeHandle &node, const std::string &topic, int queue_size, bool latched=false)
-    : topic_(topic), node_(node), is_running_(false), keep_running_(false), turn_(REALTIME)
+    : topic_(topic), node_(node), is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED)
   {
     construct(queue_size, latched);
   }
 
   RealtimePublisher()
-    : is_running_(false), keep_running_(false), turn_(REALTIME)
+    : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED)
   {
   }
 
@@ -229,7 +229,7 @@ private:
   boost::condition_variable updated_cond_;
 #endif
 
-  enum {REALTIME, NON_REALTIME};
+  enum {REALTIME, NON_REALTIME, LOOP_NOT_STARTED};
   int turn_;  // Who's turn is it to use msg_?
 };
 
