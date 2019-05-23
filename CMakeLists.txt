@@ -42,6 +42,13 @@ if (CATKIN_ENABLE_TESTING)
     target_link_libraries(realtime_publisher_tests ${PROJECT_NAME} ${std_msgs_LIBRARIES})
     target_include_directories(realtime_publisher_tests PRIVATE ${std_msgs_INCLUDE_DIRS})
   endif()
+
+  add_rostest_gtest(realtime_server_goal_handle_tests test/realtime_server_goal_handle.test test/realtime_server_goal_handle_tests.cpp)
+  if (TARGET realtime_server_goal_handle_tests)
+    find_package(actionlib REQUIRED)
+    target_link_libraries(realtime_server_goal_handle_tests ${PROJECT_NAME} ${actionlib_LIBRARIES})
+    target_include_directories(realtime_publisher_tests PRIVATE ${actionlib_INCLUDE_DIRS})
+  endif()
 endif()
 
 # Install
