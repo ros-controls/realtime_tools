@@ -19,19 +19,21 @@ add_library(${PROJECT_NAME} src/realtime_clock.cpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 # Unit Tests
-catkin_add_gtest(realtime_box_tests test/realtime_box_tests.cpp)
-if (TARGET realtime_box_tests)
-  target_link_libraries(realtime_box_tests PRIVATE ${PROJECT_NAME})
-endif()
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(realtime_box_tests test/realtime_box_tests.cpp)
+  if (TARGET realtime_box_tests)
+    target_link_libraries(realtime_box_tests ${PROJECT_NAME})
+  endif()
 
-catkin_add_gtest(realtime_buffer_tests test/realtime_buffer_tests.cpp)
-if (TARGET realtime_buffer_tests)
-  target_link_libraries(realtime_buffer_tests PRIVATE ${PROJECT_NAME})
-endif()
+  catkin_add_gtest(realtime_buffer_tests test/realtime_buffer_tests.cpp)
+  if (TARGET realtime_buffer_tests)
+    target_link_libraries(realtime_buffer_tests ${PROJECT_NAME})
+  endif()
 
-catkin_add_gtest(realtime_clock_tests test/realtime_clock_tests.cpp)
-if (TARGET realtime_clock_tests)
-  target_link_libraries(realtime_clock_tests PRIVATE ${PROJECT_NAME})
+  catkin_add_gtest(realtime_clock_tests test/realtime_clock_tests.cpp)
+  if (TARGET realtime_clock_tests)
+    target_link_libraries(realtime_clock_tests ${PROJECT_NAME})
+  endif()
 endif()
 
 # Install
