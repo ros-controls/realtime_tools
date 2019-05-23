@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <test test-name="realtime_publisher_tests" pkg="realtime_tools" type="realtime_publisher_tests" />
+</launch>

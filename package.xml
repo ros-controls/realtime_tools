@@ -21,5 +21,6 @@
   <build_export_depend>actionlib</build_export_depend>
 
   <test_depend>rosunit</test_depend>
+  <test_depend>rostest</test_depend>
 
 </package>
