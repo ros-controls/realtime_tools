@@ -30,4 +30,6 @@
   <run_depend>roscpp</run_depend> 
   <run_depend>rospy</run_depend> 
 
+  <test_depend>rosunit</test_depend>
+
 </package>

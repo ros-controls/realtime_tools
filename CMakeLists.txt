@@ -16,7 +16,13 @@ catkin_package(
   )
 
 add_library(${PROJECT_NAME} src/realtime_clock.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+# Unit Tests
+catkin_add_gtest(realtime_box_tests test/realtime_box_tests.cpp)
+if (TARGET realtime_box_tests)
+  target_link_libraries(realtime_box_tests PRIVATE ${PROJECT_NAME})
+endif()
 
 # Install
 install(DIRECTORY include/${PROJECT_NAME}/
