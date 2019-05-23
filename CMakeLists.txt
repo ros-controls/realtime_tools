@@ -24,6 +24,11 @@ if (TARGET realtime_box_tests)
   target_link_libraries(realtime_box_tests PRIVATE ${PROJECT_NAME})
 endif()
 
+catkin_add_gtest(realtime_buffer_tests test/realtime_buffer_tests.cpp)
+if (TARGET realtime_buffer_tests)
+  target_link_libraries(realtime_buffer_tests PRIVATE ${PROJECT_NAME})
+endif()
+
 # Install
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
