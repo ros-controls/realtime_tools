@@ -31,5 +31,6 @@
   <run_depend>rospy</run_depend> 
 
   <test_depend>rosunit</test_depend>
+  <test_depend>rostest</test_depend>
 
 </package>

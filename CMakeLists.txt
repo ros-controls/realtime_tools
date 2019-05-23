@@ -34,6 +34,14 @@ if (CATKIN_ENABLE_TESTING)
   if (TARGET realtime_clock_tests)
     target_link_libraries(realtime_clock_tests ${PROJECT_NAME})
   endif()
+
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(realtime_publisher_tests test/realtime_publisher.test test/realtime_publisher_tests.cpp)
+  if (TARGET realtime_publisher_tests)
+    find_package(std_msgs REQUIRED)
+    target_link_libraries(realtime_publisher_tests ${PROJECT_NAME} ${std_msgs_LIBRARIES})
+    target_include_directories(realtime_publisher_tests PRIVATE ${std_msgs_INCLUDE_DIRS})
+  endif()
 endif()
 
 # Install
