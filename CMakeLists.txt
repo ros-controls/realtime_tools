@@ -29,6 +29,11 @@ if (TARGET realtime_buffer_tests)
   target_link_libraries(realtime_buffer_tests PRIVATE ${PROJECT_NAME})
 endif()
 
+catkin_add_gtest(realtime_clock_tests test/realtime_clock_tests.cpp)
+if (TARGET realtime_clock_tests)
+  target_link_libraries(realtime_clock_tests PRIVATE ${PROJECT_NAME})
+endif()
+
 # Install
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
