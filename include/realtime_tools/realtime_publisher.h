@@ -40,17 +40,15 @@
 
 #include <string>
 #include <ros/node_handle.h>
-#include <boost/utility.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/condition.hpp>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <thread>
 
 namespace realtime_tools {
 
 template <class Msg>
-class RealtimePublisher : boost::noncopyable
+class RealtimePublisher
 {
 
 public:
@@ -83,7 +81,7 @@ public:
     {
       std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
-
+    thread_.join();
     publisher_.shutdown();
   }
 
@@ -172,11 +170,15 @@ public:
   }
 
 private:
+  // non-copyable
+  RealtimePublisher(const RealtimePublisher &) = delete;
+  RealtimePublisher & operator=(const RealtimePublisher &) = delete;
+
   void construct(int queue_size, bool latched=false)
   {
     publisher_ = node_.advertise<Msg>(topic_, queue_size, latched);
     keep_running_ = true;
-    thread_ = boost::thread(&RealtimePublisher::publishingLoop, this);
+    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
   }
 
 
@@ -221,12 +223,12 @@ private:
   volatile bool is_running_;
   volatile bool keep_running_;
 
-  boost::thread thread_;
+  std::thread thread_;
 
-  boost::mutex msg_mutex_;  // Protects msg_
+  std::mutex msg_mutex_;  // Protects msg_
 
 #ifdef NON_POLLING
-  boost::condition_variable updated_cond_;
+  std::condition_variable updated_cond_;
 #endif
 
   enum {REALTIME, NON_REALTIME, LOOP_NOT_STARTED};
