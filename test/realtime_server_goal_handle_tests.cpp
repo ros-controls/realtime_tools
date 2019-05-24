@@ -32,6 +32,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/TwoIntsAction.h>
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -131,7 +132,7 @@ send_goal(
       goal,
       TwoIntsActionClient::SimpleDoneCallback(),
       TwoIntsActionClient::SimpleActiveCallback(),
-      boost::bind(&FeedbackCallback::feedback_callback, cb, _1));
+      std::bind(&FeedbackCallback::feedback_callback, cb, std::placeholders::_1));
   }
   return ac;
 }
@@ -156,8 +157,8 @@ make_server(const std::string & server_name, ActionCallback & callbacks)
   ros::NodeHandle nh;
   auto as = std::make_shared<TwoIntsActionServer>(
       nh, server_name,
-      boost::bind(&ActionCallback::goal_callback, &callbacks, _1),
-      boost::bind(&ActionCallback::cancel_callback, &callbacks, _1), false);
+      std::bind(&ActionCallback::goal_callback, &callbacks, std::placeholders::_1),
+      std::bind(&ActionCallback::cancel_callback, &callbacks, std::placeholders::_1), false));
   as->start();
   return as;
 }
