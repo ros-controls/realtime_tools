@@ -1,51 +1,66 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(realtime_tools)
 
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS roscpp)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(include)
-
-# Declare catkin package
-catkin_package(
-  CATKIN_DEPENDS roscpp
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  )
-
 add_library(${PROJECT_NAME} src/realtime_clock.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_include_directories(${PROJECT_NAME} PUBLIC ${catkin_INCLUDE_DIRS})
+ament_target_dependencies(${PROJECT_NAME} "rclcpp")
+target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 # Unit Tests
-if (CATKIN_ENABLE_TESTING)
-  catkin_add_gmock(realtime_box_tests test/realtime_box_tests.cpp)
-  target_link_libraries(realtime_box_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
+if (BUILD_TESTING)
+  find_package(ament_cmake_gmock REQUIRED)
 
-  catkin_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
-  target_link_libraries(realtime_buffer_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
+#  ament_add_gtest(realtime_box_tests test/realtime_box_tests.cpp)
+#  if (TARGET realtime_box_tests)
+#    target_link_libraries(realtime_box_tests ${PROJECT_NAME})
+#  endif()
+#
+#  ament_add_gtest(realtime_buffer_tests test/realtime_buffer_tests.cpp)
+#  if (TARGET realtime_buffer_tests)
+#    target_link_libraries(realtime_buffer_tests ${PROJECT_NAME})
+#  endif()
 
-  catkin_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
-  target_link_libraries(realtime_clock_tests ${PROJECT_NAME})
+  ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
+  target_link_libraries(realtime_clock_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
 
-  find_package(rostest REQUIRED)
-  add_rostest_gmock(realtime_publisher_tests test/realtime_publisher.test test/realtime_publisher_tests.cpp)
-  find_package(std_msgs REQUIRED)
-  target_link_libraries(realtime_publisher_tests ${PROJECT_NAME} ${std_msgs_LIBRARIES})
-  target_include_directories(realtime_publisher_tests PRIVATE ${std_msgs_INCLUDE_DIRS})
+  # find_package(rostest REQUIRED)
+  # add_rostest_gtest(realtime_publisher_tests test/realtime_publisher.test test/realtime_publisher_tests.cpp)
+  # if (TARGET realtime_publisher_tests)
+  #   find_package(std_msgs REQUIRED)
+  #   target_link_libraries(realtime_publisher_tests ${PROJECT_NAME} ${std_msgs_LIBRARIES})
+  #   target_include_directories(realtime_publisher_tests PRIVATE ${std_msgs_INCLUDE_DIRS})
+  # endif()
 
-  add_rostest_gmock(realtime_server_goal_handle_tests test/realtime_server_goal_handle.test test/realtime_server_goal_handle_tests.cpp)
-  find_package(actionlib REQUIRED)
-  target_link_libraries(realtime_server_goal_handle_tests ${PROJECT_NAME} ${actionlib_LIBRARIES})
-  target_include_directories(realtime_publisher_tests PRIVATE ${actionlib_INCLUDE_DIRS})
+  # add_rostest_gtest(realtime_server_goal_handle_tests test/realtime_server_goal_handle.test test/realtime_server_goal_handle_tests.cpp)
+  # if (TARGET realtime_server_goal_handle_tests)
+  #   find_package(actionlib REQUIRED)
+  #   target_link_libraries(realtime_server_goal_handle_tests ${PROJECT_NAME} ${actionlib_LIBRARIES})
+  #   target_include_directories(realtime_publisher_tests PRIVATE ${actionlib_INCLUDE_DIRS})
+  # endif()
 endif()
 
 # Install
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(
+  DIRECTORY include/
+  DESTINATION include)
 
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+
+ament_export_dependencies(rclcpp)
+
+ament_package()
