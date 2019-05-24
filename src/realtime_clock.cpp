@@ -38,7 +38,6 @@
 
 #include <realtime_tools/realtime_clock.h>
 #include <chrono>
-#include <thread>
 
 namespace realtime_tools
 {
@@ -49,10 +48,9 @@ namespace realtime_tools
      system_time_(ros::Time()), 
      last_realtime_time_(ros::Time()),
      running_(true),
-     initialized_(false)
+     initialized_(false),
+     thread_(std::thread(&RealtimeClock::loop, this))
   {
-    // thread for time loop
-    thread_ = boost::thread(boost::bind(&RealtimeClock::loop, this));
   }
   
 
@@ -66,7 +64,8 @@ namespace realtime_tools
 
   ros::Time RealtimeClock::getSystemTime(const ros::Time& realtime_time)
   {
-    if (mutex_.try_lock())
+    std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
+    if (guard.owns_lock())
     {
       // update time offset when we have a new system time measurement in the last cycle
       if (lock_misses_ == 0 && system_time_ != ros::Time())
@@ -86,7 +85,6 @@ namespace realtime_tools
       }
       system_time_ = ros::Time();
       lock_misses_ = 0;
-      mutex_.unlock();
     }
 	
     else
@@ -105,8 +103,15 @@ namespace realtime_tools
     ros::Rate r(750);
     while (running_)
     {
-      // get lock
-      lock();
+#ifdef NON_POLLING
+      std::lock_guard<std::mutex> guard(mutex_);
+#else
+      std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
+      while (!guard.owns_lock()) {
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
+        guard.try_lock();
+      }
+#endif
 
       // store system time
       system_time_ = ros::Time::now();
@@ -116,23 +121,9 @@ namespace realtime_tools
 	ROS_WARN_THROTTLE(1.0, "Time estimator has trouble transferring data between non-RT and RT");
 
       // release lock
-      mutex_.unlock();
+      guard.unlock();
       r.sleep();
     }
   }
-
-
-  void RealtimeClock::lock()
-  {
-#ifdef NON_POLLING
-    mutex_.lock();
-#else
-    while (!mutex_.try_lock())
-    {
-      std::this_thread::sleep_for(std::chrono::microseconds(500));
-    }
-#endif
-  }
-
 }// namespace
 

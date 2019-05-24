@@ -39,9 +39,10 @@
 #ifndef REALTIME_TOOLS__REALTIME_CLOCK_H_
 #define REALTIME_TOOLS__REALTIME_CLOCK_H_
 
-#include <boost/thread/mutex.hpp>
-#include <boost/thread.hpp>
 #include <ros/ros.h>
+
+#include <mutex>
+#include <thread>
 
 namespace realtime_tools
 {
@@ -57,16 +58,14 @@ class RealtimeClock
 
 
  private:
-  void lock();
-
   unsigned int lock_misses_;
   ros::Time system_time_;
   ros::Duration clock_offset_;
 
   ros::Time last_realtime_time_;
   bool running_, initialized_;
-  boost::mutex mutex_;
-  boost::thread thread_;
+  std::mutex mutex_;
+  std::thread thread_;
 
 
 
