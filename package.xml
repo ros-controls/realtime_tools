@@ -14,13 +14,13 @@
 
   <author email="sglaser@willowgarage.com">Stuart Glaser</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>roscpp</depend>
+  <buildtool_export_depend>ament_cmake</buildtool_export_depend>
 
-  <build_export_depend>actionlib</build_export_depend>
+  <depend>rclcpp</depend>
 
-  <test_depend>rosunit</test_depend>
-  <test_depend>rostest</test_depend>
-  <test_depend>actionlib</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
