@@ -19,15 +19,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 if (BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
 
-#  ament_add_gtest(realtime_box_tests test/realtime_box_tests.cpp)
-#  if (TARGET realtime_box_tests)
-#    target_link_libraries(realtime_box_tests ${PROJECT_NAME})
-#  endif()
-#
-#  ament_add_gtest(realtime_buffer_tests test/realtime_buffer_tests.cpp)
-#  if (TARGET realtime_buffer_tests)
-#    target_link_libraries(realtime_buffer_tests ${PROJECT_NAME})
-#  endif()
+  ament_add_gmock(realtime_box_tests test/realtime_box_tests.cpp)
+  target_link_libraries(realtime_box_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
+
+  ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
+  target_link_libraries(realtime_buffer_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
 
   ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
   target_link_libraries(realtime_clock_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
