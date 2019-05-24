@@ -42,6 +42,7 @@
 #include <ros/node_handle.h>
 #include <chrono>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <thread>
 
@@ -235,7 +236,6 @@ private:
   int turn_;  // Who's turn is it to use msg_?
 };
 
-#include <memory>
 template <class Msg>
 using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg> >;
 
