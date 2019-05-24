@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>realtime_tools</name>
   <version>1.13.1</version>
   <description>Contains a set of tools that can be used from a hard
@@ -24,10 +24,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend> 
-  <build_depend>rospy</build_depend> 
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
 
-  <run_depend>roscpp</run_depend> 
-  <run_depend>rospy</run_depend> 
+  <build_export_depend>actionlib</build_export_depend>
 
 </package>
