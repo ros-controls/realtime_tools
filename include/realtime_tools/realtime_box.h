@@ -32,9 +32,8 @@
 #ifndef REALTIME_TOOLS__REALTIME_BOX_H__
 #define REALTIME_TOOLS__REALTIME_BOX_H__
 
+#include <mutex>
 #include <string>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/thread.hpp>
 
 namespace realtime_tools {
 
@@ -54,13 +53,13 @@ public:
 
   void set(const T &value)
   {
-    boost::mutex::scoped_lock guard(thing_lock_RT_);
+    std::lock_guard<std::mutex> guard(thing_lock_RT_);
     thing_ = value;
   }
 
   void get(T &ref)
   {
-    boost::mutex::scoped_lock guard(thing_lock_RT_);
+    std::lock_guard<std::mutex> guard(thing_lock_RT_);
     ref = thing_;
   }
 
@@ -73,7 +72,7 @@ private:
   // copy, so as long as the copy is realtime safe and the OS has
   // priority inheritance for mutexes, this lock can be safely locked
   // from within realtime.
-  boost::mutex thing_lock_RT_;
+  std::mutex thing_lock_RT_;
 };
 
 } // namespace
