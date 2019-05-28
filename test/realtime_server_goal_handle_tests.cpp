@@ -37,13 +37,15 @@
 #include <thread>
 
 using realtime_tools::RealtimeServerGoalHandle;
+using TwoIntsActionClient = actionlib::SimpleActionClient<actionlib::TwoIntsAction>;
+using TwoIntsActionServer = actionlib::ActionServer<actionlib::TwoIntsAction>;
 
 const size_t ATTEMPTS = 10;
 const std::chrono::milliseconds DELAY(250);
 
 struct ActionCallback
 {
-  using GoalHandle = actionlib::ActionServer<actionlib::TwoIntsAction>::GoalHandle;
+  using GoalHandle = TwoIntsActionServer::GoalHandle;
   bool have_handle_ = false;
   GoalHandle handle_;
   std::mutex mtx_;
@@ -82,7 +84,7 @@ struct FeedbackCallback
   bool have_feedback_ = false;
   std::mutex mtx_;
 
-  using FeedbackConstPtr = actionlib::ActionServer<actionlib::TwoIntsAction>::FeedbackConstPtr;
+  using FeedbackConstPtr = TwoIntsActionServer::FeedbackConstPtr;
   void feedback_callback(const FeedbackConstPtr &)
   {
     std::unique_lock<std::mutex> lock(mtx_);
@@ -106,13 +108,13 @@ struct FeedbackCallback
   }
 };
 
-std::shared_ptr<actionlib::SimpleActionClient<actionlib::TwoIntsAction>>
+std::shared_ptr<TwoIntsActionClient>
 send_goal(
   const std::string & server_name,
   FeedbackCallback * cb = nullptr)
 {
-  std::shared_ptr<actionlib::SimpleActionClient<actionlib::TwoIntsAction>> ac;
-  ac.reset(new actionlib::SimpleActionClient<actionlib::TwoIntsAction>(server_name, true));
+  std::shared_ptr<TwoIntsActionClient> ac;
+  ac.reset(new TwoIntsActionClient(server_name, true));
 
   for (size_t i = 0; i < ATTEMPTS && !ac->isServerConnected(); ++i)
   {
@@ -128,14 +130,14 @@ send_goal(
     goal.b = 3;
     ac->sendGoal(
       goal,
-      actionlib::SimpleActionClient<actionlib::TwoIntsAction>::SimpleDoneCallback(),
-      actionlib::SimpleActionClient<actionlib::TwoIntsAction>::SimpleActiveCallback(),
+      TwoIntsActionClient::SimpleDoneCallback(),
+      TwoIntsActionClient::SimpleActiveCallback(),
       boost::bind(&FeedbackCallback::feedback_callback, cb, _1));
   }
   return ac;
 }
 
-bool wait_for_result(std::shared_ptr<actionlib::SimpleActionClient<actionlib::TwoIntsAction>> ac)
+bool wait_for_result(std::shared_ptr<TwoIntsActionClient> ac)
 {
   for (int i = 0; i < ATTEMPTS; ++i)
   {
@@ -149,12 +151,12 @@ bool wait_for_result(std::shared_ptr<actionlib::SimpleActionClient<actionlib::Tw
   return false;
 }
 
-std::shared_ptr<actionlib::ActionServer<actionlib::TwoIntsAction>>
+std::shared_ptr<TwoIntsActionServer>
 make_server(const std::string & server_name, ActionCallback & callbacks)
 {
   ros::NodeHandle nh;
-  std::shared_ptr<actionlib::ActionServer<actionlib::TwoIntsAction>> as;
-  as.reset(new actionlib::ActionServer<actionlib::TwoIntsAction>(
+  std::shared_ptr<TwoIntsActionServer> as;
+  as.reset(new TwoIntsActionServer(
       nh, server_name,
       boost::bind(&ActionCallback::goal_callback, &callbacks, _1),
       boost::bind(&ActionCallback::cancel_callback, &callbacks, _1), false));
