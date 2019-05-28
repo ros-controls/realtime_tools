@@ -113,8 +113,7 @@ send_goal(
   const std::string & server_name,
   FeedbackCallback * cb = nullptr)
 {
-  std::shared_ptr<TwoIntsActionClient> ac;
-  ac.reset(new TwoIntsActionClient(server_name, true));
+  auto ac = std::make_shared<TwoIntsActionClient>(server_name, true);
 
   for (size_t i = 0; i < ATTEMPTS && !ac->isServerConnected(); ++i)
   {
@@ -155,11 +154,10 @@ std::shared_ptr<TwoIntsActionServer>
 make_server(const std::string & server_name, ActionCallback & callbacks)
 {
   ros::NodeHandle nh;
-  std::shared_ptr<TwoIntsActionServer> as;
-  as.reset(new TwoIntsActionServer(
+  auto as = std::make_shared<TwoIntsActionServer>(
       nh, server_name,
       boost::bind(&ActionCallback::goal_callback, &callbacks, _1),
-      boost::bind(&ActionCallback::cancel_callback, &callbacks, _1), false));
+      boost::bind(&ActionCallback::cancel_callback, &callbacks, _1), false);
   as->start();
   return as;
 }
