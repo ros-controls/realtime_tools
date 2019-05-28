@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <realtime_tools/realtime_box.h>
 
 using realtime_tools::RealtimeBox;
@@ -71,9 +71,4 @@ TEST(RealtimeBox, set_and_get)
   char output = 'a';
   box.get(output);
   EXPECT_EQ('z', output);
-}
-
-int main(int argc, char ** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

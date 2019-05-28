@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <std_msgs/String.h>
 #include <chrono>
