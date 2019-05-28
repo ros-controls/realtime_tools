@@ -17,7 +17,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>roscpp</depend>
-  <depend>rospy</depend>
 
   <build_export_depend>actionlib</build_export_depend>
 
