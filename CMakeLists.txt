@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(realtime_tools)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS roscpp rospy)
+find_package(catkin REQUIRED COMPONENTS roscpp)
 
 find_package(Boost COMPONENTS thread)
 
@@ -10,7 +10,7 @@ include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 # Declare catkin package
 catkin_package(
-  CATKIN_DEPENDS roscpp rospy
+  CATKIN_DEPENDS roscpp
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   )
