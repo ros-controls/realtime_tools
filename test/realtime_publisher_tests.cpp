@@ -72,7 +72,8 @@ TEST(RealtimePublisher, rt_publish)
   RealtimePublisher<std_msgs::String> rt_pub(nh, "rt_publish", 10, latching);
   // publish a latched message
   bool lock_is_held = rt_pub.trylock();
-  for (size_t i = 0; i < ATTEMPTS && !lock_is_held; ++i) {
+  for (size_t i = 0; i < ATTEMPTS && !lock_is_held; ++i)
+  {
     lock_is_held = rt_pub.trylock();
     std::this_thread::sleep_for(DELAY);
   }

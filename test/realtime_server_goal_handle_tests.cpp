@@ -62,11 +62,13 @@ struct ActionCallback
 
   bool wait_for_handle()
   {
-    for (size_t i = 0; i < ATTEMPTS; ++i) {
+    for (size_t i = 0; i < ATTEMPTS; ++i)
+    {
       ros::spinOnce();
       std::this_thread::sleep_for(DELAY);
       std::unique_lock<std::mutex> lock(mtx_);
-      if (have_handle_) {
+      if (have_handle_)
+      {
         break;
       }
     }
@@ -89,11 +91,13 @@ struct FeedbackCallback
 
   bool wait_for_feedback()
   {
-    for (size_t i = 0; i < ATTEMPTS; ++i) {
+    for (size_t i = 0; i < ATTEMPTS; ++i)
+    {
       ros::spinOnce();
       std::this_thread::sleep_for(DELAY);
       std::unique_lock<std::mutex> lock(mtx_);
-      if (have_feedback_) {
+      if (have_feedback_)
+      {
         break;
       }
     }
@@ -110,11 +114,13 @@ send_goal(
   std::shared_ptr<actionlib::SimpleActionClient<actionlib::TwoIntsAction>> ac;
   ac.reset(new actionlib::SimpleActionClient<actionlib::TwoIntsAction>(server_name, true));
 
-  for (size_t i = 0; i < ATTEMPTS && !ac->isServerConnected(); ++i) {
+  for (size_t i = 0; i < ATTEMPTS && !ac->isServerConnected(); ++i)
+  {
     ros::spinOnce();
     std::this_thread::sleep_for(DELAY);
   }
-  if (!ac->isServerConnected()) {
+  if (!ac->isServerConnected())
+  {
     ac.reset();
   } else {
     actionlib::TwoIntsGoal goal;
@@ -131,9 +137,11 @@ send_goal(
 
 bool wait_for_result(std::shared_ptr<actionlib::SimpleActionClient<actionlib::TwoIntsAction>> ac)
 {
-  for (int i = 0; i < ATTEMPTS; ++i) {
+  for (int i = 0; i < ATTEMPTS; ++i)
+  {
     ros::spinOnce();
-    if (ac->getState().isDone()) {
+    if (ac->getState().isDone())
+    {
       return true;
     }
     std::this_thread::sleep_for(DELAY);
@@ -197,7 +205,8 @@ TEST(RealtimeServerGoalHandle, set_canceled)
 
   // Cancel and wait for server to learn about that
   client->cancelGoal();
-  for (size_t i = 0; i < ATTEMPTS; ++i) {
+  for (size_t i = 0; i < ATTEMPTS; ++i)
+  {
     actionlib_msgs::GoalStatus gs = callbacks.handle_.getGoalStatus();
     if (gs.status == actionlib_msgs::GoalStatus::PREEMPTING) {
       break;
