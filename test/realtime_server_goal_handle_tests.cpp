@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <realtime_tools/realtime_server_goal_handle.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/TwoIntsAction.h>

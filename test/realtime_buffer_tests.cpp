@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <realtime_tools/realtime_buffer.h>
 
 using realtime_tools::RealtimeBuffer;
@@ -82,9 +82,4 @@ TEST(RealtimeBuffer, initRT)
   RealtimeBuffer<int> buffer(42);
   buffer.initRT(28);
   EXPECT_EQ(28, *buffer.readFromRT());
-}
-
-int main(int argc, char ** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }
