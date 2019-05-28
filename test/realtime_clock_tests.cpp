@@ -42,7 +42,8 @@ TEST(RealtimeClock, get_system_time)
   RealtimeClock rt_clock;
   // Wait for time to be available
   ros::Time last_rt_time;
-  for (int i = 0; i < ATTEMPTS && ros::Time() == last_rt_time; ++i) {
+  for (int i = 0; i < ATTEMPTS && ros::Time() == last_rt_time; ++i)
+  {
     std::this_thread::sleep_for(DELAY);
     last_rt_time = rt_clock.getSystemTime(ros::Time());
   }
