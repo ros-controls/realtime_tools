@@ -8,10 +8,11 @@ endif()
 # Load catkin and all dependencies required for this package
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(Threads REQUIRED)
 
 add_library(${PROJECT_NAME} src/realtime_clock.cpp)
-ament_target_dependencies(${PROJECT_NAME} "rclcpp")
+ament_target_dependencies(${PROJECT_NAME} "rclcpp" "rclcpp_action")
 target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
@@ -33,12 +34,9 @@ if (BUILD_TESTING)
   target_link_libraries(realtime_publisher_tests ${PROJECT_NAME} ${test_msgs_LIBRARIES} ${GMOCK_MAIN_LIBRARIES})
   target_include_directories(realtime_publisher_tests PRIVATE ${test_msgs_INCLUDE_DIRS})
 
-  # add_rostest_gtest(realtime_server_goal_handle_tests test/realtime_server_goal_handle.test test/realtime_server_goal_handle_tests.cpp)
-  # if (TARGET realtime_server_goal_handle_tests)
-  #   find_package(actionlib REQUIRED)
-  #   target_link_libraries(realtime_server_goal_handle_tests ${PROJECT_NAME} ${actionlib_LIBRARIES})
-  #   target_include_directories(realtime_publisher_tests PRIVATE ${actionlib_INCLUDE_DIRS})
-  # endif()
+  ament_add_gmock(realtime_server_goal_handle_tests test/realtime_server_goal_handle.test test/realtime_server_goal_handle_tests.cpp)
+  target_link_libraries(realtime_server_goal_handle_tests ${PROJECT_NAME} ${test_msgs_LIBRARIES} ${GMOCK_MAIN_LIBRARIES})
+  target_include_directories(realtime_server_goal_handle_tests PRIVATE ${test_msgs_INCLUDE_DIRS})
 endif()
 
 # Install
@@ -55,5 +53,6 @@ ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 
 ament_export_dependencies(rclcpp)
+ament_export_dependencies(rclcpp_action)
 
 ament_package()
