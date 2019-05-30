@@ -19,7 +19,9 @@
   <buildtool_export_depend>ament_cmake</buildtool_export_depend>
 
   <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
 
+  <test_depend>rclcpp_action</test_depend>
   <test_depend>test_msgs</test_depend>
 
   <export>
