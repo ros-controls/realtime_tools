@@ -158,7 +158,7 @@ make_server(const std::string & server_name, ActionCallback & callbacks)
   auto as = std::make_shared<TwoIntsActionServer>(
       nh, server_name,
       std::bind(&ActionCallback::goal_callback, &callbacks, std::placeholders::_1),
-      std::bind(&ActionCallback::cancel_callback, &callbacks, std::placeholders::_1), false));
+      std::bind(&ActionCallback::cancel_callback, &callbacks, std::placeholders::_1), false);
   as->start();
   return as;
 }
