@@ -44,11 +44,7 @@ namespace realtime_tools
 
   
   RealtimeClock::RealtimeClock()
-    :lock_misses_(0), 
-     system_time_(ros::Time()), 
-     last_realtime_time_(ros::Time()),
-     running_(true),
-     initialized_(false),
+    : running_(true),
      thread_(std::thread(&RealtimeClock::loop, this))
   {
   }
