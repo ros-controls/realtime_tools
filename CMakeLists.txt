@@ -5,6 +5,8 @@ project(realtime_tools)
 find_package(catkin REQUIRED COMPONENTS roscpp)
 find_package(Threads REQUIRED)
 
+find_package(Boost REQUIRED)
+
 include_directories(include)
 
 # Declare catkin package
@@ -15,8 +17,8 @@ catkin_package(
   )
 
 add_library(${PROJECT_NAME} src/realtime_clock.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-target_include_directories(${PROJECT_NAME} PUBLIC ${catkin_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 # Unit Tests
 if (CATKIN_ENABLE_TESTING)
