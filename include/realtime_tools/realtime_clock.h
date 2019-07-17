@@ -58,12 +58,13 @@ class RealtimeClock
 
 
  private:
-  unsigned int lock_misses_;
+  unsigned int lock_misses_ = 0;
   ros::Time system_time_;
   ros::Duration clock_offset_;
 
   ros::Time last_realtime_time_;
-  bool running_, initialized_;
+  bool running_ = false;
+  bool initialized_ = false;
   std::mutex mutex_;
   std::thread thread_;
 
