@@ -2,6 +2,18 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Undo action typedef changes
+* Remove boost
+* Clean up includes in `realtime_tools` namespace
+* Switch to gmock
+* Remove TARGET check on tests
+* Add unit test for RealtimeServerGoalHandle, RealtimePublisher, RealtimeClock, RealtimeBuffer, RealtimeBox
+* Fix race where first message won't get published
+* Clean up dependencies and package.xml
+* Contributors: Shane Loretz
+
 1.13.1 (2019-02-14)
 -------------------
 * Fix actionlib regression
