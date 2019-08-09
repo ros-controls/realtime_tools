@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.15.0 (2019-08-09)
+-------------------
 * Remove actionlib definitions
 * Contributors: Shane Loretz
 
