@@ -55,7 +55,7 @@ struct ActionServerCallbacks
   std::mutex mtx_;
 
   rclcpp_action::GoalResponse
-  goal_callback(const rclcpp_action::GoalUUID &, std::shared_ptr<const Fibonacci::Goal>)
+  goal_callback(const rclcpp_action::GoalUUID&, std::shared_ptr<const Fibonacci::Goal>)
   {
     return rclcpp_action::GoalResponse::ACCEPT_AND_DEFER;
   }
@@ -96,13 +96,13 @@ struct ActionClientCallbacks
   bool have_result_ = false;
   std::mutex mtx_;
 
-  void feedback_callback(ClientGoalHandle::SharedPtr, const Fibonacci::Feedback::ConstSharedPtr &)
+  void feedback_callback(ClientGoalHandle::SharedPtr, const Fibonacci::Feedback::ConstSharedPtr&)
   {
     std::unique_lock<std::mutex> lock(mtx_);
     have_feedback_ = true;
   }
 
-  void result_callback(const ClientGoalHandle::WrappedResult &)
+  void result_callback(const ClientGoalHandle::WrappedResult&)
   {
     std::unique_lock<std::mutex> lock(mtx_);
     have_result_ = true;
@@ -129,8 +129,8 @@ std::shared_ptr<ClientGoalHandle>
 send_goal(
   rclcpp::Node::SharedPtr node,
   std::shared_ptr<rclcpp_action::Client<Fibonacci>> ac,
-  const std::string & server_name,
-  ActionClientCallbacks & client_callbacks)
+  const std::string& server_name,
+  ActionClientCallbacks& client_callbacks)
 {
   for (size_t i = 0; i < ATTEMPTS && !ac->action_server_is_ready(); ++i)
   {
@@ -165,7 +165,7 @@ wait_for_result(rclcpp::Node::SharedPtr node, std::shared_ptr<ClientGoalHandle> 
 }
 
 rclcpp_action::Server<Fibonacci>::SharedPtr
-make_server(rclcpp::Node::SharedPtr node, const std::string & server_name, ActionServerCallbacks & callbacks)
+make_server(rclcpp::Node::SharedPtr node, const std::string& server_name, ActionServerCallbacks& callbacks)
 {
   return rclcpp_action::create_server<Fibonacci>(
     node,
