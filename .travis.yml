@@ -21,6 +21,6 @@ env:
     - ROS_DISTRO=dashing ROS_REPO=ros2
     - ROS_DISTRO=dashing ROS_REPO=ros2-testing
 install:
-  - git clone --depth 1 https://github.com/ros-industrial/industrial_ci.git .ci_config
+  - git clone --depth 1 -b master https://github.com/ros-industrial/industrial_ci.git .ci_config
 script:
 - .ci_config/travis.sh
