@@ -46,8 +46,8 @@ class RealtimeServerGoalHandle
 private:
 
   using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
-  using ResultSharedPtr = Action::Result::SharedPtr;
-  using FeedbackSharedPtr = Action::Feedback::SharedPtr;
+  using ResultSharedPtr = typename Action::Result::SharedPtr;
+  using FeedbackSharedPtr = typename Action::Feedback::SharedPtr;
 
   uint8_t state_;
 
@@ -55,24 +55,24 @@ private:
   bool req_cancel_;
   bool req_succeed_;
   bool req_execute_;
-  typename ResultSharedPtr req_result_;
-  typename FeedbackSharedPtr req_feedback_;
+  ResultSharedPtr req_result_;
+  FeedbackSharedPtr req_feedback_;
   rclcpp::Logger logger_;
 
 public:
   std::shared_ptr<GoalHandle> gh_;
-  typename ResultSharedPtr preallocated_result_;  // Preallocated so it can be used in realtime
-  typename FeedbackSharedPtr preallocated_feedback_;  // Preallocated so it can be used in realtime
+  ResultSharedPtr preallocated_result_;  // Preallocated so it can be used in realtime
+  FeedbackSharedPtr preallocated_feedback_;  // Preallocated so it can be used in realtime
 
   RealtimeServerGoalHandle(
     std::shared_ptr<GoalHandle> &gh,
-    const typename ResultSharedPtr &preallocated_result = nullptr,
-    const typename FeedbackSharedPtr &preallocated_feedback = nullptr)
+    const ResultSharedPtr &preallocated_result = nullptr,
+    const FeedbackSharedPtr &preallocated_feedback = nullptr)
     : RealtimeServerGoalHandle(gh, preallocated_result, preallocated_feedback, rclcpp::get_logger("realtime_tools"))
   {
   }
 
-  RealtimeServerGoalHandle(std::shared_ptr<GoalHandle> &gh, const typename ResultSharedPtr &preallocated_result, const typename FeedbackSharedPtr &preallocated_feedback, rclcpp::Logger logger)
+  RealtimeServerGoalHandle(std::shared_ptr<GoalHandle> &gh, const ResultSharedPtr &preallocated_result, const FeedbackSharedPtr &preallocated_feedback, rclcpp::Logger logger)
     : req_abort_(false),
       req_cancel_(false),
       req_succeed_(false),
@@ -88,7 +88,7 @@ public:
       preallocated_feedback_.reset(new typename Action::Feedback);
   }
 
-  void setAborted(typename ResultSharedPtr result = nullptr)
+  void setAborted(ResultSharedPtr result = nullptr)
   {
     if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_)
     {
@@ -97,7 +97,7 @@ public:
     }
   }
 
-  void setCanceled(typename ResultSharedPtr result = nullptr)
+  void setCanceled(ResultSharedPtr result = nullptr)
   {
     if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_)
     {
@@ -106,7 +106,7 @@ public:
     }
   }
 
-  void setSucceeded(typename ResultSharedPtr result = nullptr)
+  void setSucceeded(ResultSharedPtr result = nullptr)
   {
     if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_)
     {
@@ -115,7 +115,7 @@ public:
     }
   }
 
-  void setFeedback(typename FeedbackSharedPtr feedback = nullptr)
+  void setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
     req_feedback_ = feedback;
   }
