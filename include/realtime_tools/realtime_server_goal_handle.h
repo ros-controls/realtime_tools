@@ -45,7 +45,7 @@ class RealtimeServerGoalHandle
 {
 private:
 
-  typedef rclcpp_action::ServerGoalHandle<Action> GoalHandle;
+  using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
 
   uint8_t state_;
 
