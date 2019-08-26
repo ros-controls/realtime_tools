@@ -24,6 +24,7 @@
 
   <test_depend>rclcpp_action</test_depend>
   <test_depend>test_msgs</test_depend>
+  <test_depend>ament_cmake_gmock</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
