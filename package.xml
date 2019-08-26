@@ -13,6 +13,7 @@
   <url type="repository">https://github.com/ros-controls/realtime_tools/</url>
 
   <author email="sglaser@willowgarage.com">Stuart Glaser</author>
+  <author email="sloretz@openrobotics.org">Shane Loretz</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
