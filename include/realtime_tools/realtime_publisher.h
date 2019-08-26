@@ -51,6 +51,8 @@ namespace realtime_tools {
 template <class Msg>
 class RealtimePublisher
 {
+private:
+  using PublisherSharedptr = rclcpp::Publisher<Msg>::SharedPtr;
 
 public:
   /// The msg_ variable contains the data that will get published on the ROS topic.
@@ -60,7 +62,7 @@ public:
    *
    * \param publisher the publisher to wrap
    */
-  RealtimePublisher(typename rclcpp::Publisher<Msg>::SharedPtr publisher)
+  RealtimePublisher(typename PublisherSharedPtr publisher)
     : publisher_(publisher), is_running_(false), keep_running_(true), turn_(LOOP_NOT_STARTED)
   {
     thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
@@ -201,7 +203,7 @@ private:
     is_running_ = false;
   }
 
-  typename rclcpp::Publisher<Msg>::SharedPtr publisher_;
+  typename PublisherSharedPtr publisher_;
   volatile bool is_running_;
   volatile bool keep_running_;
 
