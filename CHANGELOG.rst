@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2019-09-09)
+------------------
 * Add test_depend ament_cmake_gmock
 * Update CI for dashing
 * Add sloretz as another author
