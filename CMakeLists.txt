@@ -38,7 +38,7 @@ if (CATKIN_ENABLE_TESTING)
   add_rostest_gmock(realtime_server_goal_handle_tests test/realtime_server_goal_handle.test test/realtime_server_goal_handle_tests.cpp)
   find_package(actionlib REQUIRED)
   target_link_libraries(realtime_server_goal_handle_tests ${PROJECT_NAME} ${actionlib_LIBRARIES})
-  target_include_directories(realtime_publisher_tests PRIVATE ${actionlib_INCLUDE_DIRS})
+  target_include_directories(realtime_server_goal_handle_tests PRIVATE ${actionlib_INCLUDE_DIRS})
 endif()
 
 # Install
