@@ -82,7 +82,11 @@ public:
     {
       std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
-    thread_.join();
+
+    if (thread_.joinable())
+    {
+      thread_.join();
+    }
     publisher_.shutdown();
   }
 
