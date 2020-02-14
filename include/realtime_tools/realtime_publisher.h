@@ -38,6 +38,7 @@
 #ifndef REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 #define REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 
+#include <atomic>
 #include <string>
 #include <rclcpp/publisher.hpp>
 #include <chrono>
@@ -204,8 +205,8 @@ private:
   }
 
   PublisherSharedPtr publisher_;
-  volatile bool is_running_;
-  volatile bool keep_running_;
+  std::atomic_bool is_running_;
+  std::atomic_bool keep_running_;
 
   std::thread thread_;
 
