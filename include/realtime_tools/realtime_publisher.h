@@ -55,7 +55,7 @@ class RealtimePublisher
 public:
   /// The msg_ variable contains the data that will get published on the ROS topic.
   Msg msg_;
-  
+
   /**  \brief Constructor for the realtime publisher
    *
    * \param node the nodehandle that specifies the namespace (or prefix) that is used to advertise the ROS topic
@@ -225,8 +225,8 @@ private:
   std::string topic_;
   ros::NodeHandle node_;
   ros::Publisher publisher_;
-  volatile bool is_running_;
-  volatile bool keep_running_;
+  std::atomic<bool> is_running_;
+  std::atomic<bool> keep_running_;
 
   std::thread thread_;
 
@@ -237,7 +237,7 @@ private:
 #endif
 
   enum {REALTIME, NON_REALTIME, LOOP_NOT_STARTED};
-  int turn_;  // Who's turn is it to use msg_?
+  std::atomic<int> turn_;  // Who's turn is it to use msg_?
 };
 
 template <class Msg>
