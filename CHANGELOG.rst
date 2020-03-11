@@ -4,6 +4,10 @@ Changelog for package realtime_tools
 
 Forthcoming
 -----------
+* Use atomic types
+* Bump CMake version to avoid CMP0048
+* Contributors: Bence Magyar, Shane Loretz, Zheng Qu
+
 * Bump CMake version to avoid CMP0048
 * Contributors: Shane Loretz
 
