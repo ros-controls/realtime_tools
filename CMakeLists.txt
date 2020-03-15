@@ -19,7 +19,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES} ${CMAKE_THREAD_
 target_include_directories(${PROJECT_NAME} PUBLIC ${catkin_INCLUDE_DIRS})
 
 # Unit Tests
-if (CATKIN_ENABLE_TESTING)
+if (CATKIN_ENABLE_TESTING AND (EXISTS ${GMOCK_MAIN_LIBRARIES}))
   catkin_add_gmock(realtime_box_tests test/realtime_box_tests.cpp)
   target_link_libraries(realtime_box_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
 
