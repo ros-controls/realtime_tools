@@ -31,12 +31,12 @@
 #define REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_H
 
 // Standard
+#include <atomic>
 #include <memory>
 
 #include <rclcpp/exceptions.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp_action/server_goal_handle.hpp>
-#include <atomic>
 
 namespace realtime_tools
 {
