@@ -205,8 +205,8 @@ private:
   }
 
   PublisherSharedPtr publisher_;
-  std::atomic_bool is_running_;
-  std::atomic_bool keep_running_;
+  std::atomic<bool> is_running_;
+  std::atomic<bool> keep_running_;
 
   std::thread thread_;
 
@@ -217,7 +217,7 @@ private:
 #endif
 
   enum {REALTIME, NON_REALTIME, LOOP_NOT_STARTED};
-  int turn_;  // Who's turn is it to use msg_?
+  std::atomic<int> turn_;  // Who's turn is it to use msg_?
 };
 
 template <class Msg>
