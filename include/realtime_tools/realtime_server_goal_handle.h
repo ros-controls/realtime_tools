@@ -52,10 +52,10 @@ private:
 
   uint8_t state_;
 
-  std::atomic<bool> req_abort_;
-  std::atomic<bool> req_cancel_;
-  std::atomic<bool> req_succeed_;
-  std::atomic<bool> req_execute_;
+  bool req_abort_;
+  bool req_cancel_;
+  bool req_succeed_;
+  bool req_execute_;
 
   std::mutex mutex_;
   ResultSharedPtr req_result_;
