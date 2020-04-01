@@ -55,6 +55,8 @@ private:
   bool req_cancel_;
   bool req_succeed_;
   bool req_execute_;
+
+  std::mutex mutex_;
   ResultSharedPtr req_result_;
   FeedbackSharedPtr req_feedback_;
   rclcpp::Logger logger_;
@@ -77,10 +79,10 @@ public:
       req_cancel_(false),
       req_succeed_(false),
       req_execute_(false),
+      logger_(logger),
       gh_(gh),
       preallocated_result_(preallocated_result),
-      preallocated_feedback_(preallocated_feedback),
-      logger_(logger)
+      preallocated_feedback_(preallocated_feedback)
   {
     if (!preallocated_result_)
       preallocated_result_.reset(new typename Action::Result);
@@ -92,6 +94,8 @@ public:
   {
     if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_)
     {
+      std::lock_guard<std::mutex> guard(mutex_);
+
       req_result_ = result;
       req_abort_ = true;
     }
@@ -101,6 +105,8 @@ public:
   {
     if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_)
     {
+      std::lock_guard<std::mutex> guard(mutex_);
+
       req_result_ = result;
       req_cancel_ = true;
     }
@@ -110,6 +116,8 @@ public:
   {
     if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_)
     {
+      std::lock_guard<std::mutex> guard(mutex_);
+
       req_result_ = result;
       req_succeed_ = true;
     }
@@ -117,6 +125,7 @@ public:
 
   void setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
+    std::lock_guard<std::mutex> guard(mutex_);
     req_feedback_ = feedback;
   }
 
@@ -124,6 +133,7 @@ public:
   {
     if (!req_succeed_ && !req_abort_ && !req_cancel_)
     {
+      std::lock_guard<std::mutex> guard(mutex_);
       req_execute_ = true;
     }
   }
@@ -135,36 +145,41 @@ public:
 
   void runNonRealtime()
   {
-    if (valid())
+    if (!valid())
+      return;
+
+    std::lock_guard<std::mutex> guard(mutex_);
+
+    try
     {
-      try
+      if (req_execute_ && !gh_->is_executing() && gh_->is_active() && !gh_->is_canceling())
       {
-        if (req_execute_ && !gh_->is_executing() && gh_->is_active() && !gh_->is_canceling())
-        {
-          gh_->execute();
-        }
-        if (req_abort_ && gh_->is_executing())
-        {
-          gh_->abort(req_result_);
-        }
-        if (req_cancel_ && gh_->is_active())
-        {
-          gh_->canceled(req_result_);
-        }
-        if (req_succeed_ && !gh_->is_canceling())
-        {
-          gh_->succeed(req_result_);
-        }
-        if (req_feedback_ && gh_->is_executing())
-        {
-          gh_->publish_feedback(req_feedback_);
-        }
+        gh_->execute();
       }
-      catch (const rclcpp::exceptions::RCLErrorBase & e)
+      if (req_abort_ && gh_->is_executing())
       {
-        // Likely invalid state transition
-        RCLCPP_WARN(logger_, e.formatted_message);
+        gh_->abort(req_result_);
+        req_abort_ = false;
       }
+      if (req_cancel_ && gh_->is_active())
+      {
+        gh_->canceled(req_result_);
+        req_cancel_ = false;
+      }
+      if (req_succeed_ && !gh_->is_canceling())
+      {
+        gh_->succeed(req_result_);
+        req_succeed_ = false;
+      }
+      if (req_feedback_ && gh_->is_executing())
+      {
+        gh_->publish_feedback(req_feedback_);
+      }
+    }
+    catch (const rclcpp::exceptions::RCLErrorBase & e)
+    {
+      // Likely invalid state transition
+      RCLCPP_WARN(logger_, e.formatted_message);
     }
   }
 };
