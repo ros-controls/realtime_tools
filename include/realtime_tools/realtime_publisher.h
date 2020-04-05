@@ -38,12 +38,14 @@
 #ifndef REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 #define REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 
-#include <string>
 #include <ros/node_handle.h>
+
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 
 namespace realtime_tools {
