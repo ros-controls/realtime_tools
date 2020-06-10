@@ -156,10 +156,13 @@ send_goal(
 }
 
 std::shared_ptr<ClientGoalHandle::WrappedResult>
-wait_for_result(rclcpp::Node::SharedPtr node, std::shared_ptr<ClientGoalHandle> client_handle)
+wait_for_result(
+  rclcpp::Node::SharedPtr node,
+  std::shared_ptr<ClientGoalHandle> client_goal_handle,
+  std::shared_ptr<rclcpp_action::Client<Fibonacci>> client)
 {
   // Get a result future
-  auto result_future = client_handle->async_result();
+  auto result_future = client->async_get_result(client_goal_handle);
   rclcpp::spin_until_future_complete(node, result_future);
   return std::make_shared<ClientGoalHandle::WrappedResult>(result_future.get());
 }
@@ -201,7 +204,7 @@ TEST(RealtimeServerGoalHandle, set_aborted)
     rt_handle.runNonRealtime();
   }
 
-  auto wrapped_result = wait_for_result(node, client_handle);
+  auto wrapped_result = wait_for_result(node, client_handle, client);
   ASSERT_NE(nullptr, wrapped_result.get());
   EXPECT_EQ(wrapped_result->code, rclcpp_action::ResultCode::ABORTED);
   ASSERT_NE(nullptr, wrapped_result->result.get());
@@ -249,7 +252,7 @@ TEST(RealtimeServerGoalHandle, set_canceled)
     rt_handle.runNonRealtime();
   }
 
-  auto wrapped_result = wait_for_result(node, client_handle);
+  auto wrapped_result = wait_for_result(node, client_handle, client);
   ASSERT_NE(nullptr, wrapped_result.get());
   EXPECT_EQ(wrapped_result->code, rclcpp_action::ResultCode::CANCELED);
   ASSERT_NE(nullptr, wrapped_result->result.get());
@@ -283,7 +286,7 @@ TEST(RealtimeServerGoalHandle, set_succeeded)
     rt_handle.runNonRealtime();
   }
 
-  auto wrapped_result = wait_for_result(node, client_handle);
+  auto wrapped_result = wait_for_result(node, client_handle, client);
   ASSERT_NE(nullptr, wrapped_result.get());
   EXPECT_EQ(wrapped_result->code, rclcpp_action::ResultCode::SUCCEEDED);
   ASSERT_NE(nullptr, wrapped_result->result.get());
