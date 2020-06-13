@@ -39,17 +39,19 @@
 #define REALTIME_TOOLS__REALTIME_PUBLISHER_H_
 
 #include <atomic>
-#include <string>
-#include <rclcpp/publisher.hpp>
 #include <chrono>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 
-namespace realtime_tools {
+#include "rclcpp/publisher.hpp"
 
-template <class Msg>
+namespace realtime_tools
+{
+
+template<class Msg>
 class RealtimePublisher
 {
 private:
@@ -58,28 +60,25 @@ private:
 public:
   /// The msg_ variable contains the data that will get published on the ROS topic.
   Msg msg_;
-  
+
   /**  \brief Constructor for the realtime publisher
    *
    * \param publisher the publisher to wrap
    */
-  RealtimePublisher(PublisherSharedPtr publisher)
-    : publisher_(publisher), is_running_(false), keep_running_(true), turn_(LOOP_NOT_STARTED)
+  explicit RealtimePublisher(PublisherSharedPtr publisher)
+  : publisher_(publisher), is_running_(false), keep_running_(true), turn_(LOOP_NOT_STARTED)
   {
     thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
   }
 
   RealtimePublisher()
-    : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED)
-  {
-  }
+  : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED) {}
 
   /// Destructor
   ~RealtimePublisher()
   {
     stop();
-    while (is_running())
-    {
+    while (is_running()) {
       std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
     if (thread_.joinable()) {
@@ -104,20 +103,14 @@ public:
    */
   bool trylock()
   {
-    if (msg_mutex_.try_lock())
-    {
-      if (turn_ == REALTIME)
-      {
+    if (msg_mutex_.try_lock()) {
+      if (turn_ == REALTIME) {
         return true;
-      }
-      else
-      {
+      } else {
         msg_mutex_.unlock();
         return false;
       }
-    }
-    else
-    {
+    } else {
       return false;
     }
   }
@@ -149,8 +142,7 @@ public:
     msg_mutex_.lock();
 #else
     // never actually block on the lock
-    while (!msg_mutex_.try_lock())
-    {
+    while (!msg_mutex_.try_lock()) {
       std::this_thread::sleep_for(std::chrono::microseconds(200));
     }
 #endif
@@ -159,31 +151,26 @@ public:
   /**  \brief Unlocks the data without publishing anything
    *
    */
-  void unlock()
-  {
-    msg_mutex_.unlock();
-  }
+  void unlock() {msg_mutex_.unlock();}
 
 private:
   // non-copyable
   RealtimePublisher(const RealtimePublisher &) = delete;
   RealtimePublisher & operator=(const RealtimePublisher &) = delete;
 
-  bool is_running() const { return is_running_; }
+  bool is_running() const {return is_running_;}
 
   void publishingLoop()
   {
     is_running_ = true;
     turn_ = REALTIME;
 
-    while (keep_running_)
-    {
+    while (keep_running_) {
       Msg outgoing;
 
       // Locks msg_ and copies it
       lock();
-      while (turn_ != NON_REALTIME && keep_running_)
-      {
+      while (turn_ != NON_REALTIME && keep_running_) {
 #ifdef NON_POLLING
         updated_cond_.wait(lock);
 #else
@@ -198,8 +185,7 @@ private:
       unlock();
 
       // Sends the outgoing message
-      if (keep_running_)
-        publisher_->publish(outgoing);
+      if (keep_running_) {publisher_->publish(outgoing);}
     }
     is_running_ = false;
   }
@@ -216,13 +202,12 @@ private:
   std::condition_variable updated_cond_;
 #endif
 
-  enum {REALTIME, NON_REALTIME, LOOP_NOT_STARTED};
+  enum { REALTIME, NON_REALTIME, LOOP_NOT_STARTED };
   std::atomic<int> turn_;  // Who's turn is it to use msg_?
 };
 
-template <class Msg>
-using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg> >;
+template<class Msg>
+using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg>>;
 
-}
-
-#endif
+}  // namespace realtime_tools
+#endif  // REALTIME_TOOLS__REALTIME_PUBLISHER_H_

@@ -28,17 +28,20 @@
  */
 
 #include <gmock/gmock.h>
-#include <realtime_tools/realtime_server_goal_handle.h>
-#include <rclcpp/executors.hpp>
-#include <rclcpp/utilities.hpp>
-#include <rclcpp_action/create_client.hpp>
-#include <rclcpp_action/create_server.hpp>
-#include <test_msgs/action/fibonacci.hpp>
+
 #include <chrono>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
+
+#include "rclcpp/executors.hpp"
+#include "rclcpp/utilities.hpp"
+#include "rclcpp_action/create_client.hpp"
+#include "rclcpp_action/create_server.hpp"
+#include "realtime_tools/realtime_server_goal_handle.h"
+#include "test_msgs/action/fibonacci.hpp"
 
 using test_msgs::action::Fibonacci;
 using ServerGoalHandle = rclcpp_action::ServerGoalHandle<Fibonacci>;
@@ -54,8 +57,8 @@ struct ActionServerCallbacks
   std::shared_ptr<ServerGoalHandle> handle_;
   std::mutex mtx_;
 
-  rclcpp_action::GoalResponse
-  goal_callback(const rclcpp_action::GoalUUID&, std::shared_ptr<const Fibonacci::Goal>)
+  rclcpp_action::GoalResponse goal_callback(
+    const rclcpp_action::GoalUUID &, std::shared_ptr<const Fibonacci::Goal>)
   {
     return rclcpp_action::GoalResponse::ACCEPT_AND_DEFER;
   }
@@ -67,21 +70,18 @@ struct ActionServerCallbacks
     have_handle_ = true;
   }
 
-  rclcpp_action::CancelResponse
-  cancel_callback(std::shared_ptr<ServerGoalHandle>)
+  rclcpp_action::CancelResponse cancel_callback(std::shared_ptr<ServerGoalHandle>)
   {
     return rclcpp_action::CancelResponse::ACCEPT;
   }
 
   bool wait_for_handle(rclcpp::Node::SharedPtr node)
   {
-    for (size_t i = 0; i < ATTEMPTS; ++i)
-    {
+    for (size_t i = 0; i < ATTEMPTS; ++i) {
       rclcpp::spin_some(node);
       std::this_thread::sleep_for(DELAY);
       std::unique_lock<std::mutex> lock(mtx_);
-      if (have_handle_)
-      {
+      if (have_handle_) {
         break;
       }
     }
@@ -96,13 +96,13 @@ struct ActionClientCallbacks
   bool have_result_ = false;
   std::mutex mtx_;
 
-  void feedback_callback(ClientGoalHandle::SharedPtr, const Fibonacci::Feedback::ConstSharedPtr&)
+  void feedback_callback(ClientGoalHandle::SharedPtr, const Fibonacci::Feedback::ConstSharedPtr &)
   {
     std::unique_lock<std::mutex> lock(mtx_);
     have_feedback_ = true;
   }
 
-  void result_callback(const ClientGoalHandle::WrappedResult&)
+  void result_callback(const ClientGoalHandle::WrappedResult &)
   {
     std::unique_lock<std::mutex> lock(mtx_);
     have_result_ = true;
@@ -110,13 +110,11 @@ struct ActionClientCallbacks
 
   bool wait_for_feedback(rclcpp::Node::SharedPtr node)
   {
-    for (size_t i = 0; i < ATTEMPTS; ++i)
-    {
+    for (size_t i = 0; i < ATTEMPTS; ++i) {
       rclcpp::spin_some(node);
       std::this_thread::sleep_for(DELAY);
       std::unique_lock<std::mutex> lock(mtx_);
-      if (have_feedback_)
-      {
+      if (have_feedback_) {
         break;
       }
     }
@@ -125,26 +123,22 @@ struct ActionClientCallbacks
   }
 };
 
-std::shared_ptr<ClientGoalHandle>
-send_goal(
-  rclcpp::Node::SharedPtr node,
-  std::shared_ptr<rclcpp_action::Client<Fibonacci>> ac,
-  const std::string& server_name,
-  ActionClientCallbacks& client_callbacks)
+std::shared_ptr<ClientGoalHandle> send_goal(
+  rclcpp::Node::SharedPtr node, std::shared_ptr<rclcpp_action::Client<Fibonacci>> ac,
+  const std::string & server_name, ActionClientCallbacks & client_callbacks)
 {
-  for (size_t i = 0; i < ATTEMPTS && !ac->action_server_is_ready(); ++i)
-  {
+  for (size_t i = 0; i < ATTEMPTS && !ac->action_server_is_ready(); ++i) {
     rclcpp::spin_some(node);
     std::this_thread::sleep_for(DELAY);
   }
-  if (ac->action_server_is_ready())
-  {
+  if (ac->action_server_is_ready()) {
     Fibonacci::Goal goal;
     goal.order = 10;
     // Create "SendGoalOptions" that has callbacks set
     rclcpp_action::Client<Fibonacci>::SendGoalOptions send_goal_options;
-    send_goal_options.feedback_callback =
-      std::bind(&ActionClientCallbacks::feedback_callback, &client_callbacks, std::placeholders::_1, std::placeholders::_2);
+    send_goal_options.feedback_callback = std::bind(
+      &ActionClientCallbacks::feedback_callback, &client_callbacks, std::placeholders::_1,
+      std::placeholders::_2);
     send_goal_options.result_callback =
       std::bind(&ActionClientCallbacks::result_callback, &client_callbacks, std::placeholders::_1);
     // wait to get a client handle
@@ -155,10 +149,8 @@ send_goal(
   return nullptr;
 }
 
-std::shared_ptr<ClientGoalHandle::WrappedResult>
-wait_for_result(
-  rclcpp::Node::SharedPtr node,
-  std::shared_ptr<ClientGoalHandle> client_goal_handle,
+std::shared_ptr<ClientGoalHandle::WrappedResult> wait_for_result(
+  rclcpp::Node::SharedPtr node, std::shared_ptr<ClientGoalHandle> client_goal_handle,
   std::shared_ptr<rclcpp_action::Client<Fibonacci>> client)
 {
   // Get a result future
@@ -167,13 +159,14 @@ wait_for_result(
   return std::make_shared<ClientGoalHandle::WrappedResult>(result_future.get());
 }
 
-rclcpp_action::Server<Fibonacci>::SharedPtr
-make_server(rclcpp::Node::SharedPtr node, const std::string& server_name, ActionServerCallbacks& callbacks)
+rclcpp_action::Server<Fibonacci>::SharedPtr make_server(
+  rclcpp::Node::SharedPtr node, const std::string & server_name, ActionServerCallbacks & callbacks)
 {
   return rclcpp_action::create_server<Fibonacci>(
-    node,
-    server_name,
-    std::bind(&ActionServerCallbacks::goal_callback, &callbacks, std::placeholders::_1, std::placeholders::_2),
+    node, server_name,
+    std::bind(
+      &ActionServerCallbacks::goal_callback, &callbacks, std::placeholders::_1,
+      std::placeholders::_2),
     std::bind(&ActionServerCallbacks::cancel_callback, &callbacks, std::placeholders::_1),
     std::bind(&ActionServerCallbacks::accepted_callback, &callbacks, std::placeholders::_1));
 }
@@ -233,10 +226,8 @@ TEST(RealtimeServerGoalHandle, set_canceled)
 
   // Cancel and wait for server to learn about that
   client->async_cancel_goal(client_handle);
-  for (size_t i = 0; i < ATTEMPTS; ++i)
-  {
-    if (callbacks.handle_->is_canceling())
-    {
+  for (size_t i = 0; i < ATTEMPTS; ++i) {
+    if (callbacks.handle_->is_canceling()) {
       break;
     }
     rclcpp::spin_some(node);
