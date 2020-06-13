@@ -35,29 +35,28 @@
 #include <mutex>
 #include <string>
 
-namespace realtime_tools {
-
+namespace realtime_tools
+{
 /*!
 
   Strongly suggested that you use an std::shared_ptr in this box to
   guarantee realtime safety.
 
  */
-template <class T>
+template<class T>
 class RealtimeBox
 {
 public:
-  RealtimeBox(const T &initial = T()) : thing_(initial)
-  {
-  }
+  explicit RealtimeBox(const T & initial = T())
+  : thing_(initial) {}
 
-  void set(const T &value)
+  void set(const T & value)
   {
     std::lock_guard<std::mutex> guard(thing_lock_RT_);
     thing_ = value;
   }
 
-  void get(T &ref)
+  void get(T & ref)
   {
     std::lock_guard<std::mutex> guard(thing_lock_RT_);
     ref = thing_;
@@ -75,6 +74,6 @@ private:
   std::mutex thing_lock_RT_;
 };
 
-} // namespace
+}  // namespace realtime_tools
 
-#endif
+#endif  // REALTIME_TOOLS__REALTIME_BOX_H_

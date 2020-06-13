@@ -39,20 +39,20 @@
 #ifndef REALTIME_TOOLS__REALTIME_CLOCK_H_
 #define REALTIME_TOOLS__REALTIME_CLOCK_H_
 
-#include <rclcpp/clock.hpp>
-#include <rclcpp/duration.hpp>
-#include <rclcpp/logger.hpp>
-#include <rclcpp/time.hpp>
-
 #include <mutex>
 #include <thread>
+
+#include "rclcpp/clock.hpp"
+#include "rclcpp/duration.hpp"
+#include "rclcpp/logger.hpp"
+#include "rclcpp/time.hpp"
 
 namespace realtime_tools
 {
 
 class RealtimeClock
 {
- public:
+public:
   /**
    * Default constructor creates an instance that always returns zero time.
    */
@@ -61,15 +61,12 @@ class RealtimeClock
   /**
    * Create a realtime-safe wrapper around a clock object.
    */
-  RealtimeClock(
-    rclcpp::Clock::SharedPtr clock);
+  explicit RealtimeClock(rclcpp::Clock::SharedPtr clock);
 
   /**
    * Create a realtime-safe wrapper around a clock object with a specified logger.
    */
-  RealtimeClock(
-    rclcpp::Clock::SharedPtr clock,
-    rclcpp::Logger logger);
+  RealtimeClock(rclcpp::Clock::SharedPtr clock, rclcpp::Logger logger);
 
   ~RealtimeClock();
 
@@ -77,8 +74,7 @@ class RealtimeClock
    * Get the current time from the clock.
    * \deprecated use now() instead.
    */
-  [[deprecated]]
-  rclcpp::Time getSystemTime(const rclcpp::Time & realtime_time = rclcpp::Time());
+  [[deprecated]] rclcpp::Time getSystemTime(const rclcpp::Time & realtime_time = rclcpp::Time());
 
   /**
    * Get the current time from the clock.
@@ -101,10 +97,7 @@ private:
   bool initialized_ = false;
   std::mutex mutex_;
   std::thread thread_;
+};  // class
 
-
-
-}; // class
-}// namespace
-
-#endif
+}  // namespace realtime_tools
+#endif  // REALTIME_TOOLS__REALTIME_CLOCK_H_

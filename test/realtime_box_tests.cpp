@@ -34,10 +34,11 @@ using realtime_tools::RealtimeBox;
 
 class DefaultConstructable
 {
-  public:
-    DefaultConstructable() : number_(42) {};
-    ~DefaultConstructable() {};
-    int number_;
+public:
+  DefaultConstructable()
+  : number_(42) {}
+  ~DefaultConstructable() {}
+  int number_;
 };
 
 TEST(RealtimeBox, default_construct)

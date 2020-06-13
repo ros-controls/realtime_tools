@@ -28,21 +28,22 @@
  */
 
 #include <gmock/gmock.h>
-#include <realtime_tools/realtime_publisher.h>
-#include <test_msgs/msg/strings.hpp>
+
 #include <chrono>
+#include <memory>
 #include <mutex>
 #include <thread>
 
-#include <rclcpp/executors.hpp>
-#include <rclcpp/node.hpp>
-#include <rclcpp/utilities.hpp>
+#include "rclcpp/executors.hpp"
+#include "rclcpp/node.hpp"
+#include "rclcpp/utilities.hpp"
+#include "realtime_tools/realtime_publisher.h"
+#include "test_msgs/msg/strings.hpp"
 
 using StringMsg = test_msgs::msg::Strings;
 using realtime_tools::RealtimePublisher;
 
-TEST(RealtimePublisher, construct_destruct)
-{
+TEST(RealtimePublisher, construct_destruct) {
   RealtimePublisher<StringMsg> rt_pub;
 }
 
@@ -72,8 +73,7 @@ TEST(RealtimePublisher, rt_publish)
   RealtimePublisher<StringMsg> rt_pub(pub);
   // publish a latched message
   bool lock_is_held = rt_pub.trylock();
-  for (size_t i = 0; i < ATTEMPTS && !lock_is_held; ++i)
-  {
+  for (size_t i = 0; i < ATTEMPTS && !lock_is_held; ++i) {
     lock_is_held = rt_pub.trylock();
     std::this_thread::sleep_for(DELAY);
   }
@@ -85,11 +85,9 @@ TEST(RealtimePublisher, rt_publish)
   StringCallback str_callback;
 
   auto sub = node->create_subscription<StringMsg>(
-    "~/rt_publish",
-    qos,
+    "~/rt_publish", qos,
     std::bind(&StringCallback::callback, &str_callback, std::placeholders::_1));
-  for (size_t i = 0; i < ATTEMPTS && str_callback.msg_.string_value.empty(); ++i)
-  {
+  for (size_t i = 0; i < ATTEMPTS && str_callback.msg_.string_value.empty(); ++i) {
     rclcpp::spin_some(node);
     std::this_thread::sleep_for(DELAY);
   }

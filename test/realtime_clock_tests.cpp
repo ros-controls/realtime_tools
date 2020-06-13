@@ -28,11 +28,12 @@
  */
 
 #include <gmock/gmock.h>
-#include <realtime_tools/realtime_clock.h>
+
 #include <chrono>
 #include <thread>
 
-#include <rclcpp/utilities.hpp>
+#include "rclcpp/utilities.hpp"
+#include "realtime_tools/realtime_clock.h"
 
 using realtime_tools::RealtimeClock;
 
@@ -45,8 +46,7 @@ TEST(RealtimeClock, get_system_time)
   RealtimeClock rt_clock(clock);
   // Wait for time to be available
   rclcpp::Time last_rt_time;
-  for (int i = 0; i < ATTEMPTS && rclcpp::Time() == last_rt_time; ++i)
-  {
+  for (int i = 0; i < ATTEMPTS && rclcpp::Time() == last_rt_time; ++i) {
     std::this_thread::sleep_for(DELAY);
     last_rt_time = rt_clock.now(rclcpp::Time());
   }
