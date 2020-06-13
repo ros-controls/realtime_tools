@@ -110,10 +110,9 @@ void RealtimeClock::loop()
 #ifdef NON_POLLING
     std::lock_guard<std::mutex> guard(mutex_);
 #else
-    std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
-    while (!guard.owns_lock()) {
+    std::unique_lock<std::mutex> guard(mutex_, std::defer_lock);
+    while (!guard.try_lock()) {
       std::this_thread::sleep_for(std::chrono::microseconds(500));
-      guard.try_lock();
     }
 #endif
 
