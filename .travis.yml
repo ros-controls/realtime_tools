@@ -18,8 +18,8 @@ env:
 #    - UPSTREAM_WORKSPACE=https://raw.github.com/ros-controls/ros_control/melodic-devel/ros_control.rosinstall
     - ROS_PARALLEL_TEST_JOBS=-j1
   matrix:
-    - ROS_DISTRO=dashing ROS_REPO=ros2
-    - ROS_DISTRO=dashing ROS_REPO=ros2-testing
+    - ROS_DISTRO=foxy ROS_REPO=ros2
+    - ROS_DISTRO=foxy ROS_REPO=ros2-testing
 install:
   - git clone --depth 1 -b master https://github.com/ros-industrial/industrial_ci.git .ci_config
 script:
