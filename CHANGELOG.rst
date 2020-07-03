@@ -2,6 +2,22 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix msbuild warning
+* address linter failures
+* enable linters
+* avoid deprecations
+* Realtime server goal thread handle safety + additional warning fixes (`#2 <https://github.com/ros-controls/realtime_tools/issues/2>`_) (`#57 <https://github.com/ros-controls/realtime_tools/issues/57>`_)
+  * Made code thread safe, fixed warnings with repeated aborts/success/cancels
+  Fixed -reorder warning
+  Early return
+  * removed atomic
+  * removed unneeded header
+* use template instead
+* use std::atomic instead of volatile
+* Contributors: Karsten Knese, Yutaka Kondo, ddengster
+
 2.0.0 (2019-09-09)
 ------------------
 * Add test_depend ament_cmake_gmock
