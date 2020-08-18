@@ -64,6 +64,7 @@ public:
    * @param data The object to use as default value
    */
   explicit RealtimeBuffer(const T & data)
+  : new_data_available_(false)
   {
     // allocate memory
     non_realtime_data_ = new T(data);
