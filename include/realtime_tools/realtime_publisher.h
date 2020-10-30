@@ -80,7 +80,7 @@ public:
   ~RealtimePublisher()
   {
     stop();
-    while (is_running())
+    while (is_running_)
     {
       std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
@@ -185,17 +185,15 @@ private:
   {
     publisher_ = node_.advertise<Msg>(topic_, queue_size, latched);
     keep_running_ = true;
+    turn_ = REALTIME;
     thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
   }
-
-  bool is_running() const { return is_running_; }
 
   void publishingLoop()
   {
     is_running_ = true;
-    turn_ = REALTIME;
 #ifdef NON_POLLING
-    std::unique_lock<std::mutex> cond_lock_(msg_mutex_, std::defer_lock_t());
+    std::unique_lock<std::mutex> cond_lock(msg_mutex_, std::defer_lock_t());
 #endif
 
     while (keep_running_)
@@ -207,7 +205,7 @@ private:
       while (turn_ != NON_REALTIME && keep_running_)
       {
 #ifdef NON_POLLING
-        updated_cond_.wait(cond_lock_);
+        updated_cond_.wait(cond_lock);
 #else
         unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(500));
@@ -234,7 +232,7 @@ private:
 
   std::thread thread_;
 
-  std::mutex msg_mutex_;  // Protects msg_
+  std::mutex msg_mutex_;  // Protects msg_ and turn_
 
 #ifdef NON_POLLING
   std::condition_variable updated_cond_;
