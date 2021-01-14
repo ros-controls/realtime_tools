@@ -2,6 +2,12 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Replace Travis with GH actions CI workflow
+* Add missing #include <atomic>
+* Contributors: Matt Reynolds
+
 1.16.0 (2020-03-11)
 -------------------
 * Use atomic types
