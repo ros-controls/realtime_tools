@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.16.1 (2021-01-14)
+-------------------
 * Replace Travis with GH actions CI workflow
 * Add missing #include <atomic>
 * Contributors: Matt Reynolds
