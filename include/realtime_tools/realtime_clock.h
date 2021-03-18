@@ -90,7 +90,7 @@ private:
   rclcpp::Logger logger_;
   unsigned int lock_misses_ = 0;
   rclcpp::Time system_time_;
-  rclcpp::Duration clock_offset_{0};
+  rclcpp::Duration clock_offset_{0, 0u};
 
   rclcpp::Time last_realtime_time_;
   bool running_ = false;
