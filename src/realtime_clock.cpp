@@ -78,7 +78,7 @@ rclcpp::Time RealtimeClock::now(const rclcpp::Time & realtime_time)
     // update time offset when we have a new system time measurement in the last cycle
     if (lock_misses_ == 0 && system_time_ != rclcpp::Time()) {
       // get additional offset caused by period of realtime loop
-      rclcpp::Duration period_offset(0);
+      rclcpp::Duration period_offset(0, 0u);
       if (last_realtime_time_ != rclcpp::Time()) {
         period_offset = (realtime_time - last_realtime_time_) * 0.5;
       }
