@@ -2,6 +2,15 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix deprecation warnings when constructing rclcpp::Duration
+  Since https://github.com/ros2/rclcpp/pull/1432 (upcoming in Galactic), we should not initialize with a single integer
+  as the units are ambiguous.
+* fix the mis-type error.
+* Fix uninitialized variable
+* Contributors: Jacob Perron, Victor Lopez, seanyen
+
 2.1.0 (2020-07-03)
 ------------------
 * fix msbuild warning
