@@ -149,10 +149,9 @@ TEST(ReadBarrier, write_from_RT_to_nRT)
   // write state to non-RT
   ReadBarrier<DefaultConstructable> buffer;
   decltype(buffer)::MemoryBarrierType::DirectAccess<> da_writer(buffer);
-  //   typeof(state) is MemoryBarrier<StateData>::DirectAccess<realtime, try_lock>
-  da_writer->number_ = 8;                // using smart_ptr-like semantics
-  da_writer.new_data_available(true); // indicate to non-RT there is new state data
-  da_writer.reset();                     // unlock the state barrier
+  da_writer->number_ = 8;                     // using smart_ptr-like semantics
+  da_writer.new_data_available(true);   // indicate to non-RT there is new state data
+  da_writer.reset();                          // unlock the state barrier
 }
 
 TEST(ReadBarrier, read_on_nRT)
@@ -162,10 +161,9 @@ TEST(ReadBarrier, read_on_nRT)
 
   // repeat RT write
   decltype(buffer)::MemoryBarrierType::DirectAccess<> da_writer(buffer);
-  //   typeof(state) is MemoryBarrier<StateData>::DirectAccess<realtime, try_lock>
-  da_writer->number_ = 8;                // using smart_ptr-like semantics
-  da_writer.new_data_available(true); // indicate to non-RT there is new state data
-  da_writer.reset();                     // unlock the state barrier
+  da_writer->number_ = 8;                     // using smart_ptr-like semantics
+  da_writer.new_data_available(true);   // indicate to non-RT there is new state data
+  da_writer.reset();                          // unlock the state barrier
 
   // now test the read from nRT thread
   // get the data from RT thread and write into our user

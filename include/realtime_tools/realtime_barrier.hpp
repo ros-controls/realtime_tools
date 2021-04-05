@@ -1,9 +1,43 @@
-//
-// Created by guru on 2/22/21.
-//
+/*
+ * Copyright (c) 2021 Colin F. MacKenzie, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Willow Garage, Inc. nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
-#ifndef REALTIME_TOOLS__REALTIME_BARRIER_H
-#define REALTIME_TOOLS__REALTIME_BARRIER_H
+/*
+ * Publishing ROS messages is difficult, as the publish function is
+ * not realtime safe.  This class provides the proper locking so that
+ * you can call publish in realtime and a separate (non-realtime)
+ * thread will ensure that the message gets published over ROS.
+ *
+ * Author: Colin F. MacKenzie
+ */
+
+#ifndef REALTIME_TOOLS__REALTIME_BARRIER_HPP_
+#define REALTIME_TOOLS__REALTIME_BARRIER_HPP_
 
 #include <mutex>
 #include <thread>
@@ -12,7 +46,7 @@
 namespace realtime_tools
 {
 
-///@brief Attempt a lock on a resource but fail if already locked
+/// @brief Attempt a lock on a resource but fail if already locked
 class try_lock : public std::unique_lock<std::mutex>
 {
 public:
@@ -21,7 +55,7 @@ public:
   {}
 };
 
-///@brief Lock a resource or wait for it to be free
+/// @brief Lock a resource or wait for it to be free
 class wait_lock : public std::unique_lock<std::mutex>
 {
 public:
@@ -35,20 +69,20 @@ public:
   }
 };
 
-///@brief default options for realtime acess to resources
+/// @brief default options for realtime acess to resources
 struct realtime
 {
   using lock_strategy = try_lock;
 };
 
-///@brief default options for non-realtime access to resources
+/// @brief default options for non-realtime access to resources
 struct non_realtime
 {
   using lock_strategy = wait_lock;
 };
 
 
-///@brief Implements the underlying mechanisms for communicating between threads.
+/// @brief Implements the underlying mechanisms for communicating between threads.
 /// MemoryBarrier implements a double buffer swapping mechanism for interchanging data between
 /// threads. It allocates two T objects on the heap. When MemoryBarrier::swap() is called the two
 /// pointers are swapped. Generally one pointer is accessed from the non-realtime thread and the
@@ -56,7 +90,7 @@ struct non_realtime
 /// possible. For two-way communication two separate MemoryBarriers can be used as a pair.
 ///
 /// You should not use this class directly, you will work with ReadBarrier, WriteBarrier and
-// DirectAccess classes only.
+/// DirectAccess classes only.
 ///
 /// General strategy:
 ///   For non-RT writing to RT thread, non-RT thread writes but doesnt swap, RT swaps and reads.
@@ -65,7 +99,7 @@ template<class T>
 class MemoryBarrier
 {
 public:
-  ///@brief Provides direct access to data
+  /// @brief Provides direct access to data
   /// Should only be used from within the realtime thread. Default template args specify
   /// DirectAccess should only try to lock the resource and on failure the DirectAccess object
   /// would be equal to nullptr and therefore evaluate to false.
@@ -81,22 +115,21 @@ public:
     explicit DirectAccess(MemoryBarrierType & mem_barrier) noexcept
     : lock_strategy(mem_barrier.mutex_), mem_(&mem_barrier), obj_(nullptr)
     {
-      obj_ = _get(); // will return nullptr if we dont own the lock yet
+      obj_ = _get();     // will return nullptr if we dont own the lock yet
     }
 
     template<class X>
     explicit DirectAccess(X & mem_barrier) noexcept
     : lock_strategy(mem_barrier.memory().mutex_), mem_(&mem_barrier.memory()), obj_(nullptr)
     {
-
-      obj_ = _get(); // will return nullptr if we dont own the lock yet
+      obj_ = _get();     // will return nullptr if we dont own the lock yet
     }
 
     template<class X>
     explicit DirectAccess(X * mem_barrier) noexcept
     : lock_strategy(mem_barrier->memory().mutex_), mem_(&mem_barrier->memory()), obj_(nullptr)
     {
-      obj_ = _get(); // will return nullptr if we dont own the lock yet
+      obj_ = _get();     // will return nullptr if we dont own the lock yet
     }
 
 
@@ -230,7 +263,6 @@ private:
              obj_ = mem_->nrt_ :
                nullptr;
     }
-
   };
 
 
@@ -254,9 +286,6 @@ private:
     move.new_data_available_ = false;
   }
 
-  /*MemoryBarrier(const MemoryBarrier<T, read_locking_strategy, write_locking_strategy>& copy)
-  : in_(new T(*copy.in_)), out_(new T(*copy.out_)), polarity_(copy.polarity_), new_data_available_(copy.new_data_available_) {} }*/
-
   // allow moving but not copying
   MemoryBarrier(const MemoryBarrier<T> &) = delete;
 
@@ -264,7 +293,8 @@ private:
 
 
   // todo: perhaps we need a new_data on both nrt and rt side
-  // true if new data is available, depends on if the memory is being used for Read from RT or Write to RT mode
+  // true if new data is available, depends on if the memory is being used for Read
+  // from RT or Write to RT mode
   inline bool new_data_available() const
   {return new_data_available_;}
 
@@ -301,7 +331,7 @@ protected:
   friend class DirectAccess<non_realtime>;
 };
 
-///@brief Create a barrier for reading data from a realtime thread
+/// @brief Create a barrier for reading data from a realtime thread
 /// ReadBarrier implements reading data from a realtime thread using a MemoryBarrier. For example,
 /// this is used to transfer state data out of hardware interfaces. The default constructor will
 // create a new memory barrier for use. There is an alternate constructor if you want to create
@@ -311,7 +341,6 @@ class ReadBarrier
 {
 public:
   using MemoryBarrierType = MemoryBarrier<T>;
-  //using DirectAccessType = typename T::DirectAccess<>;
 
   ReadBarrier() noexcept
   : mem_(new MemoryBarrierType()), owns_mem(true)
@@ -330,14 +359,17 @@ public:
     }
   }
 
-  //inline operator MemoryBarrier&() { return *mem_; }
-
-  ///@brief Access the underlying MemoryBarrier object
+  /// @brief Access the underlying MemoryBarrier object
   inline MemoryBarrierType & memory()
   {return *mem_;}
 
-  ///@brief Get current value from non-realtime side without affecting the barrier.
-  /// Copy the current data into dest. No swap is performed and the new_data_available flag is unaffected.
+  /// @brief Returns true if new data is available to read
+  inline bool new_data_available() const
+  {return mem_->new_data_available();}
+
+  /// @brief Get current value from non-realtime side without affecting the barrier.
+  /// Copy the current data into dest. No swap is performed and the new_data_available flag is
+  /// unaffected.
   bool current(T & dest)
   {
     typename MemoryBarrierType::template DirectAccess<non_realtime, locking_strategy> direct(*mem_);
@@ -349,7 +381,7 @@ public:
     }
   }
 
-  ///@brief Read data out of the realtime thread
+  /// @brief Read data out of the realtime thread
   /// Swap RT buffer for non-RT. Copy the new data into val and reset the new_data_available flag.
   // todo: since this read also swaps, should it be called read_and_swap() or pop() or pull()
   bool pull(T & dest)
@@ -361,7 +393,7 @@ public:
       dest = *direct;
       return true;
     } else {
-      return false; // failed to read
+      return false;     // failed to read
     }
   }
 
@@ -371,7 +403,7 @@ private:
 };
 
 
-///@brief Create a barrier for writing data to a realtime thread
+/// @brief Create a barrier for writing data to a realtime thread
 /// WriteBarrier implements writing data to a realtime thread from a non-realtime thread using a
 /// MemoryBarrier. For example, this is used to transfer commands to a hardware interface. The
 /// default constructor will create a new memory barrier for use. There is an alternate
@@ -381,23 +413,22 @@ class WriteBarrier
 {
 public:
   using MemoryBarrierType = MemoryBarrier<T>;
-  //using DirectAccessType = DirectAccess<T>;
 
   WriteBarrier() noexcept
   : mem_(new MemoryBarrierType())
   {
   }
 
-  WriteBarrier(MemoryBarrierType & mem_barrier) noexcept
+  explicit WriteBarrier(MemoryBarrierType & mem_barrier) noexcept
   : mem_(&mem_barrier)
   {
   }
 
-  ///@brief Access the underlying MemoryBarrier object
+  /// @brief Access the underlying MemoryBarrier object
   inline MemoryBarrierType & memory()
   {return *mem_;}
 
-  ///@brief Get current value from non-realtime side without affecting the barrier.
+  /// @brief Get current value from non-realtime side without affecting the barrier.
   /// Copy the current data into dest. No swap is performed and the new_data_available flag
   /// is unaffected.
   bool current(T & dest)
@@ -411,7 +442,7 @@ public:
     }
   }
 
-  ///@brief Write data into the realtime thread
+  /// @brief Write data into the realtime thread
   /// Copy the new data from val into non-RT buffer then swap RT buffer for non-RT and set the
   // new_data_available flag.
   bool push(const T & data)
@@ -431,7 +462,7 @@ private:
   MemoryBarrierType * mem_;
 };
 
-}
+}  // namespace realtime_tools
 
 
-#endif // REALTIME_TOOLS__REALTIME_BARRIER_H
+#endif    // REALTIME_TOOLS__REALTIME_BARRIER_HPP_
