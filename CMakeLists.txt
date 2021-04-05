@@ -41,6 +41,9 @@ if(BUILD_TESTING)
   ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
 
+  ament_add_gmock(realtime_barrier_tests test/realtime_barrier_tests.cpp)
+  target_link_libraries(realtime_barrier_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
+
   ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
   target_link_libraries(realtime_clock_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
 
