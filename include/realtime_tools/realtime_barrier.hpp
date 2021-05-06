@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Colin F. MacKenzie, Inc.
+ * Copyright (c) 2021 FlyingEinstein.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
