@@ -72,3 +72,9 @@ TEST(RealtimeBox, set_and_get)
   box.get(output);
   EXPECT_EQ('z', output);
 }
+
+int main(int argc, char ** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  ros::Time::init();
+  return RUN_ALL_TESTS();
+}
