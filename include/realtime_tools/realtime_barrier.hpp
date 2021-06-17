@@ -177,7 +177,7 @@ public:
     inline void swap()
     {
       if (!std::unique_lock<std::mutex>::owns_lock()) {
-        throw std::runtime_error("can't swap an unlocked MemoryBarrier");
+        throw std::runtime_error("Can't swap an unlocked MemoryBarrier");
       }
       mem_->swap();
       obj_ = nullptr;   // must explicitly set to null so _get doesnt return cached value
