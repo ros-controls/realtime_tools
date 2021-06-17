@@ -169,7 +169,7 @@ public:
     inline void new_data_available(bool avail)
     {
       if (!lock_strategy::owns_lock()) {
-        throw std::runtime_error("can't modify an unlocked MemoryBarrier");
+        throw std::runtime_error("Can't modify an unlocked MemoryBarrier");
       }
       mem_->new_data_available_ = avail;
     }
