@@ -93,7 +93,7 @@ struct non_realtime
 /// DirectAccess classes only.
 ///
 /// General strategy:
-///   For non-RT writing to RT thread, non-RT thread writes but doesnt swap, RT swaps and reads.
+///   For non-RT writing to RT thread, non-RT thread writes but doesn't swap, RT swaps and reads.
 ///   For RT writing back to non-RT, RT writes but doesnt swap, NRT swaps and reads at will
 template<class T>
 class MemoryBarrier
