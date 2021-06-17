@@ -188,7 +188,7 @@ public:
     {return mem_ != nullptr && get();}
 
     inline bool operator==(std::nullptr_t) const
-    {return mem_ == nullptr && get();}
+    {return mem_ == nullptr || get() == nullptr;}
 
     inline bool operator!=(std::nullptr_t) const
     {return mem_ != nullptr && get();}
