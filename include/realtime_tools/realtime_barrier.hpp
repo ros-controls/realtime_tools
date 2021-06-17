@@ -115,7 +115,7 @@ public:
     explicit DirectAccess(MemoryBarrierType & mem_barrier) noexcept
     : lock_strategy(mem_barrier.mutex_), mem_(&mem_barrier), obj_(nullptr)
     {
-      obj_ = _get();     // will return nullptr if we dont own the lock yet
+      obj_ = _get();  // Will return nullptr if we don't own the lock yet
     }
 
     template<class X>
