@@ -444,7 +444,7 @@ public:
 
   /// @brief Write data into the realtime thread
   /// Copy the new data from val into non-RT buffer then swap RT buffer for non-RT and set the
-  // new_data_available flag.
+  /// new_data_available flag.
   bool push(const T & data)
   {
     typename MemoryBarrierType::template DirectAccess<non_realtime, locking_strategy> direct(*mem_);
