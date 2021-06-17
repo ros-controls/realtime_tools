@@ -94,7 +94,7 @@ struct non_realtime
 ///
 /// General strategy:
 ///   For non-RT writing to RT thread, non-RT thread writes but doesn't swap, RT swaps and reads.
-///   For RT writing back to non-RT, RT writes but doesnt swap, NRT swaps and reads at will
+///   For RT writing to non-RT, RT thread writes but doesn't swap, non-RT swaps and reads.
 template<class T>
 class MemoryBarrier
 {
