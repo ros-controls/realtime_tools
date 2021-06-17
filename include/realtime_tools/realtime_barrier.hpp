@@ -75,7 +75,7 @@ struct realtime
   using lock_strategy = try_lock;
 };
 
-/// @brief default options for non-realtime access to resources
+/// @brief Default options for non-realtime access to resources
 struct non_realtime
 {
   using lock_strategy = wait_lock;
