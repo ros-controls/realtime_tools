@@ -69,7 +69,7 @@ public:
   }
 };
 
-/// @brief default options for realtime acess to resources
+/// @brief Default options for realtime access to resources
 struct realtime
 {
   using lock_strategy = try_lock;
