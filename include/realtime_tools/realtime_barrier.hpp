@@ -180,7 +180,7 @@ public:
         throw std::runtime_error("Can't swap an unlocked MemoryBarrier");
       }
       mem_->swap();
-      obj_ = nullptr;   // must explicitly set to null so _get doesnt return cached value
+      obj_ = nullptr;  // Must explicitly set to null so _get() doesn't return cached value
       obj_ = _get();
     }
 
