@@ -164,7 +164,7 @@ public:
       }
     } catch (const rclcpp::exceptions::RCLErrorBase & e) {
       // Likely invalid state transition
-      RCLCPP_WARN(logger_, e.formatted_message);
+      RCLCPP_WARN(logger_, e.formatted_message.c_str());
     }
   }
 };
