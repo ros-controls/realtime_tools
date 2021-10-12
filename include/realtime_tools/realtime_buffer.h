@@ -149,6 +149,17 @@ public:
     *realtime_data_ = data;
   }
 
+  void reset()
+  {
+    // delete the old memory
+    if (non_realtime_data_) {delete non_realtime_data_;}
+    if (realtime_data_) {delete realtime_data_;}
+
+    // allocate memory
+    non_realtime_data_ = new T();
+    realtime_data_ = new T();
+  }
+
 private:
   T * realtime_data_;
   T * non_realtime_data_;
