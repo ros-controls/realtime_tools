@@ -2,6 +2,11 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adding new reset() function for Issue-247.
+* Contributors: bailaC
+
 2.1.1 (2021-03-21)
 ------------------
 * Fix deprecation warnings when constructing rclcpp::Duration
