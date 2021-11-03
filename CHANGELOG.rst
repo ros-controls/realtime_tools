@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2021-11-03)
+------------------
 * Adding new reset() function for Issue-247.
 * Contributors: bailaC
 
