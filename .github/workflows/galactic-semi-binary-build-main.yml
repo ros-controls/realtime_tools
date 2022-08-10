@@ -1,6 +1,5 @@
-name: Galacitc Binary Build - main
-# author: Denis Štogl <denis@stoglrobotics.de>
-# description: 'Build & test all dependencies from released (binary) packages.'
+name: Galacitc Semi-Binary Build - main
+# description: 'Build & test that compiles the main dependencies from source.'
 
 on:
   workflow_dispatch:
@@ -14,13 +13,13 @@ on:
       - master
   schedule:
     # Run every morning to detect flakiness and broken dependencies
-    - cron: '03 1 * * *'
+    - cron: '33 1 * * *'
 
 jobs:
-  binary:
+  semi_binary:
     uses: ./.github/workflows/reusable-industrial-ci-with-cache.yml
     with:
-      ros_distro: galacitc
+      ros_distro: galactic
       ros_repo: main
-      upstream_workspace: realtime_tools-not-released.galacitc.repos
+      upstream_workspace: realtime_tools.galactic.repos
       ref_for_scheduled_build: master
