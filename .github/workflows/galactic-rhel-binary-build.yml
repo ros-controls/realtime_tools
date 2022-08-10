@@ -1,4 +1,4 @@
-name: Galacitc RHEL Binary Build
+name: Galactic RHEL Binary Build
 on:
   workflow_dispatch:
     branches:
@@ -16,7 +16,7 @@ on:
 
 jobs:
   galactic_rhel_binary:
-    name: Galacitc RHEL binary build
+    name: Galactic RHEL binary build
     runs-on: ubuntu-latest
     env:
       ROS_DISTRO: galactic

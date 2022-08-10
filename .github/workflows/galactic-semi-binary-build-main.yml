@@ -1,4 +1,4 @@
-name: Galacitc Semi-Binary Build - main
+name: Galactic Semi-Binary Build - main
 # description: 'Build & test that compiles the main dependencies from source.'
 
 on:
