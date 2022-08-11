@@ -16,6 +16,14 @@ ament_target_dependencies(${PROJECT_NAME} "rclcpp" "rclcpp_action")
 target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
+# A library to detect a realtime kernel and set thread priority, if one is found
+add_library(thread_priority STATIC src/thread_priority.cpp)
+target_include_directories(thread_priority PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+)
+ament_target_dependencies(thread_priority ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
 # Unit Tests
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
@@ -44,13 +52,13 @@ install(
   DIRECTORY include/
   DESTINATION include)
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME} thread_priority
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
 ament_export_include_directories(include)
-ament_export_libraries(${PROJECT_NAME})
+ament_export_libraries(${PROJECT_NAME} thread_priority)
 
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(rclcpp_action)
