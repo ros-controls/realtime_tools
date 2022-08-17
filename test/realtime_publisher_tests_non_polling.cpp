@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Open Source Robotics Foundation, Inc.
+ * Copyright (c) 2022, ros2_control development team.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
