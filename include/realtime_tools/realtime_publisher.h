@@ -165,7 +165,6 @@ private:
     is_running_ = true;
     turn_ = REALTIME;
 
-
     while (keep_running_) {
       Msg outgoing;
 
