@@ -165,14 +165,21 @@ private:
     is_running_ = true;
     turn_ = REALTIME;
 
+
     while (keep_running_) {
       Msg outgoing;
 
       // Locks msg_ and copies it
-      lock();
+    
+#ifdef NON_POLLING
+      std::unique_lock<std::mutex> lock_(msg_mutex_); 
+#else 
+       lock();
+#endif
+
       while (turn_ != NON_REALTIME && keep_running_) {
 #ifdef NON_POLLING
-        updated_cond_.wait(lock);
+        updated_cond_.wait(lock_);
 #else
         unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(500));
