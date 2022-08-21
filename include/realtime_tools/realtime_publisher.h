@@ -50,8 +50,7 @@
 
 namespace realtime_tools
 {
-
-template<class Msg>
+template <class Msg>
 class RealtimePublisher
 {
 private:
@@ -71,8 +70,7 @@ public:
     thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
   }
 
-  RealtimePublisher()
-  : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED) {}
+  RealtimePublisher() : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED) {}
 
   /// Destructor
   ~RealtimePublisher()
@@ -99,7 +97,7 @@ public:
    *
    * To publish data from the realtime loop, you need to run trylock to
    * attempt to get unique access to the msg_ variable. Trylock returns
-   * true if the lock was aquired, and false if it failed to get the lock.
+   * true if the lock was acquired, and false if it failed to get the lock.
    */
   bool trylock()
   {
@@ -134,7 +132,7 @@ public:
    *
    * To publish data from the realtime loop, you need to run trylock to
    * attempt to get unique access to the msg_ variable. Trylock returns
-   * true if the lock was aquired, and false if it failed to get the lock.
+   * true if the lock was acquired, and false if it failed to get the lock.
    */
   void lock()
   {
@@ -151,14 +149,14 @@ public:
   /**  \brief Unlocks the data without publishing anything
    *
    */
-  void unlock() {msg_mutex_.unlock();}
+  void unlock() { msg_mutex_.unlock(); }
 
 private:
   // non-copyable
   RealtimePublisher(const RealtimePublisher &) = delete;
   RealtimePublisher & operator=(const RealtimePublisher &) = delete;
 
-  bool is_running() const {return is_running_;}
+  bool is_running() const { return is_running_; }
 
   void publishingLoop()
   {
@@ -185,7 +183,9 @@ private:
       unlock();
 
       // Sends the outgoing message
-      if (keep_running_) {publisher_->publish(outgoing);}
+      if (keep_running_) {
+        publisher_->publish(outgoing);
+      }
     }
     is_running_ = false;
   }
@@ -206,7 +206,7 @@ private:
   std::atomic<int> turn_;  // Who's turn is it to use msg_?
 };
 
-template<class Msg>
+template <class Msg>
 using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg>>;
 
 }  // namespace realtime_tools

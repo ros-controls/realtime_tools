@@ -38,8 +38,7 @@
 
 namespace realtime_tools
 {
-
-template<class Action>
+template <class Action>
 class RealtimeServerGoalHandle
 {
 private:
@@ -65,8 +64,7 @@ public:
   FeedbackSharedPtr preallocated_feedback_;  // Preallocated so it can be used in realtime
 
   explicit RealtimeServerGoalHandle(
-    std::shared_ptr<GoalHandle> & gh,
-    const ResultSharedPtr & preallocated_result = nullptr,
+    std::shared_ptr<GoalHandle> & gh, const ResultSharedPtr & preallocated_result = nullptr,
     const FeedbackSharedPtr & preallocated_feedback = nullptr)
   : RealtimeServerGoalHandle(
       gh, preallocated_result, preallocated_feedback, rclcpp::get_logger("realtime_tools"))
@@ -74,10 +72,8 @@ public:
   }
 
   RealtimeServerGoalHandle(
-    std::shared_ptr<GoalHandle> & gh,
-    const ResultSharedPtr & preallocated_result,
-    const FeedbackSharedPtr & preallocated_feedback,
-    rclcpp::Logger logger)
+    std::shared_ptr<GoalHandle> & gh, const ResultSharedPtr & preallocated_result,
+    const FeedbackSharedPtr & preallocated_feedback, rclcpp::Logger logger)
   : req_abort_(false),
     req_cancel_(false),
     req_succeed_(false),
@@ -87,8 +83,12 @@ public:
     preallocated_result_(preallocated_result),
     preallocated_feedback_(preallocated_feedback)
   {
-    if (!preallocated_result_) {preallocated_result_.reset(new typename Action::Result);}
-    if (!preallocated_feedback_) {preallocated_feedback_.reset(new typename Action::Feedback);}
+    if (!preallocated_result_) {
+      preallocated_result_.reset(new typename Action::Result);
+    }
+    if (!preallocated_feedback_) {
+      preallocated_feedback_.reset(new typename Action::Feedback);
+    }
   }
 
   void setAborted(ResultSharedPtr result = nullptr)
@@ -135,11 +135,13 @@ public:
     }
   }
 
-  bool valid() {return nullptr != gh_.get();}
+  bool valid() { return nullptr != gh_.get(); }
 
   void runNonRealtime()
   {
-    if (!valid()) {return;}
+    if (!valid()) {
+      return;
+    }
 
     std::lock_guard<std::mutex> guard(mutex_);
 

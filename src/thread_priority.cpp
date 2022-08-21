@@ -40,8 +40,7 @@ bool has_realtime_kernel()
 {
   std::ifstream realtime_file("/sys/kernel/realtime", std::ios::in);
   bool has_realtime = false;
-  if (realtime_file.is_open())
-  {
+  if (realtime_file.is_open()) {
     realtime_file >> has_realtime;
   }
   return has_realtime;

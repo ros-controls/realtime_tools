@@ -35,8 +35,7 @@ using realtime_tools::RealtimeBuffer;
 class DefaultConstructable
 {
 public:
-  DefaultConstructable()
-  : number_(42) {}
+  DefaultConstructable() : number_(42) {}
   ~DefaultConstructable() {}
   int number_;
 };

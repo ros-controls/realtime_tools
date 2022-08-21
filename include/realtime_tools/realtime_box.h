@@ -43,12 +43,11 @@ namespace realtime_tools
   guarantee realtime safety.
 
  */
-template<class T>
+template <class T>
 class RealtimeBox
 {
 public:
-  explicit RealtimeBox(const T & initial = T())
-  : thing_(initial) {}
+  explicit RealtimeBox(const T & initial = T()) : thing_(initial) {}
 
   void set(const T & value)
   {

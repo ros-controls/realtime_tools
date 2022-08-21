@@ -45,8 +45,7 @@
 
 namespace realtime_tools
 {
-RealtimeClock::RealtimeClock()
-: RealtimeClock(nullptr, rclcpp::get_logger("realtime_tools")) {}
+RealtimeClock::RealtimeClock() : RealtimeClock(nullptr, rclcpp::get_logger("realtime_tools")) {}
 
 RealtimeClock::RealtimeClock(rclcpp::Clock::SharedPtr clock)
 : RealtimeClock(clock, rclcpp::get_logger("realtime_tools"))

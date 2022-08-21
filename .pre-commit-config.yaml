@@ -83,6 +83,7 @@ repos:
         entry: ament_cppcheck
         language: system
         files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+        args: ['--language=c++']
 
   # Maybe use https://github.com/cpplint/cpplint instead
   - repo: local

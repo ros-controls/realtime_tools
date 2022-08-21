@@ -45,13 +45,11 @@
 
 namespace realtime_tools
 {
-
-template<class T>
+template <class T>
 class RealtimeBuffer
 {
 public:
-  RealtimeBuffer()
-  : new_data_available_(false)
+  RealtimeBuffer() : new_data_available_(false)
   {
     // allocate memory
     non_realtime_data_ = new T();
@@ -63,8 +61,7 @@ public:
    * a default constructor
    * @param data The object to use as default value
    */
-  explicit RealtimeBuffer(const T & data)
-  : new_data_available_(false)
+  explicit RealtimeBuffer(const T & data) : new_data_available_(false)
   {
     // allocate memory
     non_realtime_data_ = new T(data);
@@ -73,8 +70,12 @@ public:
 
   ~RealtimeBuffer()
   {
-    if (non_realtime_data_) {delete non_realtime_data_;}
-    if (realtime_data_) {delete realtime_data_;}
+    if (non_realtime_data_) {
+      delete non_realtime_data_;
+    }
+    if (realtime_data_) {
+      delete realtime_data_;
+    }
   }
 
   RealtimeBuffer(const RealtimeBuffer & source)
@@ -92,7 +93,9 @@ public:
    */
   RealtimeBuffer & operator=(const RealtimeBuffer & source)
   {
-    if (this == &source) {return *this;}
+    if (this == &source) {
+      return *this;
+    }
 
     // Copy the data from old RTB to new RTB
     writeFromNonRT(*source.readFromNonRT());
@@ -152,8 +155,12 @@ public:
   void reset()
   {
     // delete the old memory
-    if (non_realtime_data_) {delete non_realtime_data_;}
-    if (realtime_data_) {delete realtime_data_;}
+    if (non_realtime_data_) {
+      delete non_realtime_data_;
+    }
+    if (realtime_data_) {
+      delete realtime_data_;
+    }
 
     // allocate memory
     non_realtime_data_ = new T();

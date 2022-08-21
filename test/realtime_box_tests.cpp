@@ -35,8 +35,7 @@ using realtime_tools::RealtimeBox;
 class DefaultConstructable
 {
 public:
-  DefaultConstructable()
-  : number_(42) {}
+  DefaultConstructable() : number_(42) {}
   ~DefaultConstructable() {}
   int number_;
 };

@@ -49,7 +49,6 @@
 
 namespace realtime_tools
 {
-
 class RealtimeClock
 {
 public:
