@@ -18,19 +18,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 # Unit Tests
 if(BUILD_TESTING)
-  find_package(ament_cmake_cppcheck REQUIRED)
-  find_package(ament_cmake_cpplint REQUIRED)
-  find_package(ament_cmake_lint_cmake REQUIRED)
-  find_package(ament_cmake_uncrustify REQUIRED)
-  ament_cppcheck(LANGUAGE c++)
-  ament_cpplint()
-  ament_lint_cmake()
-  ament_uncrustify(LANGUAGE C++)
-  # Renable the below once we have a global variable
-  # supporting the language feature for ament_uncrustify
-  # find_package(ament_lint_auto REQUIRED)
-  # set(ament_cmake_copyright_FOUND TRUE)
-  # ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gmock REQUIRED)
   find_package(test_msgs REQUIRED)
