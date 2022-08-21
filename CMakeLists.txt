@@ -13,13 +13,13 @@ find_package(Threads REQUIRED)
 
 add_library(${PROJECT_NAME} src/realtime_clock.cpp)
 ament_target_dependencies(${PROJECT_NAME} "rclcpp" "rclcpp_action")
-target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} ${Update CMakeLists.txt})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 # A library to detect a realtime kernel and set thread priority, if one is found
 add_library(thread_priority STATIC src/thread_priority.cpp)
 target_include_directories(thread_priority PUBLIC include)
-ament_target_dependencies(thread_priority ${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_target_dependencies(thread_priority "rclcpp" "rclcpp_action")
 
 # Unit Tests
 if(BUILD_TESTING)
