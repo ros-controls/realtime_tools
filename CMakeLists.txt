@@ -18,7 +18,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 # Unit Tests
 if(BUILD_TESTING)
-
   find_package(ament_cmake_gmock REQUIRED)
   find_package(test_msgs REQUIRED)
 
