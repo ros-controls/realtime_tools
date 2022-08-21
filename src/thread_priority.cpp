@@ -29,9 +29,10 @@
 
 #include "realtime_tools/thread_priority.hpp"
 
+#include <sched.h>
+
 #include <cstring>
 #include <fstream>
-#include <sched.h>
 
 namespace realtime_tools
 {

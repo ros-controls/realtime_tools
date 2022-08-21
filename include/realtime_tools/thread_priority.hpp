@@ -27,8 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef REALTIME_TOOLS__JOINT_THREAD_PRIORITY_HPP_
-#define REALTIME_TOOLS__JOINT_THREAD_PRIORITY_HPP_
+#ifndef REALTIME_TOOLS__THREAD_PRIORITY_HPP_
+#define REALTIME_TOOLS__THREAD_PRIORITY_HPP_
 
 namespace realtime_tools
 {
@@ -47,4 +47,4 @@ bool configure_sched_fifo(int priority);
 
 }  // namespace realtime_tools
 
-#endif  // REALTIME_TOOLS__JOINT_THREAD_PRIORITY_HPP_
+#endif  // REALTIME_TOOLS__THREAD_PRIORITY_HPP_
