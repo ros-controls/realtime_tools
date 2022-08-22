@@ -44,6 +44,8 @@ To send us a pull request, please:
 GitHub provides additional documentation on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
+Any contribution that you make to this repository will be under the 3-Clause BSD License, as dictated by that [license](https://opensource.org/licenses/BSD-3-Clause).
+
 
 ## Finding contributions to work on
 Looking at the existing issues is a great way to find something to contribute on.
