@@ -6,7 +6,7 @@
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
   <maintainer email="denis@stoglrobotics.de">Denis Štogl</maintainer>
 
-  <license>BSD</license>
+  <license>3-Clause BSD</license>
 
   <url type="website">http://ros.org/wiki/realtime_tools</url>
   <url type="bugtracker">https://github.com/ros-controls/realtime_tools/issues</url>

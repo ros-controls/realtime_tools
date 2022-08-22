@@ -1,21 +1,23 @@
-///////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2008, Willow Garage, Inc.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-//   * Redistributions of source code must retain the above copyright notice,
-//     this list of conditions and the following disclaimer.
-//   * Redistributions in binary form must reproduce the above copyright
-//     notice, this list of conditions and the following disclaimer in the
-//     documentation and/or other materials provided with the distribution.
-//   * Neither the name of hiDOF, Inc. nor the names of its
-//     contributors may be used to endorse or promote products derived from
-//     this software without specific prior written permission.
+//
+//    * Redistributions of source code must retain the above copyright
+//      notice, this list of conditions and the following disclaimer.
+//
+//    * Redistributions in binary form must reproduce the above copyright
+//      notice, this list of conditions and the following disclaimer in the
+//      documentation and/or other materials provided with the distribution.
+//
+//    * Neither the name of the Willow Garage, Inc. nor the names of its
+//      contributors may be used to endorse or promote products derived from
+//      this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -23,7 +25,6 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-//////////////////////////////////////////////////////////////////////////////
 
 /// \author Stuart Glaser
 
@@ -38,8 +39,7 @@
 
 namespace realtime_tools
 {
-
-template<class Action>
+template <class Action>
 class RealtimeServerGoalHandle
 {
 private:
@@ -65,8 +65,7 @@ public:
   FeedbackSharedPtr preallocated_feedback_;  // Preallocated so it can be used in realtime
 
   explicit RealtimeServerGoalHandle(
-    std::shared_ptr<GoalHandle> & gh,
-    const ResultSharedPtr & preallocated_result = nullptr,
+    std::shared_ptr<GoalHandle> & gh, const ResultSharedPtr & preallocated_result = nullptr,
     const FeedbackSharedPtr & preallocated_feedback = nullptr)
   : RealtimeServerGoalHandle(
       gh, preallocated_result, preallocated_feedback, rclcpp::get_logger("realtime_tools"))
@@ -74,10 +73,8 @@ public:
   }
 
   RealtimeServerGoalHandle(
-    std::shared_ptr<GoalHandle> & gh,
-    const ResultSharedPtr & preallocated_result,
-    const FeedbackSharedPtr & preallocated_feedback,
-    rclcpp::Logger logger)
+    std::shared_ptr<GoalHandle> & gh, const ResultSharedPtr & preallocated_result,
+    const FeedbackSharedPtr & preallocated_feedback, rclcpp::Logger logger)
   : req_abort_(false),
     req_cancel_(false),
     req_succeed_(false),
@@ -87,8 +84,12 @@ public:
     preallocated_result_(preallocated_result),
     preallocated_feedback_(preallocated_feedback)
   {
-    if (!preallocated_result_) {preallocated_result_.reset(new typename Action::Result);}
-    if (!preallocated_feedback_) {preallocated_feedback_.reset(new typename Action::Feedback);}
+    if (!preallocated_result_) {
+      preallocated_result_.reset(new typename Action::Result);
+    }
+    if (!preallocated_feedback_) {
+      preallocated_feedback_.reset(new typename Action::Feedback);
+    }
   }
 
   void setAborted(ResultSharedPtr result = nullptr)
@@ -135,11 +136,13 @@ public:
     }
   }
 
-  bool valid() {return nullptr != gh_.get();}
+  bool valid() { return nullptr != gh_.get(); }
 
   void runNonRealtime()
   {
-    if (!valid()) {return;}
+    if (!valid()) {
+      return;
+    }
 
     std::lock_guard<std::mutex> guard(mutex_);
 
