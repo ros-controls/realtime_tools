@@ -1,4 +1,4 @@
-// Copyright (c) 2022 PickNik Inc.
+// Copyright (c) 2022, PickNik, Inc.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
