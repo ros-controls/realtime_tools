@@ -2,6 +2,15 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix source-based branch names (`#90 <https://github.com/ros-controls/realtime_tools/issues/90>`_)
+* Fix formatting (`#89 <https://github.com/ros-controls/realtime_tools/issues/89>`_)
+* fix cpplint errors
+* Add a library to set thread priority
+* Add CI setup as for ros2_control repository.
+* Contributors: Andy Zelenak, Bence Magyar, Denis Štogl
+
 2.2.0 (2021-11-03)
 ------------------
 * Adding new reset() function for Issue-247.
