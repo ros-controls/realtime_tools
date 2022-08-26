@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.0 (2022-08-26)
+------------------
 * Fix source-based branch names (`#90 <https://github.com/ros-controls/realtime_tools/issues/90>`_)
 * Fix formatting (`#89 <https://github.com/ros-controls/realtime_tools/issues/89>`_)
 * fix cpplint errors
