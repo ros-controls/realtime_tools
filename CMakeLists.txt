@@ -17,7 +17,7 @@ target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 # A library to detect a realtime kernel and set thread priority, if one is found
-add_library(thread_priority STATIC src/thread_priority.cpp)
+add_library(thread_priority SHARED src/thread_priority.cpp)
 target_include_directories(thread_priority PUBLIC include)
 ament_target_dependencies(thread_priority "rclcpp" "rclcpp_action")
 
