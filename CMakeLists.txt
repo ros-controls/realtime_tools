@@ -44,7 +44,7 @@ if(BUILD_TESTING)
   ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
   target_link_libraries(realtime_clock_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
 
-  ament_add_gmock(realtime_publisher_tests_non_polling 
+  ament_add_gmock(realtime_publisher_tests_non_polling
                   test/realtime_publisher_non_polling.test test/realtime_publisher_tests_non_polling.cpp)
   target_link_libraries(realtime_publisher_tests_non_polling ${PROJECT_NAME} ${test_msgs_LIBRARIES} ${GMOCK_MAIN_LIBRARIES})
   target_include_directories(realtime_publisher_tests_non_polling PRIVATE ${test_msgs_INCLUDE_DIRS})
