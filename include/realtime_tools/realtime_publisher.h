@@ -169,11 +169,11 @@ private:
       Msg outgoing;
 
       // Locks msg_ and copies it
-    
+
 #ifdef NON_POLLING
-      std::unique_lock<std::mutex> lock_(msg_mutex_); 
-#else 
-       lock();
+      std::unique_lock<std::mutex> lock_(msg_mutex_);
+#else
+      lock();
 #endif
 
       while (turn_ != NON_REALTIME && keep_running_) {
