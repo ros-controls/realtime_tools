@@ -1,31 +1,30 @@
-/*
- * Copyright (c) 2008, Willow Garage, Inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Willow Garage, Inc. nor the names of its
- *       contributors may be used to endorse or promote products derived from
- *       this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+// Copyright (c) 2008, Willow Garage, Inc.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//    * Redistributions of source code must retain the above copyright
+//      notice, this list of conditions and the following disclaimer.
+//
+//    * Redistributions in binary form must reproduce the above copyright
+//      notice, this list of conditions and the following disclaimer in the
+//      documentation and/or other materials provided with the distribution.
+//
+//    * Neither the name of the Willow Garage, Inc. nor the names of its
+//      contributors may be used to endorse or promote products derived from
+//      this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 
 /*
  * Publishing ROS messages is difficult, as the publish function is
@@ -50,8 +49,7 @@
 
 namespace realtime_tools
 {
-
-template<class Msg>
+template <class Msg>
 class RealtimePublisher
 {
 private:
@@ -71,8 +69,7 @@ public:
     thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
   }
 
-  RealtimePublisher()
-  : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED) {}
+  RealtimePublisher() : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED) {}
 
   /// Destructor
   ~RealtimePublisher()
@@ -99,7 +96,7 @@ public:
    *
    * To publish data from the realtime loop, you need to run trylock to
    * attempt to get unique access to the msg_ variable. Trylock returns
-   * true if the lock was aquired, and false if it failed to get the lock.
+   * true if the lock was acquired, and false if it failed to get the lock.
    */
   bool trylock()
   {
@@ -134,7 +131,7 @@ public:
    *
    * To publish data from the realtime loop, you need to run trylock to
    * attempt to get unique access to the msg_ variable. Trylock returns
-   * true if the lock was aquired, and false if it failed to get the lock.
+   * true if the lock was acquired, and false if it failed to get the lock.
    */
   void lock()
   {
@@ -151,14 +148,14 @@ public:
   /**  \brief Unlocks the data without publishing anything
    *
    */
-  void unlock() {msg_mutex_.unlock();}
+  void unlock() { msg_mutex_.unlock(); }
 
 private:
   // non-copyable
   RealtimePublisher(const RealtimePublisher &) = delete;
   RealtimePublisher & operator=(const RealtimePublisher &) = delete;
 
-  bool is_running() const {return is_running_;}
+  bool is_running() const { return is_running_; }
 
   void publishingLoop()
   {
@@ -191,7 +188,9 @@ private:
       unlock();
 
       // Sends the outgoing message
-      if (keep_running_) {publisher_->publish(outgoing);}
+      if (keep_running_) {
+        publisher_->publish(outgoing);
+      }
     }
     is_running_ = false;
   }
@@ -212,7 +211,7 @@ private:
   std::atomic<int> turn_;  // Who's turn is it to use msg_?
 };
 
-template<class Msg>
+template <class Msg>
 using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg>>;
 
 }  // namespace realtime_tools

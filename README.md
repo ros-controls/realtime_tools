@@ -1,6 +1,6 @@
 realtime_tools
 ===========
-See [ros_control](http://wiki.ros.org/ros_control) and [realtime_tools](http://wiki.ros.org/realtime_tools) documentation on ros.org
+See [control.ros.org](http://control.ros.org) and [realtime_tools](http://wiki.ros.org/realtime_tools) documentation on ros.org
 
 
 ## Build status
@@ -8,7 +8,7 @@ ROS2 Distro | Branch | Build status | Documentation | Released packages
 :---------: | :----: | :----------: | :-----------: | :---------------:
 **Rolling** | [`rolling`](https://github.com/ros-controls/realtime_tools/tree/rolling) | [![Rolling Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build-main.yml?branch=master) <br /> [![Rolling Semi-Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-semi-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-semi-binary-build-main.yml?branch=master) |   | [realtime_tools](https://index.ros.org/p/realtime_tools/#rolling)
 **Humble** | [`humble`](https://github.com/ros-controls/realtime_tools/tree/humble) | [![Humble Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build-main.yml?branch=master) <br /> [![Humble Semi-Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-semi-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-semi-binary-build-main.yml?branch=master) |  | [realtime_tools](https://index.ros.org/p/realtime_tools/#humble)
-**Galacitc** | [`galacitc`](https://github.com/ros-controls/realtime_tools/tree/galacitc) | [![Galacitc Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/galacitc-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/galacitc-binary-build-main.yml?branch=master) <br /> [![Galacitc Semi-Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/galacitc-semi-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/galacitc-semi-binary-build-main.yml?branch=master) |  | [realtime_tools](https://index.ros.org/p/realtime_tools/#galacitc)
+
 
 ### Explanation of different build types
 
