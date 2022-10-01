@@ -1,13 +1,30 @@
 realtime_tools
 ===========
-
-See [ros_control](http://wiki.ros.org/ros_control) and [realtime_tools](http://wiki.ros.org/realtime_tools) documentation on ros.org
-
+See [control.ros.org](http://control.ros.org) and [realtime_tools](http://wiki.ros.org/realtime_tools) documentation on ros.org
 
 
-### Build Status
+## Build status
+ROS2 Distro | Branch | Build status | Documentation | Released packages
+:---------: | :----: | :----------: | :-----------: | :---------------:
+**Rolling** | [`rolling`](https://github.com/ros-controls/realtime_tools/tree/rolling) | [![Rolling Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build-main.yml?branch=master) <br /> [![Rolling Semi-Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-semi-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-semi-binary-build-main.yml?branch=master) |   | [realtime_tools](https://index.ros.org/p/realtime_tools/#rolling)
+**Humble** | [`humble`](https://github.com/ros-controls/realtime_tools/tree/humble) | [![Humble Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build-main.yml?branch=master) <br /> [![Humble Semi-Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-semi-binary-build-main.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-semi-binary-build-main.yml?branch=master) |  | [realtime_tools](https://index.ros.org/p/realtime_tools/#humble)
 
-[![Build Status](https://travis-ci.org/ros-controls/realtime_tools.png?branch=melodic-devel)](https://travis-ci.org/ros-controls/realtime_tools)
+
+### Explanation of different build types
+
+**NOTE**: There are three build stages checking current and future compatibility of the package.
+
+[Detailed build status](.github/workflows/README.md)
+
+1. Binary builds - against released packages (main and testing) in ROS distributions. Shows that direct local build is possible.
+
+   Uses repos file: `$NAME$-not-released.<ros-distro>.repos`
+
+1. Semi-binary builds - against released core ROS packages (main and testing), but the immediate dependencies are pulled from source.
+   Shows that local build with dependencies is possible and if fails there we can expect that after the next package sync we will not be able to build.
+
+   Uses repos file: `$NAME$.repos`
+
 
 ## Publication
 

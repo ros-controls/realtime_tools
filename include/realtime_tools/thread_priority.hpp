@@ -1,4 +1,4 @@
-// Copyright (c) 2019, Open Source Robotics Foundation, Inc.
+// Copyright (c) 2022, PickNik, Inc.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the Open Source Robotics Foundation, Inc. nor the names of its
+//    * Neither the name of the PickNik Inc. nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -26,48 +26,24 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <gmock/gmock.h>
-#include <realtime_tools/realtime_box.h>
+#ifndef REALTIME_TOOLS__THREAD_PRIORITY_HPP_
+#define REALTIME_TOOLS__THREAD_PRIORITY_HPP_
 
-using realtime_tools::RealtimeBox;
-
-class DefaultConstructable
+namespace realtime_tools
 {
-public:
-  DefaultConstructable() : number_(42) {}
-  ~DefaultConstructable() {}
-  int number_;
-};
+/**
+ * Detect if realtime kernel is present.
+ * \returns true if realtime kernel is detected
+ */
+bool has_realtime_kernel();
 
-TEST(RealtimeBox, default_construct)
-{
-  DefaultConstructable thing;
-  thing.number_ = 5;
+/**
+ * Configure SCHED_FIFO thread priority for the thread that calls this function
+ * \param[in] priority the priority of this thread from 0-99
+ * \returns true if configuring scheduler succeeded
+ */
+bool configure_sched_fifo(int priority);
 
-  RealtimeBox<DefaultConstructable> box;
-  box.get(thing);
+}  // namespace realtime_tools
 
-  EXPECT_EQ(42, thing.number_);
-}
-
-TEST(RealtimeBox, initial_value)
-{
-  RealtimeBox<double> box(3.14);
-  double num = 0.0;
-  box.get(num);
-  EXPECT_DOUBLE_EQ(3.14, num);
-}
-
-TEST(RealtimeBox, set_and_get)
-{
-  RealtimeBox<char> box('a');
-
-  {
-    const char input = 'z';
-    box.set(input);
-  }
-
-  char output = 'a';
-  box.get(output);
-  EXPECT_EQ('z', output);
-}
+#endif  // REALTIME_TOOLS__THREAD_PRIORITY_HPP_

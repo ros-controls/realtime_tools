@@ -1,0 +1,57 @@
+name: ROS Lint
+on:
+  pull_request:
+
+jobs:
+  ament_lint:
+    name: ament_${{ matrix.linter }}
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+          linter: [copyright, lint_cmake]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ros-tooling/setup-ros@v0.2
+    - uses: ros-tooling/action-ros-lint@v0.1
+      with:
+        distribution: rolling
+        linter: ${{ matrix.linter }}
+        package-name:
+          realtime_tools
+
+  ament_cpplint:
+    name: ament_${{ matrix.linter }}
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+          linter: [cpplint]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ros-tooling/setup-ros@v0.2
+    - uses: ros-tooling/action-ros-lint@v0.1
+      with:
+        distribution: rolling
+        linter: cpplint
+        arguments: "--linelength=100 --filter=-whitespace/newline"
+        package-name:
+          realtime_tools
+
+  ament_cppcheck:
+    name: ament_${{ matrix.linter }}
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+          linter: [cppcheck]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ros-tooling/setup-ros@v0.2
+    - uses: ros-tooling/action-ros-lint@v0.1
+      with:
+        distribution: rolling
+        linter: ${{ matrix.linter }}
+        arguments: "--language=c++"
+        package-name:
+          realtime_tools

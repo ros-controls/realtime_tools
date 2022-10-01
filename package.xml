@@ -1,12 +1,12 @@
 <package format="2">
   <name>realtime_tools</name>
-  <version>2.1.1</version>
+  <version>2.3.0</version>
   <description>Contains a set of tools that can be used from a hard
     realtime thread, without breaking the realtime behavior.</description>
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
-  <maintainer email="gennaro.raiola@iit.it">Gennaro Raiola</maintainer>
+  <maintainer email="denis@stoglrobotics.de">Denis Štogl</maintainer>
 
-  <license>BSD</license>
+  <license>3-Clause BSD</license>
 
   <url type="website">http://ros.org/wiki/realtime_tools</url>
   <url type="bugtracker">https://github.com/ros-controls/realtime_tools/issues</url>
@@ -22,9 +22,6 @@
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
 
-  <test_depend>ament_cmake_gmock</test_depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
   <test_depend>rclcpp_action</test_depend>
   <test_depend>test_msgs</test_depend>
 
