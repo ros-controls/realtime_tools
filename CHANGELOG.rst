@@ -2,6 +2,13 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-11-19)
+------------------
+* bug fix for RealtimePublisher with NON_POLLING (`#85 <https://github.com/ros-controls/realtime_tools/issues/85>`_)
+* ci: :construction_worker: update rhel container (`#92 <https://github.com/ros-controls/realtime_tools/issues/92>`_)
+* Make `thread_priority` a shared library (`#91 <https://github.com/ros-controls/realtime_tools/issues/91>`_)
+* Contributors: Andy Zelenak, Jaron Lundwall, Yoav Fekete, Denis Štogl
+
 2.3.0 (2022-08-26)
 ------------------
 * Fix source-based branch names (`#90 <https://github.com/ros-controls/realtime_tools/issues/90>`_)
