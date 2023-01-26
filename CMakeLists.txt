@@ -5,11 +5,16 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall -Wextra)
 endif()
 
-# Load catkin and all dependencies required for this package
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  rclcpp
+  rclcpp_action
+  Threads
+)
+
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
-find_package(Threads REQUIRED)
+foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${Dependency} REQUIRED)
+endforeach()
 
 add_library(realtime_tools SHARED
   src/realtime_clock.cpp
@@ -19,11 +24,7 @@ target_include_directories(realtime_tools PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
-target_link_libraries(realtime_tools PUBLIC
-  rclcpp::rclcpp
-  rclcpp_action::rclcpp_action
-  Threads::Threads
-)
+ament_target_dependencies(realtime_tools PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # A library to detect a realtime kernel and set thread priority, if one is found
 add_library(thread_priority SHARED
@@ -34,10 +35,7 @@ target_include_directories(thread_priority PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
-target_link_libraries(thread_priority PUBLIC
-  rclcpp::rclcpp
-  rclcpp_action::rclcpp_action
-)
+ament_target_dependencies(thread_priority PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Unit Tests
 if(BUILD_TESTING)
@@ -85,9 +83,5 @@ install(TARGETS realtime_tools thread_priority
 )
 
 ament_export_targets(export_realtime_tools HAS_LIBRARY_TARGET)
-ament_export_dependencies(
-  rclcpp
-  rclcpp_action
-  Threads
-)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package()
