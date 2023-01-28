@@ -2,6 +2,12 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix overriding of install (`#105 <https://github.com/ros-controls/realtime_tools/issues/105>`_)
+* Add missing test dependency on ament_cmake_gmock (`#94 <https://github.com/ros-controls/realtime_tools/issues/94>`_)
+* Contributors: Bence Magyar, Denis Štogl, Scott K Logan, Tyler Weaver
+
 2.4.0 (2022-11-19)
 ------------------
 * bug fix for RealtimePublisher with NON_POLLING (`#85 <https://github.com/ros-controls/realtime_tools/issues/85>`_)
