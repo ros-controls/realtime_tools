@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.0 (2023-01-28)
+------------------
 * Fix overriding of install (`#105 <https://github.com/ros-controls/realtime_tools/issues/105>`_)
 * Add missing test dependency on ament_cmake_gmock (`#94 <https://github.com/ros-controls/realtime_tools/issues/94>`_)
 * Contributors: Bence Magyar, Denis Štogl, Scott K Logan, Tyler Weaver
