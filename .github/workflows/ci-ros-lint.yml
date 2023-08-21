@@ -5,7 +5,7 @@ on:
 jobs:
   ament_lint:
     name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +22,7 @@ jobs:
 
   ament_cpplint:
     name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -40,11 +40,13 @@ jobs:
 
   ament_cppcheck:
     name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
           linter: [cppcheck]
+    env:
+      AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: true
     steps:
     - uses: actions/checkout@v3
     - uses: ros-tooling/setup-ros@0.6.2
