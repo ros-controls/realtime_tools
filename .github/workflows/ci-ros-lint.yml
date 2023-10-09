@@ -11,7 +11,7 @@ jobs:
       matrix:
           linter: [copyright, lint_cmake]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ros-tooling/setup-ros@0.7.0
     - uses: ros-tooling/action-ros-lint@v0.1
       with:
@@ -28,7 +28,7 @@ jobs:
       matrix:
           linter: [cpplint]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ros-tooling/setup-ros@0.7.0
     - uses: ros-tooling/action-ros-lint@v0.1
       with:
@@ -48,7 +48,7 @@ jobs:
     env:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: true
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ros-tooling/setup-ros@0.7.0
     - uses: ros-tooling/action-ros-lint@v0.1
       with:
