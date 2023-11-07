@@ -38,6 +38,8 @@ using realtime_tools::RealtimeClock;
 
 TEST(RealtimeClock, get_system_time)
 {
+  // initialize the global context
+  rclcpp::init(0, nullptr);
   const int ATTEMPTS = 10;
   const std::chrono::milliseconds DELAY(1);
 
