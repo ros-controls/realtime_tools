@@ -1,6 +1,6 @@
 realtime_tools
 ===========
-[![codecov](https://codecov.io/gh/ros-controls/realtime_tools/graph/badge.svg?token=Osge1FOaAh)](https://codecov.io/gh/ros-controls/realtime_tools)
+[![codecov](https://codecov.io/gh/ros-controls/realtime_tools/branch/master/graph/badge.svg?token=Osge1FOaAh)](https://app.codecov.io/gh/ros-controls/realtime_tools/tree/master)
 
 See [control.ros.org](http://control.ros.org) and [realtime_tools](http://wiki.ros.org/realtime_tools) documentation on ros.org
 
