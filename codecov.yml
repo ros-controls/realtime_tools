@@ -10,7 +10,7 @@ coverage:
 fixes:
   - "ros_ws/src/realtime_tools/::"
 ignore:
-  - "**/test"
+  - "test"
 comment:
   layout: "diff, flags, files"
   behavior: default
