@@ -6,9 +6,7 @@ services:
 notifications:
   email:
     recipients:
-      - enrique.fernandez.perdomo@gmail.com
       - bence.magyar.robotics@gmail.com
-      - gennaro.raiola@gmail.com
     on_success: change #[always|never|change] # default: change
     on_failure: change #[always|never|change] # default: always
 
