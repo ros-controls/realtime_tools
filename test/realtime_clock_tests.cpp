@@ -38,19 +38,24 @@ using realtime_tools::RealtimeClock;
 
 TEST(RealtimeClock, get_system_time)
 {
+  // initialize the global context
+  rclcpp::init(0, nullptr);
   const int ATTEMPTS = 10;
   const std::chrono::milliseconds DELAY(1);
 
   rclcpp::Clock::SharedPtr clock(new rclcpp::Clock());
-  RealtimeClock rt_clock(clock);
-  // Wait for time to be available
-  rclcpp::Time last_rt_time;
-  for (int i = 0; i < ATTEMPTS && rclcpp::Time() == last_rt_time; ++i) {
-    std::this_thread::sleep_for(DELAY);
-    last_rt_time = rt_clock.now(rclcpp::Time());
-  }
-  ASSERT_NE(rclcpp::Time(), last_rt_time);
+  {
+    RealtimeClock rt_clock(clock);
+    // Wait for time to be available
+    rclcpp::Time last_rt_time;
+    for (int i = 0; i < ATTEMPTS && rclcpp::Time() == last_rt_time; ++i) {
+      std::this_thread::sleep_for(DELAY);
+      last_rt_time = rt_clock.now(rclcpp::Time());
+    }
+    ASSERT_NE(rclcpp::Time(), last_rt_time);
 
-  // This test assumes system time will not jump backwards during it
-  EXPECT_GT(rt_clock.now(last_rt_time), last_rt_time);
+    // This test assumes system time will not jump backwards during it
+    EXPECT_GT(rt_clock.now(last_rt_time), last_rt_time);
+  }
+  rclcpp::shutdown();
 }
