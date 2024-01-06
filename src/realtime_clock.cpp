@@ -117,7 +117,9 @@ namespace realtime_tools
 	ROS_WARN_THROTTLE(1.0, "Time estimator has trouble transferring data between non-RT and RT");
 
       // release lock
+#ifndef NON_POLLING
       guard.unlock();
+#endif
       r.sleep();
     }
   }

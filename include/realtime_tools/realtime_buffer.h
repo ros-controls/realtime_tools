@@ -51,7 +51,6 @@ class RealtimeBuffer
 {
  public:
   RealtimeBuffer()
-    : new_data_available_(false)
   {
     // allocate memory
     non_realtime_data_ = new T();
@@ -157,7 +156,7 @@ class RealtimeBuffer
 
   T* realtime_data_;
   T* non_realtime_data_;
-  bool new_data_available_;
+  bool new_data_available_{false};
 
   // Set as mutable so that readFromNonRT() can be performed on a const buffer
   mutable std::mutex mutex_;
