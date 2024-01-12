@@ -21,7 +21,7 @@ class RealtimeBoxBestEffort
     std::is_same_v<mutex_type, std::mutex> || std::is_same_v<mutex_type, std::recursive_mutex>);
   static_assert(std::is_copy_constructible_v<T>, "Passed type must be copy constructible");
 
-public: 
+public:
   using mutex_t = mutex_type;
   using type = T;
   //Provide various constructors
