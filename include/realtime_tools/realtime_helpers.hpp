@@ -53,6 +53,18 @@ bool configure_sched_fifo(int priority);
 */
 bool lock_memory(std::string & message);
 
+/**
+ * Configure the caller thread affinity - Tell the scheduler to prefer a certain core for the current thread
+ * \param[in] core - the number of the core
+ * \returns true if configuring the scheduler succeeded
+*/
+bool set_preferred_core(const int core = -1);
+
+/**
+ * \returns The amount of available cpu cores
+*/
+int get_core_count();
+
 }  // namespace realtime_tools
 
 #endif  // REALTIME_TOOLS__REALTIME_HELPERS_HPP_
