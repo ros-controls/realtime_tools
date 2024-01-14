@@ -9,6 +9,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
   rclcpp_action
   Threads
+  rcpputils
 )
 
 find_package(ament_cmake REQUIRED)

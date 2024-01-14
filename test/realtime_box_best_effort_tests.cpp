@@ -29,7 +29,7 @@ TEST(RealtimeBoxBestEffort, empty_construct)
 {
   RealtimeBoxBestEffort<DefaultConstructable> box;
 
-  auto value = box.getNonRT();
+  auto value = box.get();
   EXPECT_EQ(value.a, 10);
   EXPECT_EQ(value.str, "hallo");
 }
@@ -41,7 +41,7 @@ TEST(RealtimeBoxBestEffort, default_construct)
 
   RealtimeBoxBestEffort<DefaultConstructable> box(data);
 
-  auto value = box.getNonRT();
+  auto value = box.get();
   EXPECT_EQ(value.a, 100);
   EXPECT_EQ(value.str, "hallo");
 }
@@ -50,7 +50,7 @@ TEST(RealtimeBoxBestEffort, non_default_constructable)
 {
   RealtimeBoxBestEffort<NonDefaultConstructable> box(NonDefaultConstructable(-10, "hello"));
 
-  auto value = box.getNonRT();
+  auto value = box.get();
   EXPECT_EQ(value.a, -10);
   EXPECT_EQ(value.str, "hello");
 }
@@ -59,7 +59,7 @@ TEST(RealtimeBoxBestEffort, initializer_list)
 {
   RealtimeBoxBestEffort<FromInitializerList> box({1, 2, 3});
 
-  auto value = box.getNonRT();
+  auto value = box.get();
   EXPECT_EQ(value.data[0], 1);
   EXPECT_EQ(value.data[1], 2);
   EXPECT_EQ(value.data[2], 3);
@@ -73,7 +73,7 @@ TEST(RealtimeBoxBestEffort, assignment_operator)
   //Assignement operator is always non RT!
   box = data;
 
-  auto value = box.getNonRT();
+  auto value = box.get();
   EXPECT_EQ(value.a, 1000);
 }
 TEST(RealtimeBoxBestEffort, typecast_operator)
@@ -99,10 +99,29 @@ TEST(RealtimeBoxBestEffort, pointer_type)
   int * ptr = &a;
 
   RealtimeBoxBestEffort box(ptr);
+  //This does not and should not compile!
+  //auto value = box.get();
 
-  auto value = box.getNonRT();
+  //Instead access it via a passed function. This assues that we access the data within the scope of the lock
+  box.get([](const auto & i) { EXPECT_EQ(*i, 100); });
 
-  //Correctly working with pointer types is nasty...
-  std::lock_guard<decltype(box)::mutex_t> guard(box.getMutex());
-  EXPECT_EQ(*value, 100);
+  box.set([](auto & i) { *i = 200; });
+
+  box.get([](const auto & i) { EXPECT_EQ(*i, 200); });
+}
+
+TEST(RealtimeBoxBestEffort, smart_ptr_type)
+{
+  std::shared_ptr<int> ptr = std::make_shared<int>(100);
+
+  RealtimeBoxBestEffort box(ptr);
+  //This does not and should not compile!
+  //auto value = box.get();
+
+  //Instead access it via a passed function. This assues that we access the data within the scope of the lock
+  box.get([](const auto & i) { EXPECT_EQ(*i, 100); });
+
+  box.set([](auto & i) { *i = 200; });
+
+  box.get([](const auto & i) { EXPECT_EQ(*i, 200); });
 }

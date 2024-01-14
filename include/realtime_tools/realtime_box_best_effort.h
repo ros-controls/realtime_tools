@@ -1,18 +1,22 @@
 #pragma once
 
-#include <mutex>
-
 #include <initializer_list>
+#include <mutex>
 #include <optional>
+#include <rcpputils/pointer_traits.hpp>
 namespace realtime_tools
 {
+
+template <typename T>
+constexpr auto is_ptr_or_smart_ptr = rcpputils::is_pointer<T>::value;
 
 /*!
     A Box that ensures thread safe access to the boxed contents. 
     Access is best effort. If it can not lock it will return.
 
-    Note: Be carefull with pointers as this implementation will actually just copy the pointer
-    See the tests for an example on how to work with pointers
+    NOTE about pointers:
+    You can use pointers with this box but the access will be different. 
+    Only use the get/set methods that take function pointer for accessing the internal value.
 */
 template <class T, typename mutex_type = std::mutex>
 class RealtimeBoxBestEffort
@@ -42,7 +46,8 @@ public:
      * @brief set a new content with best effort
      * @return false if mutex could not be locked
     */
-  bool set(const T & value)
+  template <typename U = T>
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, bool> trySet(const T & value)
   {
     std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
     if (!guard.try_lock()) {
@@ -51,11 +56,23 @@ public:
     value_ = value;
     return true;
   }
+
+  bool trySet(const std::function<void(T &)> & func)
+  {
+    std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
+    if (!guard.try_lock()) {
+      return false;
+    }
+
+    func(value_);
+    return true;
+  }
   /**
      * @brief get the content with best effort
      * @return std::nullopt if content could not be access, otherwise the content is returned
     */
-  [[nodiscard]] std::optional<T> get() const
+  template <typename U = T>
+  [[nodiscard]] typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, std::optional<U>> tryGet() const
   {
     std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
     if (!guard.try_lock()) {
@@ -64,36 +81,80 @@ public:
     return value_;
   }
 
+  bool tryGet(const std::is_function<void(const T &)> & func)
+  {
+    std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
+    if (!guard.try_lock()) {
+      return false;
+    }
+
+    func(value_);
+    return true;
+  }
+
   /**
      * @brief set the content and wait until the mutex could be locked (RealtimeBox behaviour)
      * @return true
     */
-  bool setNonRT(const T & value)
+  template <typename U = T>
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> set(const T & value)
   {
     std::lock_guard<std::mutex> guard(lock_);
     value_ = value;
-    //Also return a bool in order to mimic the behaviour from 'set'
-    return true;
   }
+
+  void set(const std::function<void(T &)> & func)
+  {
+    std::lock_guard<std::mutex> guard(lock_);
+    func(value_);
+  }
+
   /**
      * @brief get the content and wait until the mutex could be locked (RealtimeBox behaviour)
      * @return copy of the value
     */
-  [[nodiscard]] T getNonRT() const
+  template <typename U = T>
+  [[nodiscard]] typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, U> get() const
   {
     std::lock_guard<std::mutex> guard(lock_);
     return value_;
   }
+  /**
+   * @brief get the content and wait until the mutex could be locked
+   * @note same signature as in the existing RealtimeBox<T>
+  */
+  template <typename U = T>
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> get(T & in) const
+  {
+    std::lock_guard<std::mutex> guard(lock_);
+    return value_;
+  }
+
+  void get(const std::function<void(const T &)> & func)
+  {
+    std::lock_guard<std::mutex> guard(lock_);
+    func(value_);
+  }
+
   //Make the usage easier by providing a custom assignment operator and a custom conversion operator
   //Only to be used from non-RT!
-  void operator=(const T & value) { set(value); }
+  template <typename U = T>
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> operator=(const T & value)
+  {
+    set(value);
+  }
 
+  template <typename U = T, typename = typename std::enable_if_t<!is_ptr_or_smart_ptr<U>>>
   [[nodiscard]] operator T() const
   {
     //Only makes sense with the getNonRT method otherwise we would return an std::optional
-    return getNonRT();
+    return get();
   }
-  [[nodiscard]] operator std::optional<T>() const { return get(); }
+  template <typename U = T, typename = typename std::enable_if_t<!is_ptr_or_smart_ptr<U>>>
+  [[nodiscard]] operator std::optional<T>() const
+  {
+    return tryGet();
+  }
 
   //In case one wants to actually use a pointer in this implementation we allow accessing the lock directly.
   //Note: Be carefull with lock.unlock(). It may only be called from the thread that locked the mutext!
