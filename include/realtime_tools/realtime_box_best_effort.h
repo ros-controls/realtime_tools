@@ -89,7 +89,7 @@ public:
    * @return false if the mutex could not be locked
    * @note only safe way to access pointer type content (r)
   */
-  bool tryGet(const std::is_function<void(const T &)> & func)
+  bool tryGet(const std::function<void(const T &)> & func)
   {
     std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
     if (!guard.try_lock()) {

@@ -108,6 +108,8 @@ TEST(RealtimeBoxBestEffort, pointer_type)
   box.set([](auto & i) { *i = 200; });
 
   box.get([](const auto & i) { EXPECT_EQ(*i, 200); });
+
+  box.tryGet([](const auto &i){EXPECT_EQ(*i,200);});
 }
 
 TEST(RealtimeBoxBestEffort, smart_ptr_type)
