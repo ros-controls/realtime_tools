@@ -29,7 +29,6 @@ public:
   using mutex_t = mutex_type;
   using type = T;
   //Provide various constructors
-
   constexpr explicit RealtimeBoxBestEffort(const T & init = T{}) : value_(init) {}
   constexpr explicit RealtimeBoxBestEffort(const T && init) : value_(std::move(init)) {}
 
@@ -45,6 +44,7 @@ public:
   /**
      * @brief set a new content with best effort
      * @return false if mutex could not be locked
+     * @note disabled for pointer types
     */
   template <typename U = T>
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, bool> trySet(const T & value)
@@ -56,7 +56,11 @@ public:
     value_ = value;
     return true;
   }
-
+  /**
+   * @brief access the content readable with best effort
+   * @return false if the mutex could not be locked
+   * @note only safe way to access pointer type content (rw)
+  */
   bool trySet(const std::function<void(T &)> & func)
   {
     std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
@@ -80,7 +84,11 @@ public:
     }
     return value_;
   }
-
+  /**
+   * @brief access the content (r) with best effort 
+   * @return false if the mutex could not be locked
+   * @note only safe way to access pointer type content (r)
+  */
   bool tryGet(const std::is_function<void(const T &)> & func)
   {
     std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
@@ -102,7 +110,9 @@ public:
     std::lock_guard<std::mutex> guard(lock_);
     value_ = value;
   }
-
+  /**
+   * @brief access the content (rw) and wait until the mutex could locked
+  */
   void set(const std::function<void(T &)> & func)
   {
     std::lock_guard<std::mutex> guard(lock_);
@@ -129,7 +139,11 @@ public:
     std::lock_guard<std::mutex> guard(lock_);
     return value_;
   }
-
+  /**
+   * @brief access the content (r) and wait until the mutex could be locked
+   * @note only safe way to access pointer type content (r)
+   * @note same signature as in the existing RealtimeBox<T>
+  */
   void get(const std::function<void(const T &)> & func)
   {
     std::lock_guard<std::mutex> guard(lock_);
