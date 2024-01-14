@@ -54,6 +54,21 @@ TEST(RealtimeBoxBestEffort, non_default_constructable)
   EXPECT_EQ(value.a, -10);
   EXPECT_EQ(value.str, "hello");
 }
+TEST(RealtimeBoxBestEffort, standard_get)
+{
+  RealtimeBoxBestEffort<DefaultConstructable> box(DefaultConstructable{.a=1000});
+
+  DefaultConstructable data;
+  box.get(data);
+  EXPECT_EQ(data.a,1000);
+  data.a = 10000;
+
+
+  box.set(data);
+
+  auto value = box.get();
+  EXPECT_EQ(value.a, 10000);  
+}
 
 TEST(RealtimeBoxBestEffort, initializer_list)
 {

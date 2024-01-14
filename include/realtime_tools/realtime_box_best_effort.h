@@ -137,7 +137,7 @@ public:
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> get(T & in) const
   {
     std::lock_guard<std::mutex> guard(lock_);
-    return value_;
+    in = value_;
   }
   /**
    * @brief access the content (r) and wait until the mutex could be locked
