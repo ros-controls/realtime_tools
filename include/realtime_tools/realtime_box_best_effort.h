@@ -79,7 +79,7 @@ public:
      * @brief get the content and wait until the mutex could be locked (RealtimeBox behaviour)
      * @return copy of the value
     */
-  [[nodiscard]] T getNonRT() const
+  T getNonRT() const
   {
     std::lock_guard<std::mutex> guard(lock_);
     return value_;
@@ -88,17 +88,17 @@ public:
   //Only to be used from non-RT!
   void operator=(const T & value) { set(value); }
 
-  [[nodiscard]] operator T() const
+  operator T() const
   {
     //Only makes sense with the getNonRT method otherwise we would return an std::optional
     return getNonRT();
   }
-  [[nodiscard]] operator std::optional<T>() const { return get(); }
+  operator std::optional<T>() const { return get(); }
 
   //In case one wants to actually use a pointer in this implementation we allow accessing the lock directly.
   //Note: Be carefull with lock.unlock(). It may only be called from the thread that locked the mutext!
-  [[nodiscard]] const mutex_t & getMutex() const { return lock_; }
-  [[nodiscard]] mutex_t & getMutex() { return lock_; }
+  const mutex_t & getMutex() const { return lock_; }
+  mutex_t & getMutex() { return lock_; }
 
 private:
   T value_;
