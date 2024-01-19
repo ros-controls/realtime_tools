@@ -121,10 +121,7 @@ public:
   void unlockAndPublish()
   {
     turn_ = NON_REALTIME;
-    msg_mutex_.unlock();
-#ifdef NON_POLLING
-    updated_cond_.notify_one();
-#endif
+    unlock();
   }
 
   /**  \brief Get the data lock form non-realtime
@@ -148,7 +145,13 @@ public:
   /**  \brief Unlocks the data without publishing anything
    *
    */
-  void unlock() { msg_mutex_.unlock(); }
+  void unlock()
+  {
+    msg_mutex_.unlock();
+#ifdef NON_POLLING
+    updated_cond_.notify_one();
+#endif
+  }
 
 private:
   // non-copyable
