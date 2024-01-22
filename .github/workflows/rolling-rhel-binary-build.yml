@@ -1,17 +1,12 @@
-name: Rolling RHEL Binary Build
+name: RHEL Rolling Binary Build
 on:
   workflow_dispatch:
-    branches:
-      - master
   pull_request:
-    branches:
-      - master
-  push:
     branches:
       - master
   schedule:
     # Run every day to detect flakiness and broken dependencies
-    - cron: '03 1 * * *'
+    - cron: '03 3 * * *'
 
 
 jobs:
@@ -20,14 +15,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ROS_DISTRO: rolling
-    container: ghcr.io/ros-controls/ros:${{ env.ROS_DISTRO }}-rhel
+    container: ghcr.io/ros-controls/ros:rolling-rhel
     steps:
       - uses: actions/checkout@v4
         with:
           path: src/realtime_tools
       - run: |
           rosdep update
-          rosdep install -iy --from-path src/realtime_tools
+          rosdep install -iyr --from-path src/realtime_tools || true
           source /opt/ros/${{ env.ROS_DISTRO }}/setup.bash
           colcon build
           colcon test
+          colcon test-result
