@@ -34,10 +34,13 @@
 #include <sched.h>
 #include <sys/capability.h>
 #include <sys/mman.h>
+
+#include <unistd.h>
 #endif
 
 #include <cstring>
 #include <fstream>
+#include <iostream>
 
 namespace realtime_tools
 {
@@ -112,4 +115,57 @@ bool lock_memory(std::string & message)
   }
 #endif
 }
+
+static void print_error(const int errc)
+{
+  switch (errc) {
+    case 0:
+      return;
+    case EFAULT:
+      std::cerr << "Call of sched_setaffinity with invalid cpuset" << std::endl;
+      return;
+    case EINVAL:
+      std::cerr << "Call of sched_setaffinity with an invalid cpu core" << std::endl;
+      return;
+    case ESRCH:
+      std::cerr << "Call of sched_setaffinity with and invalid thread id/process id" << std::endl;
+      return;
+    default:
+      std::cerr << "Error code: " << errc << ": " << std::string(strerror(errc)) << std::endl;
+  }
+}
+
+bool set_preferred_core(const int core)
+{
+  //Allow attaching the thread/process to a certain cpu core
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  //Obtain amount of cores/
+  const auto number_of_cores = get_core_count();
+
+  //Reset affinity by setting it to all cores
+  if (core < 0) {
+    for (int i{0}; i < number_of_cores; i++) {
+      CPU_SET(i, &cpuset);
+    }
+    //And actually tell the schedular to set the affinity of the currently calling thread
+    const auto result = sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
+    print_error(result);
+    return result == 0;
+  }
+
+  if (core < number_of_cores) {
+    //Set the passed core to the cpu set
+    CPU_SET(core, &cpuset);
+    //And actually tell the schedular to set the affinity of the currently calling thread
+    const auto result = sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
+    print_error(result);
+    return result == 0;
+  }
+  //Invalid core number passed
+  return false;
+}
+
+int get_core_count() { return sysconf(_SC_NPROCESSORS_ONLN); }
+
 }  // namespace realtime_tools
