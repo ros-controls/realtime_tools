@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - humble
+      - master
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * *'

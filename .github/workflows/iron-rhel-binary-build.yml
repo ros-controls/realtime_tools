@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - iron
+      - master
   schedule:
     # Run every day to detect flakiness and broken dependencies
-    - cron: '03 1 * * *'
+    - cron: '03 3 * * *'
 
 
 jobs:
