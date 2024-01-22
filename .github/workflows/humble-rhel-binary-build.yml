@@ -19,9 +19,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: src/realtime_tools
-      - run: |
+      - name: Install dependencies
+        run: |
           rosdep update
           rosdep install -iyr --from-path src/realtime_tools || true
+      - name: Build and test
+        run: |
           source /opt/ros/${{ env.ROS_DISTRO }}/setup.bash
           colcon build
           colcon test
