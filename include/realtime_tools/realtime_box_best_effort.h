@@ -41,11 +41,11 @@ template <typename T>
 constexpr auto is_ptr_or_smart_ptr = rcpputils::is_pointer<T>::value;
 
 /*!
-    A Box that ensures thread safe access to the boxed contents. 
+    A Box that ensures thread safe access to the boxed contents.
     Access is best effort. If it can not lock it will return.
 
     NOTE about pointers:
-    You can use pointers with this box but the access will be different. 
+    You can use pointers with this box but the access will be different.
     Only use the get/set methods that take function pointer for accessing the internal value.
 */
 template <class T, typename mutex_type = std::mutex>
@@ -115,7 +115,7 @@ public:
     return value_;
   }
   /**
-   * @brief access the content (r) with best effort 
+   * @brief access the content (r) with best effort
    * @return false if the mutex could not be locked
    * @note only safe way to access pointer type content (r)
   */

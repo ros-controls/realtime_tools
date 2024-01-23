@@ -114,7 +114,7 @@ TEST(RealtimeBoxBestEffort, assignment_operator)
   DefaultConstructable data;
   data.a = 1000;
   RealtimeBoxBestEffort<DefaultConstructable> box;
-  //Assignement operator is always non RT!
+  //Assignment operator is always non RT!
   box = data;
 
   auto value = box.get();
