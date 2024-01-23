@@ -29,4 +29,4 @@ jobs:
           source /opt/ros/${{ env.ROS_DISTRO }}/setup.bash
           colcon build
           colcon test
-          colcon test-result
+          colcon test-result --verbose
