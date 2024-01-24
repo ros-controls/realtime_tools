@@ -1,0 +1,30 @@
+name: Debian Rolling Build
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+  schedule:
+    # Run every day to detect flakiness and broken dependencies
+    - cron: '33 2 * * *'
+
+
+jobs:
+  rolling_debian:
+    name: Rolling debian build
+    runs-on: ubuntu-latest
+    env:
+      ROS_DISTRO: rolling
+    container: ghcr.io/ros-controls/ros:rolling-debian
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src/realtime_tools
+      - name: Build and test
+        shell: bash
+        run: |
+          source /opt/ros2_ws/install/setup.bash
+          vcs import src < src/realtime_tools/realtime_tools.${{ env.ROS_DISTRO }}.repos
+          colcon build
+          colcon test
+          colcon test-result --verbose
