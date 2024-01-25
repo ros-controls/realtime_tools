@@ -53,7 +53,7 @@ struct FromInitializerList
   std::array<int, 3> data;
 };
 
-using namespace realtime_tools;
+using realtime_tools::RealtimeBoxBestEffort;
 
 TEST(RealtimeBoxBestEffort, empty_construct)
 {
@@ -114,7 +114,7 @@ TEST(RealtimeBoxBestEffort, assignment_operator)
   DefaultConstructable data;
   data.a = 1000;
   RealtimeBoxBestEffort<DefaultConstructable> box;
-  //Assignment operator is always non RT!
+  // Assignment operator is always non RT!
   box = data;
 
   auto value = box.get();
@@ -124,12 +124,12 @@ TEST(RealtimeBoxBestEffort, typecast_operator)
 {
   RealtimeBoxBestEffort box(DefaultConstructable{.a = 100, .str = ""});
 
-  //Use non RT access
+  // Use non RT access
   DefaultConstructable data = box;
 
   EXPECT_EQ(data.a, 100);
 
-  //Use RT access -> returns std::nullopt if the mutex could not be locked
+  // Use RT access -> returns std::nullopt if the mutex could not be locked
   std::optional<DefaultConstructable> rt_data_access = box;
 
   if (rt_data_access) {
@@ -143,10 +143,11 @@ TEST(RealtimeBoxBestEffort, pointer_type)
   int * ptr = &a;
 
   RealtimeBoxBestEffort box(ptr);
-  //This does not and should not compile!
-  //auto value = box.get();
+  // This does not and should not compile!
+  // auto value = box.get();
 
-  //Instead access it via a passed function. This assues that we access the data within the scope of the lock
+  // Instead access it via a passed function.
+  // This assures that we access the data within the scope of the lock
   box.get([](const auto & i) { EXPECT_EQ(*i, 100); });
 
   box.set([](auto & i) { *i = 200; });
@@ -161,10 +162,11 @@ TEST(RealtimeBoxBestEffort, smart_ptr_type)
   std::shared_ptr<int> ptr = std::make_shared<int>(100);
 
   RealtimeBoxBestEffort box(ptr);
-  //This does not and should not compile!
-  //auto value = box.get();
+  // This does not and should not compile!
+  // auto value = box.get();
 
-  //Instead access it via a passed function. This assues that we access the data within the scope of the lock
+  // Instead access it via a passed function.
+  // This assures that we access the data within the scope of the lock
   box.get([](const auto & i) { EXPECT_EQ(*i, 100); });
 
   box.set([](auto & i) { *i = 200; });

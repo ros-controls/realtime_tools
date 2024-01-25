@@ -34,6 +34,7 @@
 #include <mutex>
 #include <optional>
 #include <rcpputils/pointer_traits.hpp>
+#include <utility>
 namespace realtime_tools
 {
 
@@ -58,11 +59,11 @@ class RealtimeBoxBestEffort
 public:
   using mutex_t = mutex_type;
   using type = T;
-  //Provide various constructors
+  // Provide various constructors
   constexpr explicit RealtimeBoxBestEffort(const T & init = T{}) : value_(init) {}
   constexpr explicit RealtimeBoxBestEffort(const T && init) : value_(std::move(init)) {}
 
-  //Only enabled for types that can be constructed from an initializer list
+  // Only enabled for types that can be constructed from an initializer list
   template <typename U = T>
   constexpr RealtimeBoxBestEffort(
     const std::initializer_list<U> & init,
@@ -180,8 +181,9 @@ public:
     func(value_);
   }
 
-  //Make the usage easier by providing a custom assignment operator and a custom conversion operator
-  //Only to be used from non-RT!
+  // Make the usage easier by providing a custom assignment operator
+  // and a custom conversion operator
+  // Only to be used from non-RT!
   template <typename U = T>
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> operator=(const T & value)
   {
@@ -191,7 +193,7 @@ public:
   template <typename U = T, typename = typename std::enable_if_t<!is_ptr_or_smart_ptr<U>>>
   [[nodiscard]] operator T() const
   {
-    //Only makes sense with the getNonRT method otherwise we would return an std::optional
+    // Only makes sense with the getNonRT method otherwise we would return an std::optional
     return get();
   }
   template <typename U = T, typename = typename std::enable_if_t<!is_ptr_or_smart_ptr<U>>>
@@ -200,8 +202,10 @@ public:
     return tryGet();
   }
 
-  //In case one wants to actually use a pointer in this implementation we allow accessing the lock directly.
-  //Note: Be careful with lock.unlock(). It may only be called from the thread that locked the mutext!
+  // In case one wants to actually use a pointer
+  // in this implementation we allow accessing the lock directly.
+  // Note: Be careful with lock.unlock().
+  // It may only be called from the thread that locked the mutext!
   [[nodiscard]] const mutex_t & getMutex() const { return lock_; }
   [[nodiscard]] mutex_t & getMutex() { return lock_; }
 
