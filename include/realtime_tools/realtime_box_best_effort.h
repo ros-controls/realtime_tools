@@ -201,7 +201,7 @@ public:
   }
 
   //In case one wants to actually use a pointer in this implementation we allow accessing the lock directly.
-  //Note: Be carefull with lock.unlock(). It may only be called from the thread that locked the mutext!
+  //Note: Be careful with lock.unlock(). It may only be called from the thread that locked the mutext!
   [[nodiscard]] const mutex_t & getMutex() const { return lock_; }
   [[nodiscard]] mutex_t & getMutex() { return lock_; }
 
