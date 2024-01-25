@@ -141,6 +141,7 @@ public:
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> set(const T & value)
   {
     std::lock_guard<std::mutex> guard(lock_);
+    // cppcheck-suppress missingReturn
     value_ = value;
   }
   /**
@@ -170,6 +171,7 @@ public:
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> get(T & in) const
   {
     std::lock_guard<std::mutex> guard(lock_);
+    // cppcheck-suppress missingReturn
     in = value_;
   }
   /**
