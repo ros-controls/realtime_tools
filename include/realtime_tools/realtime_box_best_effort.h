@@ -33,8 +33,10 @@
 #include <initializer_list>
 #include <mutex>
 #include <optional>
-#include <rcpputils/pointer_traits.hpp>
 #include <utility>
+
+#include <rcpputils/pointer_traits.hpp>
+
 namespace realtime_tools
 {
 
