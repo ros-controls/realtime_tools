@@ -1,0 +1,22 @@
+name: Source Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  schedule:
+    # Run every day to detect flakiness and broken dependencies
+    - cron: '03 3 * * *'
+
+jobs:
+  source:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling, iron, humble]
+    with:
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      ref: master
+      ros2_repo_branch: ${{ matrix.ROS_DISTRO }}
+      
