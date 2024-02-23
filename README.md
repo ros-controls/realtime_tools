@@ -1,8 +1,7 @@
 realtime_tools
 ===========
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![codecov](https://codecov.io/gh/ros-controls/realtime_tools/branch/master/graph/badge.svg?token=Osge1FOaAh)](https://app.codecov.io/gh/ros-controls/realtime_tools/tree/master)
-
-See [control.ros.org](http://control.ros.org) and [realtime_tools](http://wiki.ros.org/realtime_tools) documentation on ros.org
 
 
 ## Build status
