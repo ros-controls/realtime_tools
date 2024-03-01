@@ -229,4 +229,4 @@ private:
 };
 }  // namespace realtime_tools
 
-#endif  //REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_H_
+#endif  // REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_H_
