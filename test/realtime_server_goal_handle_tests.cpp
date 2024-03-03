@@ -124,7 +124,7 @@ struct ActionClientCallbacks
 
 std::shared_ptr<ClientGoalHandle> send_goal(
   rclcpp::Node::SharedPtr node, std::shared_ptr<rclcpp_action::Client<Fibonacci>> ac,
-  const std::string & server_name, ActionClientCallbacks & client_callbacks)
+  const std::string & /*server_name*/, ActionClientCallbacks & client_callbacks)
 {
   for (size_t i = 0; i < ATTEMPTS && !ac->action_server_is_ready(); ++i) {
     rclcpp::spin_some(node);

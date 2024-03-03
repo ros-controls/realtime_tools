@@ -11,39 +11,8 @@ on:
 jobs:
   coverage:
     name: coverage build
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-    env:
-      ROS_DISTRO: rolling
-    steps:
-      - uses: ros-tooling/setup-ros@0.7.1
-        with:
-          required-ros-distributions: ${{ env.ROS_DISTRO }}
-      - uses: actions/checkout@v4
-      - uses: ros-tooling/action-ros-ci@0.3.6
-        with:
-          target-ros2-distro: ${{ env.ROS_DISTRO }}
-          import-token: ${{ secrets.GITHUB_TOKEN }}
-          # build all packages listed in the meta package
-          package-name:
-            realtime_tools
-
-          vcs-repo-file-url: |
-            https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/realtime_tools-not-released.${{ env.ROS_DISTRO }}.repos?token=${{ secrets.GITHUB_TOKEN }}
-          colcon-defaults: |
-            {
-              "build": {
-                "mixin": ["coverage-gcc"]
-              }
-            }
-          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-      - uses: codecov/codecov-action@v3.1.5
-        with:
-          file: ros_ws/lcov/total_coverage.info
-          flags: unittests
-          name: codecov-umbrella
-      - uses: actions/upload-artifact@v4.3.0
-        with:
-          name: colcon-logs-coverage-rolling
-          path: ros_ws/log
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
+    secrets: inherit
+    with:
+      ros_distro: rolling
+      os_name: ubuntu-22.04
