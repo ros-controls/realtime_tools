@@ -1,4 +1,4 @@
-// Copyright (c) 2022, PickNik, Inc.
+// Copyright (c) 2024, Lennart Nachtigall
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the PickNik Inc. nor the names of its
+//    * Neither the name of the Willow Garage, Inc. nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -26,36 +26,34 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef REALTIME_TOOLS__THREAD_PRIORITY_HPP_
-#define REALTIME_TOOLS__THREAD_PRIORITY_HPP_
+// Author: Lennart Nachtigall
 
-namespace realtime_tools
+#include <gmock/gmock.h>
+#include <realtime_tools/thread_priority.hpp>
+#include <thread>
+
+TEST(thread_priority, get_core_count)
 {
-/**
- * Detect if realtime kernel is present.
- * \returns true if realtime kernel is detected
- */
-bool has_realtime_kernel();
+  const auto count = realtime_tools::get_core_count();
 
-/**
- * Configure SCHED_FIFO thread priority for the thread that calls this function
- * \param[in] priority the priority of this thread from 0-99
- * \returns true if configuring scheduler succeeded
- */
-bool configure_sched_fifo(int priority);
+  EXPECT_EQ(count, std::thread::hardware_concurrency());
+}
 
-/**
- * Configure the caller thread affinity - Tell the scheduler to prefer a certain core for the current thread
- * \param[in] core - the number of the core
- * \returns true if configuring the scheduler succeeded
-*/
-bool set_preferred_core(const int core = -1);
+TEST(thread_priority, set_preferred_core_valid)
+{
+  //We should always have at least one core
+  EXPECT_TRUE(realtime_tools::set_preferred_core(0));
+}
 
-/**
- * \returns The amount of available cpu cores
-*/
-int get_core_count();
+TEST(thread_priority, set_preferred_core_invalid_too_many_cores)
+{
+  const auto count = realtime_tools::get_core_count();
+  //We should always have at least one core
+  EXPECT_FALSE(realtime_tools::set_preferred_core(count + 10));
+}
 
-}  // namespace realtime_tools
-
-#endif  // REALTIME_TOOLS__THREAD_PRIORITY_HPP_
+TEST(thread_priority, set_preferred_core_valid_reset)
+{
+  //Reset core affinity
+  EXPECT_TRUE(realtime_tools::set_preferred_core(-1));
+}

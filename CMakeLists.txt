@@ -42,6 +42,9 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
   find_package(test_msgs REQUIRED)
 
+  ament_add_gmock(thread_priority_tests test/thread_priority_tests.cpp)
+  target_link_libraries(thread_priority_tests thread_priority)
+
   ament_add_gmock(realtime_box_tests test/realtime_box_tests.cpp)
   target_link_libraries(realtime_box_tests realtime_tools)
 
