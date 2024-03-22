@@ -83,7 +83,7 @@ public:
   template <typename U = T>
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, bool> trySet(const T & value)
   {
-    std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
     if (!guard.try_lock()) {
       return false;
     }
@@ -97,7 +97,7 @@ public:
    */
   bool trySet(const std::function<void(T &)> & func)
   {
-    std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
     if (!guard.try_lock()) {
       return false;
     }
@@ -112,7 +112,7 @@ public:
   template <typename U = T>
   [[nodiscard]] typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, std::optional<U>> tryGet() const
   {
-    std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
     if (!guard.try_lock()) {
       return std::nullopt;
     }
@@ -125,7 +125,7 @@ public:
    */
   bool tryGet(const std::function<void(const T &)> & func)
   {
-    std::unique_lock<std::mutex> guard(lock_, std::defer_lock);
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
     if (!guard.try_lock()) {
       return false;
     }
@@ -141,7 +141,7 @@ public:
   template <typename U = T>
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> set(const T & value)
   {
-    std::lock_guard<std::mutex> guard(lock_);
+    std::lock_guard<mutex_t> guard(lock_);
     // cppcheck-suppress missingReturn
     value_ = value;
   }
@@ -150,7 +150,7 @@ public:
    */
   void set(const std::function<void(T &)> & func)
   {
-    std::lock_guard<std::mutex> guard(lock_);
+    std::lock_guard<mutex_t> guard(lock_);
     func(value_);
   }
 
@@ -161,7 +161,7 @@ public:
   template <typename U = T>
   [[nodiscard]] typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, U> get() const
   {
-    std::lock_guard<std::mutex> guard(lock_);
+    std::lock_guard<mutex_t> guard(lock_);
     return value_;
   }
   /**
@@ -171,7 +171,7 @@ public:
   template <typename U = T>
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> get(T & in) const
   {
-    std::lock_guard<std::mutex> guard(lock_);
+    std::lock_guard<mutex_t> guard(lock_);
     // cppcheck-suppress missingReturn
     in = value_;
   }
@@ -182,7 +182,7 @@ public:
    */
   void get(const std::function<void(const T &)> & func)
   {
-    std::lock_guard<std::mutex> guard(lock_);
+    std::lock_guard<mutex_t> guard(lock_);
     func(value_);
   }
 
