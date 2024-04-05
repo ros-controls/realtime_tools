@@ -53,7 +53,7 @@ struct FromInitializerList
   std::array<int, 3> data;
 };
 
-using namespace realtime_tools;
+using realtime_tools::RealtimeBox;
 
 TEST(RealtimeBox, empty_construct)
 {
@@ -114,7 +114,7 @@ TEST(RealtimeBox, assignment_operator)
   DefaultConstructable data;
   data.a = 1000;
   RealtimeBox<DefaultConstructable> box;
-  //Assignment operator is always non RT!
+  // Assignment operator is always non RT!
   box = data;
 
   auto value = box.get();
@@ -124,12 +124,12 @@ TEST(RealtimeBox, typecast_operator)
 {
   RealtimeBox box(DefaultConstructable{.a = 100, .str = ""});
 
-  //Use non RT access
+  // Use non RT access
   DefaultConstructable data = box;
 
   EXPECT_EQ(data.a, 100);
 
-  //Use RT access -> returns std::nullopt if the mutex could not be locked
+  // Use RT access -> returns std::nullopt if the mutex could not be locked
   std::optional<DefaultConstructable> rt_data_access = box;
 
   if (rt_data_access) {
@@ -143,10 +143,11 @@ TEST(RealtimeBox, pointer_type)
   int * ptr = &a;
 
   RealtimeBox box(ptr);
-  //This does not and should not compile!
-  //auto value = box.get();
+  // This does not and should not compile!
+  // auto value = box.get();
 
-  //Instead access it via a passed function. This assues that we access the data within the scope of the lock
+  // Instead access it via a passed function.
+  // This assures that we access the data within the scope of the lock
   box.get([](const auto & i) { EXPECT_EQ(*i, 100); });
 
   box.set([](auto & i) { *i = 200; });
@@ -161,10 +162,11 @@ TEST(RealtimeBox, smart_ptr_type)
   std::shared_ptr<int> ptr = std::make_shared<int>(100);
 
   RealtimeBox box(ptr);
-  //This does not and should not compile!
-  //auto value = box.get();
+  // This does not and should not compile!
+  // auto value = box.get();
 
-  //Instead access it via a passed function. This assues that we access the data within the scope of the lock
+  // Instead access it via a passed function.
+  // This assures that we access the data within the scope of the lock
   box.get([](const auto & i) { EXPECT_EQ(*i, 100); });
 
   box.set([](auto & i) { *i = 200; });
@@ -176,8 +178,8 @@ TEST(RealtimeBox, smart_ptr_type)
   box.tryGet([](const auto & p) { EXPECT_EQ(*p, 10); });
 }
 
-//These are the tests from the old RealtimeBox implementation
-//They are therefore suffixed with _existing
+// These are the tests from the old RealtimeBox implementation
+// They are therefore suffixed with _existing
 
 class DefaultConstructable_existing
 {
