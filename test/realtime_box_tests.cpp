@@ -122,7 +122,7 @@ TEST(RealtimeBox, assignment_operator)
 }
 TEST(RealtimeBox, typecast_operator)
 {
-  RealtimeBox box(DefaultConstructable{.a = 100, .str = ""});
+  RealtimeBox<DefaultConstructable> box(DefaultConstructable{.a = 100, .str = ""});
 
   // Use non RT access
   DefaultConstructable data = box;
@@ -142,7 +142,7 @@ TEST(RealtimeBox, pointer_type)
   int a = 100;
   int * ptr = &a;
 
-  RealtimeBox box(ptr);
+  RealtimeBox<int *> box(ptr);
   // This does not and should not compile!
   // auto value = box.get();
 
@@ -161,7 +161,7 @@ TEST(RealtimeBox, smart_ptr_type)
 {
   std::shared_ptr<int> ptr = std::make_shared<int>(100);
 
-  RealtimeBox box(ptr);
+  RealtimeBox<std::shared_ptr<int>> box(ptr);
   // This does not and should not compile!
   // auto value = box.get();
 
@@ -176,6 +176,26 @@ TEST(RealtimeBox, smart_ptr_type)
   box.trySet([](const auto & p) { *p = 10; });
 
   box.tryGet([](const auto & p) { EXPECT_EQ(*p, 10); });
+}
+
+TEST(RealtimeBox, deprecated_note)
+{
+  int a = 100;
+  int * ptr = &a;
+
+  RealtimeBox<int *> box(ptr);
+
+  int * res;
+  box.get(res);
+  EXPECT_EQ(*res, 100);
+
+  EXPECT_EQ(*box.get(), 100);
+
+  std::shared_ptr<int> sptr = std::make_shared<int>(10);
+
+  RealtimeBox<std::shared_ptr<int>> sbox(sptr);
+
+  EXPECT_EQ(*sbox.get(), 10);
 }
 
 // These are the tests from the old RealtimeBox implementation
