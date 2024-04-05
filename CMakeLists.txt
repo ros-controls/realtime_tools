@@ -9,6 +9,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
   rclcpp_action
   Threads
+  rcpputils
 )
 
 find_package(ament_cmake REQUIRED)
@@ -47,6 +48,9 @@ if(BUILD_TESTING)
 
   ament_add_gmock(realtime_box_tests test/realtime_box_tests.cpp)
   target_link_libraries(realtime_box_tests realtime_tools)
+
+  ament_add_gmock(realtime_box_best_effort_tests test/realtime_box_best_effort_tests.cpp)
+  target_link_libraries(realtime_box_best_effort_tests realtime_tools)
 
   ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests realtime_tools)
