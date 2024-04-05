@@ -52,3 +52,12 @@ Looking at the existing issues is a great way to find something to contribute on
 As this project, by default, uses the default GitHub issue labels
   (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any ['help wanted'][help-wanted] issues
   is a great place to start.
+
+## Licensing
+Any contribution that you make to this repository will
+be under the 3-Clause BSD License, as dictated by that
+[license](https://opensource.org/licenses/BSD-3-Clause).
+
+[issues]: https://github.com/ros-controls/realtime_tools/issues
+[closed-issues]: https://github.com/ros-controls/realtime_tools/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20
+[help-wanted]: https://github.com/ros-controls/realtime_tools/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22
