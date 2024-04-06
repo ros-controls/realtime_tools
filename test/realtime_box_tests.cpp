@@ -1,4 +1,5 @@
 // Copyright (c) 2024, Lennart Nachtigall
+// Copyright (c) 2019, Open Source Robotics Foundation, Inc.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,8 +26,6 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-
-// Author: Lennart Nachtigall
 
 #include <gmock/gmock.h>
 #include <realtime_tools/realtime_box.h>
