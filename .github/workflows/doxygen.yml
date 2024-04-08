@@ -1,0 +1,17 @@
+name: "Doxygen"
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build-multiversion:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Install doxygen
+      run: sudo apt-get install -y doxygen
+    - name: Run doxygen and check for warnings/errors
+      run: |
+        ./doxygen/doxygen.sh
