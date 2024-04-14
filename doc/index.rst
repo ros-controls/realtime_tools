@@ -1,7 +1,15 @@
 Welcome to the documentation for realtime_tools
 ===============================================
 
-.. include:: main.rst
+Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
+
+For more information of the ros2_control framework see `control.ros.org <https://control.ros.org/>`__.
+
+.. toctree::
+   :maxdepth: 2
+
+   C++ API <generated/index>
+
 
 Indices and Search
 ==================
