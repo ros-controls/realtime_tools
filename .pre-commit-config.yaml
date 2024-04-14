@@ -142,14 +142,3 @@ repos:
         args: ["--verbose"]
       - id: check-dependabot
         args: ["--verbose"]
-
-  - repo: local
-    hooks:
-          - id: doxygen-check
-            name: doxygen-check
-            entry: ./doxygen/doxygen.sh
-            files: ^include/
-            types_or: [file]
-            language: system
-            pass_filenames: false
-            verbose: true
