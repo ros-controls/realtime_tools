@@ -8,7 +8,6 @@
 
   <license>3-Clause BSD</license>
 
-  <url type="website">http://ros.org/wiki/realtime_tools</url>
   <url type="bugtracker">https://github.com/ros-controls/realtime_tools/issues</url>
   <url type="repository">https://github.com/ros-controls/realtime_tools/</url>
 
