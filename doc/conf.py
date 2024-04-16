@@ -1,27 +1,5 @@
 # Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+# settings will be overridden by rosdoc2, so we add here only custom settings
 
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-
-project = "realtime_tools"
-copyright = "2024, Stuart Glaser, Shane Loretz"
-author = "Stuart Glaser, Shane Loretz"
-
-# -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
-
-extensions = []
-
-templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
-
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
-html_theme = "alabaster"
-html_static_path = ["_static"]
+copyright = "2024, ros2_control development team"
 html_logo = "https://control.ros.org/master/_static/logo_ros-controls.png"
