@@ -5,6 +5,10 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - doc/**
+      - rosdoc2.yaml
+      - package.xml
 
 
 jobs:
