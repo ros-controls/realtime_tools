@@ -26,6 +26,7 @@ repos:
       - id: check-symlinks
       - id: check-xml
       - id: check-yaml
+        exclude: rosdoc2.yaml
       - id: debug-statements
       - id: end-of-file-fixer
       - id: mixed-line-ending
@@ -105,6 +106,7 @@ repos:
         description: Check if copyright notice is available in all files.
         entry: ament_copyright
         language: system
+        exclude: doc/conf.py
 
   # Docs - RestructuredText hooks
   - repo: https://github.com/PyCQA/doc8
