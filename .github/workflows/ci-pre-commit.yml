@@ -8,7 +8,7 @@ on:
 
 jobs:
   pre-commit:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-pre-commit.yml@revert_coverage_hack
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-pre-commit.yml@master
     strategy:
       fail-fast: false
       matrix:
@@ -18,7 +18,7 @@ jobs:
       os_name: ubuntu-22.04
 
   pre-commit-rolling:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-pre-commit.yml@revert_coverage_hack
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-pre-commit.yml@master
     with:
       ros_distro: rolling
       container: ubuntu:24.04
