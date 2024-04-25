@@ -14,7 +14,7 @@ jobs:
         ROS_DISTRO: [rolling, jazzy, iron, humble]
     steps:
       - uses: actions/checkout@v4
-      - uses: ros-industrial/industrial_ci@master
+      - uses: 'christophfroehlich/industrial_ci@add_jazzy'
         env:
           ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
           ROS_REPO: main
