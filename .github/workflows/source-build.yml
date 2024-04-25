@@ -21,6 +21,9 @@ jobs:
         - ROS_DISTRO: iron
           CONTAINER: ""
           OS_NAME: ubuntu-22.04
+        - ROS_DISTRO: jazzy
+          CONTAINER: ubuntu:24.04
+          OS_NAME: ubuntu-latest
         - ROS_DISTRO: rolling
           CONTAINER: ubuntu:24.04
           OS_NAME: ubuntu-latest
