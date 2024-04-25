@@ -14,8 +14,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, iron, humble]
+        ROS_DISTRO: [iron, humble]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref: master
       ros2_repo_branch: ${{ matrix.ROS_DISTRO }}
+      os_name: ubuntu-22.04
+  source-rolling:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling]
+    with:
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      ref: master
+      ros2_repo_branch: ${{ matrix.ROS_DISTRO }}
+      container: ubuntu:24.04
