@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, iron, humble]
+        ROS_DISTRO: [rolling, iron, jazzy, humble]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       upstream_workspace: realtime_tools.${{ matrix.ROS_DISTRO }}.repos
