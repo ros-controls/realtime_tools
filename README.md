@@ -8,7 +8,7 @@ Contains a set of tools that can be used from a hard realtime thread, without br
 ## Build status
 ROS2 Distro | Branch | Build status | Documentation | Released packages
 :---------: | :----: | :----------: | :-----------: | :---------------:
-**Rolling** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/binary-build.yml?branch=master) <br /> [![Semi-Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/semi-binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/semi-binary-build.yml?branch=master) |  [API](http://docs.ros.org/en/rolling/p/realtime_tools/)  | [realtime_tools](https://index.ros.org/p/realtime_tools/#rolling)
+**Rolling** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/binary-build.yml?branch=master) <br /> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/source-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/source-build.yml?branch=master) | [API](http://docs.ros.org/en/rolling/p/realtime_tools/)  | [realtime_tools](https://index.ros.org/p/realtime_tools/#rolling)
 **Jazzy** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | see above | [API](http://docs.ros.org/en/jazzy/p/realtime_tools/) | [realtime_tools](https://index.ros.org/p/realtime_tools/#jazzy)
 **Iron** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | see above | [API](http://docs.ros.org/en/iron/p/realtime_tools/) | [realtime_tools](https://index.ros.org/p/realtime_tools/#iron)
 **Humble** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | see above | [API](http://docs.ros.org/en/humble/p/realtime_tools/) | [realtime_tools](https://index.ros.org/p/realtime_tools/#humble)
@@ -16,7 +16,7 @@ ROS2 Distro | Branch | Build status | Documentation | Released packages
 
 ### Explanation of different build types
 
-**NOTE**: There are three build stages checking current and future compatibility of the package.
+**NOTE**: There are different build stages checking current and future compatibility of the package.
 
 [Detailed build status](.github/workflows/README.md)
 
