@@ -12,20 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-        - ROS_DISTRO: humble
-          CONTAINER: ""
-          OS_NAME: ubuntu-22.04
-        - ROS_DISTRO: iron
-          CONTAINER: ""
-          OS_NAME: ubuntu-22.04
-        - ROS_DISTRO: jazzy
-          CONTAINER: ubuntu:24.04
-          OS_NAME: ubuntu-latest
-        - ROS_DISTRO: rolling
-          CONTAINER: ubuntu:24.04
-          OS_NAME: ubuntu-latest
+        ROS_DISTRO: [humble, iron, jazzy, rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
-      os_name: ${{ matrix.OS_NAME }}
-      container: ${{ matrix.CONTAINER }}
