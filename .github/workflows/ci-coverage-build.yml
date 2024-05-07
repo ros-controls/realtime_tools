@@ -11,8 +11,7 @@ on:
 jobs:
   coverage:
     name: coverage build
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@coverage_build
     secrets: inherit
     with:
       ros_distro: rolling
-      container: ubuntu:24.04
