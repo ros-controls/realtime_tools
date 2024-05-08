@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, jazzy, iron, humble]
+        ROS_DISTRO: [humble, iron, jazzy, rolling]
     steps:
       - uses: actions/checkout@v4
       - uses: ros-industrial/industrial_ci@master
