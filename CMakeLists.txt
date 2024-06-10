@@ -10,6 +10,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp_action
   Threads
   rcpputils
+  lifecycle_msgs
+  rclcpp_lifecycle
 )
 
 find_package(ament_cmake REQUIRED)
@@ -72,6 +74,11 @@ if(BUILD_TESTING)
                   test/realtime_server_goal_handle_tests.cpp)
   target_link_libraries(realtime_server_goal_handle_tests realtime_tools)
   ament_target_dependencies(realtime_server_goal_handle_tests test_msgs)
+
+  ament_add_gmock(test_async_function_handler test/test_async_function_handler.cpp)
+  target_link_libraries(test_async_function_handler
+    realtime_tools
+  )
 endif()
 
 # Install
