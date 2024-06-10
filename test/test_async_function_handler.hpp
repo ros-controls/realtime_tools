@@ -36,7 +36,7 @@ public:
 
   realtime_tools::AsyncFunctionHandler<return_type> & get_handler() { return handler_; }
 
-  return_type trigger();
+  std::pair<bool, return_type> trigger();
 
   return_type update(const rclcpp::Time & time, const rclcpp::Duration & period);
 
