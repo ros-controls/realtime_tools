@@ -20,6 +20,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -30,8 +31,10 @@
 
 #include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/duration.hpp"
+#include "rclcpp/logging.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp_lifecycle/state.hpp"
+#include "realtime_tools/thread_priority.hpp"
 
 namespace realtime_tools
 {
@@ -58,7 +61,8 @@ public:
    */
   void init(
     std::function<const rclcpp_lifecycle::State &()> get_state_function,
-    std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function)
+    std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function,
+    int thread_priority = 50)
   {
     if (get_state_function == nullptr) {
       throw std::runtime_error(
@@ -75,6 +79,7 @@ public:
     }
     get_state_function_ = get_state_function;
     async_function_ = async_function;
+    thread_priority_ = thread_priority;
   }
 
   /// Triggers the async update method cycle
@@ -200,6 +205,15 @@ public:
       trigger_in_progress_ = false;
       async_update_return_ = T();
       thread_ = std::thread([this]() -> void {
+        if (!realtime_tools::configure_sched_fifo(thread_priority_)) {
+          RCLCPP_WARN(
+            rclcpp::get_logger("AsyncFunctionHandler"),
+            "Could not enable FIFO RT scheduling policy. Consider setting up your user to do FIFO "
+            "RT "
+            "scheduling. See "
+            "[https://control.ros.org/master/doc/ros2_control/controller_manager/doc/userdoc.html] "
+            "for details.");
+        }
         // \note There might be an concurrency issue with the get_state() call here. This mightn't
         // be critical here as the state of the controller is not expected to change during the
         // update cycle
@@ -231,6 +245,7 @@ private:
 
   // Async related variables
   std::thread thread_;
+  int thread_priority_ = std::numeric_limits<int>::quiet_NaN();
   std::atomic_bool async_update_stop_{false};
   std::atomic_bool trigger_in_progress_{false};
   std::atomic<T> async_update_return_;

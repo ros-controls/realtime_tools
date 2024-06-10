@@ -78,6 +78,7 @@ if(BUILD_TESTING)
   ament_add_gmock(test_async_function_handler test/test_async_function_handler.cpp)
   target_link_libraries(test_async_function_handler
     realtime_tools
+    thread_priority
   )
 endif()
 
