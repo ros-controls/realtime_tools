@@ -60,18 +60,15 @@ public:
     std::function<const rclcpp_lifecycle::State &()> get_state_function,
     std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function)
   {
-    if (get_state_function == nullptr)
-    {
+    if (get_state_function == nullptr) {
       throw std::runtime_error(
         "AsyncFunctionHandler: parsed function to get the lifecycle state is not valid!");
     }
-    if (async_function == nullptr)
-    {
+    if (async_function == nullptr) {
       throw std::runtime_error(
         "AsyncFunctionHandler: parsed function to call asynchronously is not valid!");
     }
-    if (thread_.joinable())
-    {
+    if (thread_.joinable()) {
       throw std::runtime_error(
         "AsyncFunctionHandler: Cannot reinitialize while the thread is "
         "running. Please stop the async update first!");
@@ -99,19 +96,16 @@ public:
   std::pair<bool, T> trigger_async_update(
     const rclcpp::Time & time, const rclcpp::Duration & period)
   {
-    if (!is_initialized())
-    {
+    if (!is_initialized()) {
       throw std::runtime_error("AsyncFunctionHandler: need to be initialized first!");
     }
-    if (!is_running())
-    {
+    if (!is_running()) {
       throw std::runtime_error(
         "AsyncFunctionHandler: need to start the async update thread first before triggering!");
     }
     std::unique_lock<std::mutex> lock(async_mtx_, std::try_to_lock);
     bool trigger_status = false;
-    if (lock.owns_lock() && !trigger_in_progress_)
-    {
+    if (lock.owns_lock() && !trigger_in_progress_) {
       {
         std::unique_lock<std::mutex> scoped_lock(std::move(lock));
         trigger_in_progress_ = true;
@@ -131,8 +125,7 @@ public:
    */
   void wait_for_trigger_cycle_to_finish()
   {
-    if (is_running())
-    {
+    if (is_running()) {
       std::unique_lock<std::mutex> lock(async_mtx_);
       cycle_end_condition_.wait(lock, [this] { return !trigger_in_progress_; });
     }
@@ -151,8 +144,7 @@ public:
    */
   void join_async_update_thread()
   {
-    if (is_running())
-    {
+    if (is_running()) {
       thread_.join();
     }
   }
@@ -182,8 +174,7 @@ public:
    */
   void stop_async_update()
   {
-    if (is_running())
-    {
+    if (is_running()) {
       {
         std::unique_lock<std::mutex> lock(async_mtx_);
         async_update_stop_ = true;
@@ -201,40 +192,33 @@ public:
    */
   void start_async_update_thread()
   {
-    if (!is_initialized())
-    {
+    if (!is_initialized()) {
       throw std::runtime_error("AsyncFunctionHandler: need to be initialized first!");
     }
-    if (!thread_.joinable())
-    {
+    if (!thread_.joinable()) {
       async_update_stop_ = false;
       trigger_in_progress_ = false;
       async_update_return_ = T();
-      thread_ = std::thread(
-        [this]() -> void
-        {
-          // \note There might be an concurrency issue with the get_state() call here. This mightn't
-          // be critical here as the state of the controller is not expected to change during the
-          // update cycle
-          while ((get_state_function_().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE ||
-                  get_state_function_().id() ==
-                    lifecycle_msgs::msg::State::TRANSITION_STATE_ACTIVATING) &&
-                 !async_update_stop_)
+      thread_ = std::thread([this]() -> void {
+        // \note There might be an concurrency issue with the get_state() call here. This mightn't
+        // be critical here as the state of the controller is not expected to change during the
+        // update cycle
+        while (
+          (get_state_function_().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE ||
+           get_state_function_().id() == lifecycle_msgs::msg::State::TRANSITION_STATE_ACTIVATING) &&
+          !async_update_stop_) {
           {
-            {
-              std::unique_lock<std::mutex> lock(async_mtx_);
-              async_update_condition_.wait(
-                lock, [this] { return trigger_in_progress_ || async_update_stop_; });
-              if (!async_update_stop_)
-              {
-                async_update_return_ =
-                  async_function_(current_update_time_, current_update_period_);
-              }
-              trigger_in_progress_ = false;
+            std::unique_lock<std::mutex> lock(async_mtx_);
+            async_update_condition_.wait(
+              lock, [this] { return trigger_in_progress_ || async_update_stop_; });
+            if (!async_update_stop_) {
+              async_update_return_ = async_function_(current_update_time_, current_update_period_);
             }
-            cycle_end_condition_.notify_all();
+            trigger_in_progress_ = false;
           }
-        });
+          cycle_end_condition_.notify_all();
+        }
+      });
     }
   }
 
@@ -254,6 +238,6 @@ private:
   std::condition_variable cycle_end_condition_;
   std::mutex async_mtx_;
 };
-}  // namespace ros2_control
+}  // namespace realtime_tools
 
 #endif  // REALTIME_TOOLS__ASYNC_FUNCTION_HANDLER_HPP_

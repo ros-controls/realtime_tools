@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "test_async_function_handler.hpp"
-#include "rclcpp/rclcpp.hpp"
 #include "gmock/gmock.h"
+#include "rclcpp/rclcpp.hpp"
 
 namespace realtime_tools
 {

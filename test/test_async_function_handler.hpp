@@ -15,12 +15,13 @@
 #ifndef TEST_ASYNC_FUNCTION_HANDLER_HPP_
 #define TEST_ASYNC_FUNCTION_HANDLER_HPP_
 
+#include <utility>
+
 #include "realtime_tools/async_function_handler.hpp"
 
 namespace realtime_tools
 {
-enum class return_type : std::uint8_t
-{
+enum class return_type : std::uint8_t {
   OK = 0,
   ERROR = 1,
   DEACTIVATE = 2,
