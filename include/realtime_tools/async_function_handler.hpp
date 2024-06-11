@@ -164,13 +164,7 @@ public:
   /**
    * @return True if the async update is stopped, false otherwise
    */
-  bool is_stopped() const
-  {
-    return (
-      async_update_stop_ ||
-      (is_initialized() &&
-       get_state_function_().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE));
-  }
+  bool is_stopped() const { return async_update_stop_; }
 
   /// Stops the async update thread
   /**
@@ -217,15 +211,14 @@ public:
         // \note There might be an concurrency issue with the get_state() call here. This mightn't
         // be critical here as the state of the controller is not expected to change during the
         // update cycle
-        while (
-          (get_state_function_().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE ||
-           get_state_function_().id() == lifecycle_msgs::msg::State::TRANSITION_STATE_ACTIVATING) &&
-          !async_update_stop_) {
+        while (!async_update_stop_.load(std::memory_order_relaxed)) {
           {
             std::unique_lock<std::mutex> lock(async_mtx_);
             async_update_condition_.wait(
               lock, [this] { return trigger_in_progress_ || async_update_stop_; });
-            if (!async_update_stop_) {
+            if (
+              !async_update_stop_ &&
+              (get_state_function_().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE)) {
               async_update_return_ = async_function_(current_update_time_, current_update_period_);
             }
             trigger_in_progress_ = false;

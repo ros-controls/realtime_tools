@@ -186,18 +186,13 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   // Start with a deactivated state
   async_class.initialize();
   async_class.deactivate();
+  ASSERT_THROW(async_class.trigger(), std::runtime_error)
+    << "Should throw before starting a thread";
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_FALSE(async_class.get_handler().is_running());
-  ASSERT_TRUE(async_class.get_handler().is_stopped());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
   async_class.get_handler().start_async_update_thread();
-
-  // The thread will start and end immediately when invoked in inactive state
-  async_class.get_handler().join_async_update_thread();
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
-  ASSERT_THROW(async_class.trigger(), std::runtime_error);
-  ASSERT_TRUE(async_class.get_handler().is_initialized());
-  ASSERT_FALSE(async_class.get_handler().is_running());
-  ASSERT_TRUE(async_class.get_handler().is_stopped());
 
   // Now activate it and launch again
   async_class.activate();
@@ -221,16 +216,15 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   ASSERT_TRUE(trigger_status.first);
   ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
   async_class.deactivate();
+  async_class.get_handler().wait_for_trigger_cycle_to_finish();
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
-  async_class.get_handler().join_async_update_thread();
   ASSERT_TRUE(async_class.get_handler().is_initialized());
-  ASSERT_FALSE(async_class.get_handler().is_running());
-  ASSERT_TRUE(async_class.get_handler().is_stopped());
+  ASSERT_TRUE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
 
   // Now let's test the case of activating it and then deactivating it when the thread is waiting
   // for a trigger to start new update cycle execution
   async_class.activate();
-  async_class.get_handler().start_async_update_thread();
 
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
   trigger_status = async_class.trigger();
@@ -241,7 +235,7 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
   // Now they continue to wait until a new cycle is triggered or the preempt is called
   ASSERT_TRUE(async_class.get_handler().is_running());
-  ASSERT_TRUE(async_class.get_handler().is_stopped());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
 
   // now the async update should be preempted
   async_class.get_handler().stop_async_update();
