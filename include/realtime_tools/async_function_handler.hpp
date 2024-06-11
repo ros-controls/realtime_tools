@@ -110,7 +110,9 @@ public:
     }
     std::unique_lock<std::mutex> lock(async_mtx_, std::try_to_lock);
     bool trigger_status = false;
-    if (lock.owns_lock() && !trigger_in_progress_) {
+    if (
+      lock.owns_lock() && !trigger_in_progress_ &&
+      get_state_function_().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
       {
         std::unique_lock<std::mutex> scoped_lock(std::move(lock));
         trigger_in_progress_ = true;
@@ -216,9 +218,7 @@ public:
             std::unique_lock<std::mutex> lock(async_mtx_);
             async_update_condition_.wait(
               lock, [this] { return trigger_in_progress_ || async_update_stop_; });
-            if (
-              !async_update_stop_ &&
-              (get_state_function_().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE)) {
+            if (!async_update_stop_) {
               async_update_return_ = async_function_(current_update_time_, current_update_period_);
             }
             trigger_in_progress_ = false;

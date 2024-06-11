@@ -192,13 +192,15 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
   async_class.get_handler().start_async_update_thread();
+  ASSERT_TRUE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
 
   // Now activate it and launch again
   async_class.activate();
-  async_class.get_handler().start_async_update_thread();
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
-  for (int i = 1; i < 100; i++) {
+  const int total_cycles = 100;
+  for (int i = 1; i < total_cycles; i++) {
     const auto trigger_status = async_class.trigger();
     ASSERT_TRUE(trigger_status.first);
     ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
@@ -217,6 +219,12 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
   async_class.deactivate();
   async_class.get_handler().wait_for_trigger_cycle_to_finish();
+  for (int i = 0; i < 50; i++) {
+    const auto trigger_status = async_class.trigger();
+    ASSERT_FALSE(trigger_status.first);
+    ASSERT_EQ(async_class.get_counter(), total_cycles)
+      << "The trigger should fail for any state different than ACTIVE";
+  }
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_TRUE(async_class.get_handler().is_running());
