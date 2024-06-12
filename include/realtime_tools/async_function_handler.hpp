@@ -82,6 +82,26 @@ public:
     thread_priority_ = thread_priority;
   }
 
+  /// Initialize the AsyncFunctionHandler with the get_state_function, async_function and
+  /// trigger_predicate
+  /**
+   * @param get_state_function Function that returns the current lifecycle state
+   * @param async_function Function that will be called asynchronously
+   * @param trigger_predicate Predicate function that will be called to check if the async update
+   * method should be triggered
+   * If the AsyncFunctionHandler is already initialized and is running, it will throw a runtime
+   * error.
+   * If the parsed functions are not valid, it will throw a runtime error.
+   */
+  void init(
+    std::function<const rclcpp_lifecycle::State &()> get_state_function,
+    std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function,
+    std::function<bool()> trigger_predicate, int thread_priority = 50)
+  {
+    init(get_state_function, async_function, thread_priority);
+    trigger_predicate_ = trigger_predicate;
+  }
+
   /// Triggers the async update method cycle
   /**
    * @param time Current time
@@ -110,9 +130,7 @@ public:
     }
     std::unique_lock<std::mutex> lock(async_mtx_, std::try_to_lock);
     bool trigger_status = false;
-    if (
-      lock.owns_lock() && !trigger_in_progress_ &&
-      get_state_function_().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
+    if (lock.owns_lock() && !trigger_in_progress_ && trigger_predicate_()) {
       {
         std::unique_lock<std::mutex> scoped_lock(std::move(lock));
         trigger_in_progress_ = true;
@@ -235,6 +253,7 @@ private:
 
   std::function<const rclcpp_lifecycle::State &()> get_state_function_;
   std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function_;
+  std::function<bool()> trigger_predicate_ = []() { return true; };
 
   // Async related variables
   std::thread thread_;
