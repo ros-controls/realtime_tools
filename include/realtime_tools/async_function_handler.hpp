@@ -181,6 +181,18 @@ public:
    */
   bool is_stopped() const { return async_update_stop_; }
 
+  /// Get the async update thread
+  /**
+   * @return The async update thread
+   */
+  std::thread & get_thread() { return thread_; }
+
+  /// Check if the async update method is in progress
+  /**
+   * @return True if the async update method is in progress, false otherwise
+   */
+  bool is_trigger_cycle_in_progress() const { return trigger_in_progress_; }
+
   /// Stops the async update thread
   /**
    * If the async method is running, it will notify the async thread to stop and then joins the
