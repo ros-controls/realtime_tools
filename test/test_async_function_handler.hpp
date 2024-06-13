@@ -17,6 +17,8 @@
 
 #include <utility>
 
+#include "lifecycle_msgs/msg/state.hpp"
+#include "rclcpp_lifecycle/state.hpp"
 #include "realtime_tools/async_function_handler.hpp"
 
 namespace realtime_tools

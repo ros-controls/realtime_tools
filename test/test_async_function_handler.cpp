@@ -28,7 +28,6 @@ TestAsyncFunctionHandler::TestAsyncFunctionHandler()
 void TestAsyncFunctionHandler::initialize()
 {
   handler_.init(
-    std::bind(&TestAsyncFunctionHandler::get_state, this),
     std::bind(
       &TestAsyncFunctionHandler::update, this, std::placeholders::_1, std::placeholders::_2),
     [this]() { return state_.id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE; });

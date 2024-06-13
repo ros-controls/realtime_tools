@@ -29,19 +29,17 @@
 #include <utility>
 #include <vector>
 
-#include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/duration.hpp"
 #include "rclcpp/logging.hpp"
 #include "rclcpp/time.hpp"
-#include "rclcpp_lifecycle/state.hpp"
 #include "realtime_tools/thread_priority.hpp"
 
 namespace realtime_tools
 {
 /**
  * @brief Class to handle asynchronous function calls.
- * AsyncFunctionHandler is a class that allows the user to have a ascynchronous call to the parsed
- * method, when the lifecycyle state is in the ACTIVE state
+ * AsyncFunctionHandler is a class that allows the user to have a asynchronous call to the parsed
+ * method and be able to set some thread specific parameters
  */
 template <typename T>
 class AsyncFunctionHandler
@@ -51,23 +49,17 @@ public:
 
   ~AsyncFunctionHandler() { stop_async_update(); }
 
-  /// Initialize the AsyncFunctionHandler with the get_state_function and async_function
+  /// Initialize the AsyncFunctionHandler with the async_function and thread_priority
   /**
-   * @param get_state_function Function that returns the current lifecycle state
    * @param async_function Function that will be called asynchronously
    * If the AsyncFunctionHandler is already initialized and is running, it will throw a runtime
    * error.
    * If the parsed functions are not valid, it will throw a runtime error.
    */
   void init(
-    std::function<const rclcpp_lifecycle::State &()> get_state_function,
     std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function,
     int thread_priority = 50)
   {
-    if (get_state_function == nullptr) {
-      throw std::runtime_error(
-        "AsyncFunctionHandler: parsed function to get the lifecycle state is not valid!");
-    }
     if (async_function == nullptr) {
       throw std::runtime_error(
         "AsyncFunctionHandler: parsed function to call asynchronously is not valid!");
@@ -77,28 +69,31 @@ public:
         "AsyncFunctionHandler: Cannot reinitialize while the thread is "
         "running. Please stop the async update first!");
     }
-    get_state_function_ = get_state_function;
     async_function_ = async_function;
     thread_priority_ = thread_priority;
   }
 
-  /// Initialize the AsyncFunctionHandler with the get_state_function, async_function and
-  /// trigger_predicate
+  /// Initialize the AsyncFunctionHandler with the async_function and trigger_predicate
   /**
-   * @param get_state_function Function that returns the current lifecycle state
    * @param async_function Function that will be called asynchronously
    * @param trigger_predicate Predicate function that will be called to check if the async update
-   * method should be triggered
+   * method should be triggered.
+   *
+   * \note The parsed trigger_predicate should be free from any concurrency issues. It is expected
+   * to be both thread-safe and reentrant.
+   *
    * If the AsyncFunctionHandler is already initialized and is running, it will throw a runtime
    * error.
    * If the parsed functions are not valid, it will throw a runtime error.
    */
   void init(
-    std::function<const rclcpp_lifecycle::State &()> get_state_function,
     std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function,
     std::function<bool()> trigger_predicate, int thread_priority = 50)
   {
-    init(get_state_function, async_function, thread_priority);
+    if (trigger_predicate == nullptr) {
+      throw std::runtime_error("AsyncFunctionHandler: parsed trigger predicate is not valid!");
+    }
+    init(async_function, thread_priority);
     trigger_predicate_ = trigger_predicate;
   }
 
@@ -160,7 +155,7 @@ public:
   /**
    * @return True if the AsyncFunctionHandler is initialized, false otherwise
    */
-  bool is_initialized() const { return get_state_function_ && async_function_; }
+  bool is_initialized() const { return async_function_ && trigger_predicate_; }
 
   /// Join the async update thread
   /**
@@ -228,9 +223,7 @@ public:
             "[https://control.ros.org/master/doc/ros2_control/controller_manager/doc/userdoc.html] "
             "for details.");
         }
-        // \note There might be an concurrency issue with the get_state() call here. This mightn't
-        // be critical here as the state of the controller is not expected to change during the
-        // update cycle
+
         while (!async_update_stop_.load(std::memory_order_relaxed)) {
           {
             std::unique_lock<std::mutex> lock(async_mtx_);
@@ -251,7 +244,6 @@ private:
   rclcpp::Time current_update_time_;
   rclcpp::Duration current_update_period_{0, 0};
 
-  std::function<const rclcpp_lifecycle::State &()> get_state_function_;
   std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function_;
   std::function<bool()> trigger_predicate_ = []() { return true; };
 

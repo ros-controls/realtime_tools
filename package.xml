@@ -20,11 +20,11 @@
   <buildtool_export_depend>ament_cmake</buildtool_export_depend>
 
   <depend>rclcpp</depend>
-  <depend>lifecycle_msgs</depend>
-  <depend>rclcpp_lifecycle</depend>
   <depend>rclcpp_action</depend>
 
   <test_depend>ament_cmake_gmock</test_depend>
+  <test_depend>lifecycle_msgs</test_depend>
+  <test_depend>rclcpp_lifecycle</test_depend>
   <test_depend>test_msgs</test_depend>
 
   <export>
