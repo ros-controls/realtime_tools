@@ -123,7 +123,7 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering)
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_TRUE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
-  ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
+  ASSERT_TRUE(async_class.get_handler().get_async_thread().joinable());
   ASSERT_TRUE(async_class.get_handler().is_trigger_cycle_in_progress());
   async_class.get_handler().wait_for_trigger_cycle_to_finish();
   ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());

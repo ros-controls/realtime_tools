@@ -185,7 +185,7 @@ public:
   /**
    * @return The async update thread
    */
-  std::thread & get_thread() { return thread_; }
+  std::thread & get_async_thread() { return thread_; }
 
   /// Check if the async update method is in progress
   /**
