@@ -78,6 +78,7 @@ public:
    * @param async_function Function that will be called asynchronously
    * @param trigger_predicate Predicate function that will be called to check if the async update
    * method should be triggered.
+   * @param thread_priority Priority of the async update thread
    *
    * \note The parsed trigger_predicate should be free from any concurrency issues. It is expected
    * to be both thread-safe and reentrant.
