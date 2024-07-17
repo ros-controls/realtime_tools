@@ -35,7 +35,7 @@ void TestAsyncFunctionHandler::initialize()
 
 std::pair<bool, return_type> TestAsyncFunctionHandler::trigger()
 {
-  return handler_.trigger_async_update(last_callback_time_, last_callback_period_);
+  return handler_.trigger_async_callback(last_callback_time_, last_callback_period_);
 }
 
 return_type TestAsyncFunctionHandler::update(
@@ -88,7 +88,7 @@ TEST_F(AsyncFunctionHandlerTest, check_initialization)
   ASSERT_FALSE(async_class.get_handler().is_stopped());
 
   // Once initialized, it should not be possible to initialize again
-  async_class.get_handler().start_async_update_thread();
+  async_class.get_handler().start_thread();
   auto trigger_status = async_class.trigger();
   ASSERT_TRUE(trigger_status.first);
   ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
@@ -114,7 +114,7 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering)
   ASSERT_FALSE(async_class.get_handler().is_stopped());
   // It shouldn't be possible to trigger without starting the thread
   ASSERT_THROW(async_class.trigger(), std::runtime_error);
-  async_class.get_handler().start_async_update_thread();
+  async_class.get_handler().start_thread();
 
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
   auto trigger_status = async_class.trigger();
@@ -123,7 +123,7 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering)
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_TRUE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
-  ASSERT_TRUE(async_class.get_handler().get_async_thread().joinable());
+  ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
   ASSERT_TRUE(async_class.get_handler().is_trigger_cycle_in_progress());
   async_class.get_handler().wait_for_trigger_cycle_to_finish();
   ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());
@@ -136,7 +136,7 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering)
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_TRUE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
-  async_class.get_handler().stop_async_update();
+  async_class.get_handler().stop_thread();
   ASSERT_LE(async_class.get_counter(), 2);
 
   // now the async update should be preempted
@@ -153,7 +153,7 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles)
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
-  async_class.get_handler().start_async_update_thread();
+  async_class.get_handler().start_thread();
 
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
 
@@ -176,7 +176,7 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles)
   // Make sure that the failed triggers are less than 0.1%
   ASSERT_LT(missed_triggers, static_cast<int>(0.001 * total_cycles))
     << "The missed triggers cannot be more than 0.1%!";
-  async_class.get_handler().stop_async_update();
+  async_class.get_handler().stop_thread();
 
   // now the async update should be preempted
   ASSERT_FALSE(async_class.get_handler().is_running());
@@ -195,7 +195,7 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
-  async_class.get_handler().start_async_update_thread();
+  async_class.get_handler().start_thread();
   ASSERT_TRUE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
@@ -252,7 +252,7 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   ASSERT_FALSE(async_class.get_handler().is_stopped());
 
   // now the async update should be preempted
-  async_class.get_handler().stop_async_update();
+  async_class.get_handler().stop_thread();
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_TRUE(async_class.get_handler().is_stopped());
 }
