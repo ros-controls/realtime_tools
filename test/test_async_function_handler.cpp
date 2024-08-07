@@ -35,14 +35,12 @@ void TestAsyncFunctionHandler::initialize()
 
 std::pair<bool, return_type> TestAsyncFunctionHandler::trigger()
 {
-  return handler_.trigger_async_callback(last_callback_time_, last_callback_period_);
+  return handler_.trigger_async_callback(rclcpp::Time(0, 0), rclcpp::Duration(0, 0));
 }
 
 return_type TestAsyncFunctionHandler::update(
-  const rclcpp::Time & time, const rclcpp::Duration & period)
+  const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-  last_callback_time_ = time;
-  last_callback_period_ = period;
   // to simulate some work being done
   std::this_thread::sleep_for(std::chrono::microseconds(10));
   counter_++;
@@ -126,6 +124,7 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering)
   ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
   ASSERT_TRUE(async_class.get_handler().is_trigger_cycle_in_progress());
   async_class.get_handler().wait_for_trigger_cycle_to_finish();
+  async_class.get_handler().get_last_execution_time();
   ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());
   ASSERT_EQ(async_class.get_counter(), 1);
 

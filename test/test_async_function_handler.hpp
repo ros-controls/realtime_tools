@@ -52,8 +52,6 @@ public:
 
 private:
   rclcpp_lifecycle::State state_;
-  rclcpp::Time last_callback_time_;
-  rclcpp::Duration last_callback_period_{0, 0};
   int counter_;
   return_type return_state_;
   realtime_tools::AsyncFunctionHandler<return_type> handler_;

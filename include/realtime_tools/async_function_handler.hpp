@@ -211,6 +211,12 @@ public:
     }
   }
 
+  /// Get the last execution time of the async callback method
+  /**
+   * @return The last execution time of the async callback method in seconds
+   */
+  double get_last_execution_time() const { return last_execution_time_; }
+
   /// Initializes and starts the callback thread
   /**
    * If the worker thread is not running, it will start the async callback thread.
@@ -225,6 +231,7 @@ public:
     if (!thread_.joinable()) {
       stop_async_callback_ = false;
       trigger_in_progress_ = false;
+      last_execution_time_ = 0.0;
       async_callback_return_ = T();
       thread_ = std::thread([this]() -> void {
         if (!realtime_tools::configure_sched_fifo(thread_priority_)) {
@@ -243,8 +250,11 @@ public:
             async_callback_condition_.wait(
               lock, [this] { return trigger_in_progress_ || stop_async_callback_; });
             if (!stop_async_callback_) {
+              const auto start_time = std::chrono::steady_clock::now();
               async_callback_return_ =
                 async_function_(current_callback_time_, current_callback_period_);
+              const auto end_time = std::chrono::steady_clock::now();
+              last_execution_time_ = std::chrono::duration<double>(end_time - start_time).count();
             }
             trigger_in_progress_ = false;
           }
@@ -270,6 +280,7 @@ private:
   std::condition_variable async_callback_condition_;
   std::condition_variable cycle_end_condition_;
   std::mutex async_mtx_;
+  std::atomic<double> last_execution_time_;
 };
 }  // namespace realtime_tools
 
