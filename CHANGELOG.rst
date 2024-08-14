@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.6.0 (2024-08-14)
+------------------
 * Add Async Function Handler  (`#168 <https://github.com/ros-controls/realtime_tools/issues/168>`_)
 * Bump version of pre-commit hooks (`#167 <https://github.com/ros-controls/realtime_tools/issues/167>`_)
 * [CI] Add jazzy :rocket:  (`#165 <https://github.com/ros-controls/realtime_tools/issues/165>`_)
