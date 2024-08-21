@@ -29,9 +29,9 @@
 #include "realtime_tools/thread_priority.hpp"
 
 #ifdef _WIN32
-  #include <windows.h>
+#include <windows.h>
 #else
-  #include <sched.h>
+#include <sched.h>
 #endif
 
 #include <cstring>
@@ -51,15 +51,15 @@ bool has_realtime_kernel()
 
 bool configure_sched_fifo(int priority)
 {
-  #ifdef _WIN32
+#ifdef _WIN32
   HANDLE thread = GetCurrentThread();
   return SetThreadPriority(thread, priority);
-  #else
+#else
   struct sched_param schedp;
   memset(&schedp, 0, sizeof(schedp));
   schedp.sched_priority = priority;
   return !sched_setscheduler(0, SCHED_FIFO, &schedp);
-  #endif
+#endif
 }
 
 }  // namespace realtime_tools
