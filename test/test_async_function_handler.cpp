@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "test_async_function_handler.hpp"
+#include <limits>
+
 #include "gmock/gmock.h"
 #include "rclcpp/rclcpp.hpp"
+#include "test_async_function_handler.hpp"
 
 namespace realtime_tools
 {
@@ -23,6 +25,7 @@ TestAsyncFunctionHandler::TestAsyncFunctionHandler()
   counter_(0),
   return_state_(return_type::OK)
 {
+  reset_counter(0);
 }
 
 void TestAsyncFunctionHandler::initialize()
@@ -41,6 +44,9 @@ std::pair<bool, return_type> TestAsyncFunctionHandler::trigger()
 return_type TestAsyncFunctionHandler::update(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
+  if (counter_ == std::numeric_limits<int>::max()) {
+    throw std::overflow_error("Counter reached maximum value");
+  }
   // to simulate some work being done
   std::this_thread::sleep_for(std::chrono::microseconds(10));
   counter_++;
@@ -60,6 +66,8 @@ void TestAsyncFunctionHandler::deactivate()
   state_ =
     rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, state_.label());
 }
+void TestAsyncFunctionHandler::reset_counter(int counter) { counter_ = counter; }
+
 }  // namespace realtime_tools
 class AsyncFunctionHandlerTest : public ::testing::Test
 {
@@ -254,4 +262,45 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   async_class.get_handler().stop_thread();
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_TRUE(async_class.get_handler().is_stopped());
+}
+
+TEST_F(AsyncFunctionHandlerTest, check_exception_handling)
+{
+  realtime_tools::TestAsyncFunctionHandler async_class;
+  async_class.initialize();
+  async_class.get_handler().start_thread();
+
+  EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
+  auto trigger_status = async_class.trigger();
+  ASSERT_TRUE(trigger_status.first);
+  ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
+  ASSERT_TRUE(async_class.get_handler().is_initialized());
+  ASSERT_TRUE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
+  ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
+  ASSERT_TRUE(async_class.get_handler().is_trigger_cycle_in_progress());
+  async_class.get_handler().wait_for_trigger_cycle_to_finish();
+  async_class.get_handler().get_last_execution_time();
+  ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());
+  ASSERT_EQ(async_class.get_counter(), 1);
+
+  // Trigger one more cycle
+  async_class.reset_counter(std::numeric_limits<int>::max());
+  trigger_status = async_class.trigger();
+  ASSERT_TRUE(trigger_status.first);
+  ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
+  ASSERT_TRUE(async_class.get_handler().is_initialized());
+  ASSERT_TRUE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
+  ASSERT_LE(async_class.get_counter(), std::numeric_limits<int>::max());
+
+  std::this_thread::sleep_for(std::chrono::microseconds(10));
+  // Trigger one more cycle to see exception handling
+  ASSERT_THROW(async_class.trigger(), std::overflow_error);
+
+  // now the async update should be preempted as there was an exception
+  std::this_thread::sleep_for(std::chrono::microseconds(10));
+  ASSERT_FALSE(async_class.get_handler().is_running());
+  ASSERT_TRUE(async_class.get_handler().is_stopped());
+  async_class.get_handler().wait_for_trigger_cycle_to_finish();
 }
