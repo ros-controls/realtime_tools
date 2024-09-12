@@ -120,6 +120,13 @@ public:
     if (!is_initialized()) {
       throw std::runtime_error("AsyncFunctionHandler: need to be initialized first!");
     }
+    if (async_exception_ptr_) {
+      RCLCPP_FATAL(
+        rclcpp::get_logger("AsyncFunctionHandler"),
+        "AsyncFunctionHandler: Exception caught in the async callback thread!");
+      join_async_callback_thread();
+      std::rethrow_exception(async_exception_ptr_);
+    }
     if (!is_running()) {
       throw std::runtime_error(
         "AsyncFunctionHandler: need to start the async callback thread first before triggering!");
@@ -225,6 +232,7 @@ public:
    */
   void start_thread()
   {
+    async_exception_ptr_ = nullptr;
     if (!is_initialized()) {
       throw std::runtime_error("AsyncFunctionHandler: need to be initialized first!");
     }
@@ -251,8 +259,15 @@ public:
               lock, [this] { return trigger_in_progress_ || stop_async_callback_; });
             if (!stop_async_callback_) {
               const auto start_time = std::chrono::steady_clock::now();
-              async_callback_return_ =
-                async_function_(current_callback_time_, current_callback_period_);
+              try {
+                async_callback_return_ =
+                  async_function_(current_callback_time_, current_callback_period_);
+              } catch (...) {
+                async_exception_ptr_ = std::current_exception();
+                stop_async_callback_ = true;
+                trigger_in_progress_ = false;
+                break;
+              }
               const auto end_time = std::chrono::steady_clock::now();
               last_execution_time_ = std::chrono::duration<double>(end_time - start_time).count();
             }
@@ -281,6 +296,7 @@ private:
   std::condition_variable cycle_end_condition_;
   std::mutex async_mtx_;
   std::atomic<double> last_execution_time_;
+  std::exception_ptr async_exception_ptr_;
 };
 }  // namespace realtime_tools
 
