@@ -52,6 +52,8 @@ public:
 
   void reset_counter(int counter = 0);
 
+  void set_return_state(return_type return_state);
+
 private:
   rclcpp_lifecycle::State state_;
   int counter_;

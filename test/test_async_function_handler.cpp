@@ -33,7 +33,11 @@ void TestAsyncFunctionHandler::initialize()
   handler_.init(
     std::bind(
       &TestAsyncFunctionHandler::update, this, std::placeholders::_1, std::placeholders::_2),
-    [this]() { return state_.id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE; });
+    [this]() {
+      return (
+        state_.id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE &&
+        handler_.get_last_return_value() != realtime_tools::return_type::DEACTIVATE);
+    });
 }
 
 std::pair<bool, return_type> TestAsyncFunctionHandler::trigger()
@@ -67,6 +71,11 @@ void TestAsyncFunctionHandler::deactivate()
     rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE, state_.label());
 }
 void TestAsyncFunctionHandler::reset_counter(int counter) { counter_ = counter; }
+
+void TestAsyncFunctionHandler::set_return_state(return_type return_state)
+{
+  return_state_ = return_state;
+}
 
 }  // namespace realtime_tools
 class AsyncFunctionHandlerTest : public ::testing::Test
@@ -262,6 +271,73 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   async_class.get_handler().stop_thread();
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_TRUE(async_class.get_handler().is_stopped());
+}
+
+TEST_F(AsyncFunctionHandlerTest, check_triggering_with_different_return_state_and_predicate)
+{
+  realtime_tools::TestAsyncFunctionHandler async_class;
+  async_class.initialize();
+  async_class.get_handler().start_thread();
+
+  EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
+  auto trigger_status = async_class.trigger();
+  ASSERT_TRUE(trigger_status.first);
+  ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
+  ASSERT_TRUE(async_class.get_handler().is_initialized());
+  ASSERT_TRUE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
+  ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
+  ASSERT_TRUE(async_class.get_handler().is_trigger_cycle_in_progress());
+  async_class.get_handler().wait_for_trigger_cycle_to_finish();
+  async_class.get_handler().get_last_execution_time();
+  ASSERT_EQ(async_class.get_handler().get_last_return_value(), realtime_tools::return_type::OK);
+  ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());
+  ASSERT_EQ(async_class.get_counter(), 1);
+
+  // Trigger one more cycle to return ERROR at the end of cycle,
+  // so return from this cycle should be last cycle's return
+  async_class.set_return_state(realtime_tools::return_type::ERROR);
+  trigger_status = async_class.trigger();
+  ASSERT_TRUE(trigger_status.first);
+  ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
+  ASSERT_TRUE(async_class.get_handler().is_initialized());
+  ASSERT_TRUE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
+  ASSERT_TRUE(async_class.get_handler().is_trigger_cycle_in_progress());
+  ASSERT_EQ(async_class.get_handler().get_last_return_value(), realtime_tools::return_type::OK);
+  async_class.get_handler().wait_for_trigger_cycle_to_finish();
+  ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());
+  ASSERT_EQ(async_class.get_handler().get_last_return_value(), realtime_tools::return_type::ERROR);
+  ASSERT_LE(async_class.get_counter(), 2);
+
+  // Trigger one more cycle to return DEACTIVATE at the end of cycle,
+  async_class.set_return_state(realtime_tools::return_type::DEACTIVATE);
+  trigger_status = async_class.trigger();
+  ASSERT_TRUE(trigger_status.first);
+  ASSERT_EQ(realtime_tools::return_type::ERROR, trigger_status.second);
+  ASSERT_TRUE(async_class.get_handler().is_initialized());
+  ASSERT_TRUE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
+  ASSERT_TRUE(async_class.get_handler().is_trigger_cycle_in_progress());
+  ASSERT_EQ(async_class.get_handler().get_last_return_value(), realtime_tools::return_type::ERROR);
+  async_class.get_handler().wait_for_trigger_cycle_to_finish();
+  ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());
+  ASSERT_EQ(
+    async_class.get_handler().get_last_return_value(), realtime_tools::return_type::DEACTIVATE);
+  ASSERT_LE(async_class.get_counter(), 3);
+
+  // Now the next trigger shouldn't happen as the predicate is set to DEACTIVATE
+  trigger_status = async_class.trigger();
+  ASSERT_FALSE(trigger_status.first) << "The trigger should fail as the predicate is DEACTIVATE";
+  ASSERT_EQ(realtime_tools::return_type::DEACTIVATE, trigger_status.second);
+  ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());
+
+  async_class.get_handler().stop_thread();
+  // now the async update should be preempted
+  ASSERT_FALSE(async_class.get_handler().is_running());
+  ASSERT_TRUE(async_class.get_handler().is_stopped());
+  async_class.get_handler().wait_for_trigger_cycle_to_finish();
 }
 
 TEST_F(AsyncFunctionHandlerTest, check_exception_handling)

@@ -150,6 +150,12 @@ public:
     return std::make_pair(trigger_status, return_value);
   }
 
+  /// Get the last return value of the async callback method
+  /**
+   * @return The last return value of the async callback method
+   */
+  T get_last_return_value() const { return async_callback_return_; }
+
   /// Resets the internal variables of the AsyncFunctionHandler
   /**
    * A method to reset the internal variables of the AsyncFunctionHandler.
