@@ -300,12 +300,16 @@ TEST_F(AsyncFunctionHandlerTest, check_exception_handling)
 
   // now the async update should be preempted as there was an exception
   std::this_thread::sleep_for(std::chrono::microseconds(10));
-  ASSERT_FALSE(async_class.get_handler().is_running());
-  ASSERT_TRUE(async_class.get_handler().is_stopped());
+  ASSERT_TRUE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
   async_class.get_handler().wait_for_trigger_cycle_to_finish();
 
-  // Should rethrow the exception unless the thread is restarted
-  ASSERT_THROW(async_class.trigger(), std::overflow_error);
+  // Should rethrow the exception unless the reset_variables is called
+  for (int i = 0; i < 50; i++) {
+    ASSERT_TRUE(async_class.get_handler().is_running());
+    ASSERT_THROW(async_class.trigger(), std::overflow_error);
+  }
+  async_class.get_handler().reset_variables();
 
   async_class.reset_counter(0);
   async_class.get_handler().start_thread();
