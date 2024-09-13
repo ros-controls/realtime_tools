@@ -110,6 +110,10 @@ public:
    * If the async callback method is still running, it will return the last return value from the
    * last trigger cycle.
    *
+   * \note If an exception is caught in the async callback thread, it will be rethrown in the current
+   * thread, so in order to have the trigger_async_callback method working again, the exception should
+   * be caught and the `reset_variables` method should be invoked.
+   *
    * \note In the case of controllers, The controller manager is responsible
    * for triggering and maintaining the controller's update rate, as it should be only acting as a
    * scheduler. Same applies to the resource manager when handling the hardware components.
@@ -119,6 +123,12 @@ public:
   {
     if (!is_initialized()) {
       throw std::runtime_error("AsyncFunctionHandler: need to be initialized first!");
+    }
+    if (async_exception_ptr_) {
+      RCLCPP_ERROR(
+        rclcpp::get_logger("AsyncFunctionHandler"),
+        "AsyncFunctionHandler: Exception caught in the async callback thread!");
+      std::rethrow_exception(async_exception_ptr_);
     }
     if (!is_running()) {
       throw std::runtime_error(
@@ -138,6 +148,30 @@ public:
     }
     const T return_value = async_callback_return_;
     return std::make_pair(trigger_status, return_value);
+  }
+
+  /// Get the last return value of the async callback method
+  /**
+   * @return The last return value of the async callback method
+   */
+  T get_last_return_value() const { return async_callback_return_; }
+
+  /// Resets the internal variables of the AsyncFunctionHandler
+  /**
+   * A method to reset the internal variables of the AsyncFunctionHandler.
+   * It will reset the async callback return value, exception pointer, and the trigger status.
+   *
+   * \note This method should be invoked after catching an exception in the async callback thread,
+   * to be able to trigger the async callback method again.
+   */
+  void reset_variables()
+  {
+    std::unique_lock<std::mutex> lock(async_mtx_);
+    stop_async_callback_ = false;
+    trigger_in_progress_ = false;
+    last_execution_time_ = 0.0;
+    async_callback_return_ = T();
+    async_exception_ptr_ = nullptr;
   }
 
   /// Waits until the current async callback method trigger cycle is finished
@@ -229,10 +263,7 @@ public:
       throw std::runtime_error("AsyncFunctionHandler: need to be initialized first!");
     }
     if (!thread_.joinable()) {
-      stop_async_callback_ = false;
-      trigger_in_progress_ = false;
-      last_execution_time_ = 0.0;
-      async_callback_return_ = T();
+      reset_variables();
       thread_ = std::thread([this]() -> void {
         if (!realtime_tools::configure_sched_fifo(thread_priority_)) {
           RCLCPP_WARN(
@@ -251,8 +282,12 @@ public:
               lock, [this] { return trigger_in_progress_ || stop_async_callback_; });
             if (!stop_async_callback_) {
               const auto start_time = std::chrono::steady_clock::now();
-              async_callback_return_ =
-                async_function_(current_callback_time_, current_callback_period_);
+              try {
+                async_callback_return_ =
+                  async_function_(current_callback_time_, current_callback_period_);
+              } catch (...) {
+                async_exception_ptr_ = std::current_exception();
+              }
               const auto end_time = std::chrono::steady_clock::now();
               last_execution_time_ = std::chrono::duration<double>(end_time - start_time).count();
             }
@@ -281,6 +316,7 @@ private:
   std::condition_variable cycle_end_condition_;
   std::mutex async_mtx_;
   std::atomic<double> last_execution_time_;
+  std::exception_ptr async_exception_ptr_;
 };
 }  // namespace realtime_tools
 
