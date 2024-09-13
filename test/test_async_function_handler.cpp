@@ -368,6 +368,7 @@ TEST_F(AsyncFunctionHandlerTest, check_exception_handling)
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_TRUE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
+  async_class.get_handler().wait_for_trigger_cycle_to_finish();
   ASSERT_LE(async_class.get_counter(), std::numeric_limits<int>::max());
 
   std::this_thread::sleep_for(std::chrono::microseconds(10));
