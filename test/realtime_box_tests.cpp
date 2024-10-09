@@ -161,8 +161,6 @@ TEST(RealtimeBox, smart_ptr_type)
   std::shared_ptr<int> ptr = std::make_shared<int>(100);
 
   RealtimeBox<std::shared_ptr<int>> box(ptr);
-  // This does not and should not compile!
-  // auto value = box.get();
 
   // Instead access it via a passed function.
   // This assures that we access the data within the scope of the lock
