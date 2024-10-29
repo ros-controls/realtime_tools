@@ -80,7 +80,7 @@ bool lock_memory(std::string & message)
     } else if (errno == ENOMEM) {
       message =
         "The caller had a nonzero RLIMIT_MEMLOCK soft resource limit, but tried to lock more "
-        "memory than the limit permitted. Try running application with privileges!";
+        "memory than the limit permitted. Try running the application with privileges!";
     } else if (errno == EPERM) {
       message =
         "The caller is not privileged, but needs privilege to perform the requested operation.";
