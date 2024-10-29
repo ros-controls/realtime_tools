@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.0 (2024-10-29)
+------------------
 * [AsyncFunctionHandler] Add exception handling (`#172 <https://github.com/ros-controls/realtime_tools/issues/172>`_)
 * Bump version of pre-commit hooks (`#169 <https://github.com/ros-controls/realtime_tools/issues/169>`_)
 * Contributors: Sai Kishor Kothakota, github-actions[bot]
