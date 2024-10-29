@@ -64,11 +64,10 @@ bool is_capable(cap_value_t v)
   }
 
   if (cap_set_flag(caps, CAP_EFFECTIVE, 1, &v, CAP_SET) == -1) {
-    goto cleanup;
+    rc = false;
+  } else {
+    rc = (cap_set_proc(caps) == 0);
   }
-
-  rc = (cap_set_proc(caps) == 0);
-cleanup:
   cap_free(caps);
   return rc;
 }
