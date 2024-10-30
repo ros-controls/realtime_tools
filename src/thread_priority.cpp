@@ -32,10 +32,9 @@
 #include <windows.h>
 #else
 #include <sched.h>
-#endif
-
 #include <sys/capability.h>
 #include <sys/mman.h>
+#endif
 
 #include <cstring>
 #include <fstream>
@@ -65,25 +64,28 @@ bool configure_sched_fifo(int priority)
 #endif
 }
 
-bool is_capable(cap_value_t v)
-{
-  bool rc = false;
-  cap_t caps;
-  if ((caps = cap_get_proc()) == NULL) {
-    return false;
-  }
-
-  if (cap_set_flag(caps, CAP_EFFECTIVE, 1, &v, CAP_SET) == -1) {
-    rc = false;
-  } else {
-    rc = (cap_set_proc(caps) == 0);
-  }
-  cap_free(caps);
-  return rc;
-}
-
 bool lock_memory(std::string & message)
 {
+#ifdef _WIN32
+  message = "Memory locking is not supported on Windows.";
+  return false;
+#else
+  auto is_capable = [](cap_value_t v) -> bool {
+    bool rc = false;
+    cap_t caps;
+    if ((caps = cap_get_proc()) == NULL) {
+      return false;
+    }
+
+    if (cap_set_flag(caps, CAP_EFFECTIVE, 1, &v, CAP_SET) == -1) {
+      rc = false;
+    } else {
+      rc = (cap_set_proc(caps) == 0);
+    }
+    cap_free(caps);
+    return rc;
+  };
+
   if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1) {
     if (!is_capable(CAP_IPC_LOCK)) {
       message = "No proper privileges to lock the memory!";
@@ -108,5 +110,6 @@ bool lock_memory(std::string & message)
     message = "Memory locked successfully!";
     return true;
   }
+#endif
 }
 }  // namespace realtime_tools
