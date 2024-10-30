@@ -31,6 +31,7 @@
 #ifndef REALTIME_TOOLS__REALTIME_BOX_H_
 #define REALTIME_TOOLS__REALTIME_BOX_H_
 
+#include <functional>
 #include <initializer_list>
 #include <mutex>
 #include <optional>
