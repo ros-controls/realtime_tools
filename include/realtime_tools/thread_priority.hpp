@@ -29,6 +29,8 @@
 #ifndef REALTIME_TOOLS__THREAD_PRIORITY_HPP_
 #define REALTIME_TOOLS__THREAD_PRIORITY_HPP_
 
+#include <string>
+
 namespace realtime_tools
 {
 /**
@@ -55,6 +57,13 @@ bool set_preferred_core(const int core = -1);
  * \returns The amount of available cpu cores
 */
 int get_core_count();
+
+/**
+ * Locks the memory pages of the calling thread to prevent page faults. By calling this method, the programs locks all pages mapped into the address space of the calling process and future mappings. This means that the kernel will not swap out the pages to disk i.e., the pages are guaranteed to stay in RAM until later unlocked - which is important for realtime applications.
+ * \param[out] message a message describing the result of the operation
+ * \returns true if memory locking succeeded, false otherwise
+*/
+bool lock_memory(std::string & message);
 
 }  // namespace realtime_tools
 

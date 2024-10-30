@@ -37,10 +37,15 @@ target_include_directories(thread_priority PUBLIC
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
 ament_target_dependencies(thread_priority PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+if(UNIX)
+  target_link_libraries(thread_priority PUBLIC cap)
+endif()
 
 # Unit Tests
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
+  find_package(lifecycle_msgs REQUIRED)
+  find_package(rclcpp_lifecycle REQUIRED)
   find_package(test_msgs REQUIRED)
 
   ament_add_gmock(thread_priority_tests test/thread_priority_tests.cpp)
@@ -75,6 +80,10 @@ if(BUILD_TESTING)
                   test/realtime_server_goal_handle_tests.cpp)
   target_link_libraries(realtime_server_goal_handle_tests realtime_tools)
   ament_target_dependencies(realtime_server_goal_handle_tests test_msgs)
+
+  ament_add_gmock(test_async_function_handler test/test_async_function_handler.cpp)
+  target_link_libraries(test_async_function_handler realtime_tools thread_priority)
+  ament_target_dependencies(test_async_function_handler lifecycle_msgs rclcpp_lifecycle)
 endif()
 
 # Install
