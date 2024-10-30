@@ -2,6 +2,30 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.7.0 (2024-10-29)
+------------------
+* [AsyncFunctionHandler] Add exception handling (`#172 <https://github.com/ros-controls/realtime_tools/issues/172>`_)
+* Bump version of pre-commit hooks (`#169 <https://github.com/ros-controls/realtime_tools/issues/169>`_)
+* Contributors: Sai Kishor Kothakota, github-actions[bot]
+
+2.6.0 (2024-08-14)
+------------------
+* Add Async Function Handler  (`#168 <https://github.com/ros-controls/realtime_tools/issues/168>`_)
+* Bump version of pre-commit hooks (`#167 <https://github.com/ros-controls/realtime_tools/issues/167>`_)
+* [CI] Add jazzy :rocket:  (`#165 <https://github.com/ros-controls/realtime_tools/issues/165>`_)
+* [CI] Specify runner/container images (`#163 <https://github.com/ros-controls/realtime_tools/issues/163>`_)
+* Add custom rosdoc2 config (`#161 <https://github.com/ros-controls/realtime_tools/issues/161>`_)
+* Added a new implementation of the RealtimeBox with added best effort behaviour (`#139 <https://github.com/ros-controls/realtime_tools/issues/139>`_)
+* [CI] Code coverage and pre-commit (`#154 <https://github.com/ros-controls/realtime_tools/issues/154>`_)
+* [CI] Use reusable workflows and matrix strategy (`#151 <https://github.com/ros-controls/realtime_tools/issues/151>`_)
+* Bump ros-tooling/action-ros-ci from 0.3.5 to 0.3.6 (`#148 <https://github.com/ros-controls/realtime_tools/issues/148>`_)
+* Fix RHEL workflows (`#144 <https://github.com/ros-controls/realtime_tools/issues/144>`_)
+* update unlock method to also include the part of the NON_POLLING (`#142 <https://github.com/ros-controls/realtime_tools/issues/142>`_)
+* Bump actions/upload-artifact from 4.1.0 to 4.2.0 (`#143 <https://github.com/ros-controls/realtime_tools/issues/143>`_)
+* [CI] Add debian workflows (`#145 <https://github.com/ros-controls/realtime_tools/issues/145>`_)
+* Test fix: initialize the global context to avoid runtime_error upon destruction (`#128 <https://github.com/ros-controls/realtime_tools/issues/128>`_)
+* Contributors: Christoph Fröhlich, Felix Exner (fexner), Lennart Nachtigall, Sai Kishor Kothakota, dependabot[bot], github-actions[bot]
+
 2.5.0 (2023-01-28)
 ------------------
 * Fix overriding of install (`#105 <https://github.com/ros-controls/realtime_tools/issues/105>`_)
