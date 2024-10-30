@@ -32,10 +32,9 @@
 #include <windows.h>
 #else
 #include <sched.h>
-#endif
-
 #include <sys/capability.h>
 #include <sys/mman.h>
+#endif
 
 #include <cstring>
 #include <fstream>
@@ -52,17 +51,20 @@ bool has_realtime_kernel()
   return has_realtime;
 }
 
+#ifdef _WIN32
 bool configure_sched_fifo(int priority)
 {
-#ifdef _WIN32
   HANDLE thread = GetCurrentThread();
   return SetThreadPriority(thread, priority);
+}
+
 #else
+bool configure_sched_fifo(int priority)
+{
   struct sched_param schedp;
   memset(&schedp, 0, sizeof(schedp));
   schedp.sched_priority = priority;
   return !sched_setscheduler(0, SCHED_FIFO, &schedp);
-#endif
 }
 
 bool is_capable(cap_value_t v)
@@ -109,4 +111,6 @@ bool lock_memory(std::string & message)
     return true;
   }
 }
+
+#endif
 }  // namespace realtime_tools
