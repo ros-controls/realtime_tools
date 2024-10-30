@@ -32,7 +32,7 @@
 #include "rclcpp/duration.hpp"
 #include "rclcpp/logging.hpp"
 #include "rclcpp/time.hpp"
-#include "realtime_tools/thread_priority.hpp"
+#include "realtime_tools/realtime_helpers.hpp"
 
 namespace realtime_tools
 {

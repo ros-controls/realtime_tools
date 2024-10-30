@@ -29,7 +29,7 @@ ament_target_dependencies(realtime_tools PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # A library to detect a realtime kernel and set thread priority, if one is found
 add_library(thread_priority SHARED
-  src/thread_priority.cpp
+  src/realtime_helpers.cpp
 )
 target_compile_features(thread_priority PUBLIC cxx_std_17)
 target_include_directories(thread_priority PUBLIC
@@ -39,6 +39,19 @@ target_include_directories(thread_priority PUBLIC
 ament_target_dependencies(thread_priority PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 if(UNIX)
   target_link_libraries(thread_priority PUBLIC cap)
+endif()
+
+add_library(realtime_helpers SHARED
+  src/realtime_helpers.cpp
+)
+target_compile_features(realtime_helpers PUBLIC cxx_std_17)
+target_include_directories(realtime_helpers PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/realtime_tools>
+)
+ament_target_dependencies(realtime_helpers PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+if(UNIX)
+  target_link_libraries(realtime_helpers PUBLIC cap)
 endif()
 
 # Unit Tests
@@ -88,7 +101,7 @@ install(
   DIRECTORY include/
   DESTINATION include/realtime_tools
 )
-install(TARGETS realtime_tools thread_priority
+install(TARGETS realtime_tools realtime_helpers thread_priority
   EXPORT export_realtime_tools
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

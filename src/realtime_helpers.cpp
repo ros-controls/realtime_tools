@@ -26,7 +26,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "realtime_tools/thread_priority.hpp"
+#include "realtime_tools/realtime_helpers.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
