@@ -137,32 +137,32 @@ static void print_error(const int errc)
 
 bool set_preferred_core(const int core)
 {
-  //Allow attaching the thread/process to a certain cpu core
+  // Allow attaching the thread/process to a certain cpu core
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
-  //Obtain amount of cores/
+  // Obtain amount of cores/
   const auto number_of_cores = get_core_count();
 
-  //Reset affinity by setting it to all cores
+  // Reset affinity by setting it to all cores
   if (core < 0) {
     for (int i{0}; i < number_of_cores; i++) {
       CPU_SET(i, &cpuset);
     }
-    //And actually tell the schedular to set the affinity of the currently calling thread
+    // And actually tell the schedular to set the affinity of the currently calling thread
     const auto result = sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
     print_error(result);
     return result == 0;
   }
 
   if (core < number_of_cores) {
-    //Set the passed core to the cpu set
+    // Set the passed core to the cpu set
     CPU_SET(core, &cpuset);
-    //And actually tell the schedular to set the affinity of the currently calling thread
+    // And actually tell the schedular to set the affinity of the currently calling thread
     const auto result = sched_setaffinity(0, sizeof(cpu_set_t), &cpuset);
     print_error(result);
     return result == 0;
   }
-  //Invalid core number passed
+  // Invalid core number passed
   return false;
 }
 
