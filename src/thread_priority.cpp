@@ -32,8 +32,6 @@
 #include <windows.h>
 #else
 #include <sched.h>
-#endif
-
 #include <sys/capability.h>
 #include <sys/mman.h>
 #endif
