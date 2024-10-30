@@ -34,6 +34,9 @@
 #include <sched.h>
 #endif
 
+#include <sys/capability.h>
+#include <sys/mman.h>
+
 #include <cstring>
 #include <fstream>
 
@@ -62,4 +65,48 @@ bool configure_sched_fifo(int priority)
 #endif
 }
 
+bool is_capable(cap_value_t v)
+{
+  bool rc = false;
+  cap_t caps;
+  if ((caps = cap_get_proc()) == NULL) {
+    return false;
+  }
+
+  if (cap_set_flag(caps, CAP_EFFECTIVE, 1, &v, CAP_SET) == -1) {
+    rc = false;
+  } else {
+    rc = (cap_set_proc(caps) == 0);
+  }
+  cap_free(caps);
+  return rc;
+}
+
+bool lock_memory(std::string & message)
+{
+  if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1) {
+    if (!is_capable(CAP_IPC_LOCK)) {
+      message = "No proper privileges to lock the memory!";
+    } else if (errno == ENOMEM) {
+      message =
+        "The caller had a nonzero RLIMIT_MEMLOCK soft resource limit, but tried to lock more "
+        "memory than the limit permitted. Try running the application with privileges!";
+    } else if (errno == EPERM) {
+      message =
+        "The caller is not privileged, but needs privilege to perform the requested operation.";
+    } else if (errno == EINVAL) {
+      message =
+        "The result of the addition start+len was less than start (e.g., the addition may have "
+        "resulted in an overflow).";
+    } else if (errno == EAGAIN) {
+      message = "Some or all of the specified address range could not be locked.";
+    } else {
+      message = "Unknown error occurred!";
+    }
+    return false;
+  } else {
+    message = "Memory locked successfully!";
+    return true;
+  }
+}
 }  // namespace realtime_tools

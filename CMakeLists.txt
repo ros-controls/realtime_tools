@@ -37,6 +37,7 @@ target_include_directories(thread_priority PUBLIC
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
 ament_target_dependencies(thread_priority PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(thread_priority PUBLIC cap)
 
 # Unit Tests
 if(BUILD_TESTING)
