@@ -32,6 +32,8 @@
 #include <windows.h>
 #else
 #include <sched.h>
+#endif
+
 #include <sys/capability.h>
 #include <sys/mman.h>
 #endif
@@ -61,10 +63,15 @@ bool configure_sched_fifo(int priority)
 #else
 bool configure_sched_fifo(int priority)
 {
+#ifdef _WIN32
+  HANDLE thread = GetCurrentThread();
+  return SetThreadPriority(thread, priority);
+#else
   struct sched_param schedp;
   memset(&schedp, 0, sizeof(schedp));
   schedp.sched_priority = priority;
   return !sched_setscheduler(0, SCHED_FIFO, &schedp);
+#endif
 }
 
 bool is_capable(cap_value_t v)
