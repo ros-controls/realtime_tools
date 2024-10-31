@@ -33,6 +33,6 @@
 
 // Deprecation notice
 #warning \
-  "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_helpers' library." //NOLINT
+  "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_tools' library." //NOLINT
 
 #endif  // REALTIME_TOOLS__THREAD_PRIORITY_HPP_
