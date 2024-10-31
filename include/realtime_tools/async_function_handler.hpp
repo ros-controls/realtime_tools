@@ -169,7 +169,7 @@ public:
     std::unique_lock<std::mutex> lock(async_mtx_);
     stop_async_callback_ = false;
     trigger_in_progress_ = false;
-    last_execution_time_ = 0.0;
+    last_execution_time_ = std::chrono::nanoseconds(0);
     async_callback_return_ = T();
     async_exception_ptr_ = nullptr;
   }
@@ -247,9 +247,12 @@ public:
 
   /// Get the last execution time of the async callback method
   /**
-   * @return The last execution time of the async callback method in seconds
+   * @return The last execution time of the async callback method in nanoseconds
    */
-  double get_last_execution_time() const { return last_execution_time_; }
+  std::chrono::nanoseconds get_last_execution_time() const
+  {
+    return last_execution_time_.load(std::memory_order_relaxed);
+  }
 
   /// Initializes and starts the callback thread
   /**
@@ -289,7 +292,8 @@ public:
                 async_exception_ptr_ = std::current_exception();
               }
               const auto end_time = std::chrono::steady_clock::now();
-              last_execution_time_ = std::chrono::duration<double>(end_time - start_time).count();
+              last_execution_time_ =
+                std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
             }
             trigger_in_progress_ = false;
           }
@@ -315,7 +319,7 @@ private:
   std::condition_variable async_callback_condition_;
   std::condition_variable cycle_end_condition_;
   std::mutex async_mtx_;
-  std::atomic<double> last_execution_time_;
+  std::atomic<std::chrono::nanoseconds> last_execution_time_;
   std::exception_ptr async_exception_ptr_;
 };
 }  // namespace realtime_tools
