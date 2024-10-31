@@ -19,6 +19,7 @@ endforeach()
 
 add_library(realtime_tools SHARED
   src/realtime_clock.cpp
+  src/realtime_helpers.cpp
 )
 target_compile_features(realtime_tools PUBLIC cxx_std_17)
 target_include_directories(realtime_tools PUBLIC
@@ -26,10 +27,13 @@ target_include_directories(realtime_tools PUBLIC
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
 ament_target_dependencies(realtime_tools PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+if(UNIX)
+  target_link_libraries(realtime_tools PUBLIC cap)
+endif()
 
 # A library to detect a realtime kernel and set thread priority, if one is found
 add_library(thread_priority SHARED
-  src/thread_priority.cpp
+  src/realtime_helpers.cpp
 )
 target_compile_features(thread_priority PUBLIC cxx_std_17)
 target_include_directories(thread_priority PUBLIC
