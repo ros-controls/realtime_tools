@@ -12,6 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, iron, jazzy, rolling]
+        ROS_DISTRO: [humble, jazzy, rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
