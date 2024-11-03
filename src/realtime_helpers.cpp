@@ -135,7 +135,7 @@ static void print_error(const int errc)
   }
 }
 
-bool set_preferred_core(const int core)
+bool set_preferred_core(int core)
 {
   // Allow attaching the thread/process to a certain cpu core
   cpu_set_t cpuset;
