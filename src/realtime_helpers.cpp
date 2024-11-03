@@ -118,6 +118,10 @@ bool lock_memory(std::string & message)
 
 bool set_thread_affinity(int core, int pid)
 {
+#ifdef _WIN32
+  std::cerr << "Thread affinity is not supported on Windows." << std::endl;
+  return false;
+#else
   auto print_error = [](int result) {
     if (result == 0) {
       return;
@@ -168,6 +172,7 @@ bool set_thread_affinity(int core, int pid)
   }
   // Invalid core number passed
   return false;
+#endif
 }
 
 int get_number_of_available_processors()
