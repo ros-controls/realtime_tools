@@ -65,9 +65,10 @@ bool lock_memory(std::string & message);
  * the affinity is reset to the default.
  * \param[in] pid the process id of the thread to set the affinity for. If 0 is
  * passed, the affinity is set for the calling thread.
+ * \param[out] message a message describing the result of the operation
  * \returns true if configuring the scheduler succeeded, false otherwise
 */
-bool set_thread_affinity(int core, int pid = 0);
+bool set_thread_affinity(int core, int pid, std::string & message);
 
 /**
  * Method to get the amount of available cpu cores

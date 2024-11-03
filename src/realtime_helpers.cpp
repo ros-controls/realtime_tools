@@ -116,34 +116,35 @@ bool lock_memory(std::string & message)
 #endif
 }
 
-bool set_thread_affinity(int core, int pid)
+bool set_thread_affinity(int core, int pid, std::string & message)
 {
 #ifdef _WIN32
-  std::cerr << "Thread affinity is not supported on Windows." << std::endl;
+  message = "Thread affinity is not supported on Windows.";
   return false;
 #else
-  auto print_error = [](int result) {
+  auto set_affinity_result_message = [](int result, std::string & message) -> bool {
     if (result == 0) {
-      return;
+      message = "Thread affinity set successfully!";
+      return true;
     }
     switch (errno) {
       case EFAULT:
-        std::cerr << "Call of sched_setaffinity with invalid cpuset" << std::endl;
-        return;
+        message = "Call of sched_setaffinity with invalid cpuset";
+        break;
       case EINVAL:
-        std::cerr << "Call of sched_setaffinity with an invalid cpu core" << std::endl;
-        return;
+        message = "Call of sched_setaffinity with an invalid cpu core";
+        break;
       case ESRCH:
-        std::cerr
-          << "Call of sched_setaffinity with a thread id/process id that is invalid or not found!"
-          << std::endl;
-        return;
+        message =
+          "Call of sched_setaffinity with a thread id/process id that is invalid or not found!";
+        break;
       case EPERM:
-        std::cerr << "Call of sched_setaffinity with insufficient privileges!" << std::endl;
-        return;
+        message = "Call of sched_setaffinity with insufficient privileges!";
+        break;
       default:
-        std::cerr << "Error code: " << errno << ": " << std::string(strerror(errno)) << std::endl;
+        message = "Unknown error code: " + std::string(strerror(errno));
     }
+    return false;
   };
   // Allow attaching the thread/process to a certain cpu core
   cpu_set_t cpuset;
@@ -158,8 +159,7 @@ bool set_thread_affinity(int core, int pid)
     }
     // And actually tell the schedular to set the affinity of the currently calling thread
     const auto result = sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset);
-    print_error(result);
-    return result == 0;
+    return set_affinity_result_message(result, message);
   }
 
   if (core < number_of_cores) {
@@ -167,10 +167,13 @@ bool set_thread_affinity(int core, int pid)
     CPU_SET(core, &cpuset);
     // And actually tell the schedular to set the affinity of the currently calling thread
     const auto result = sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset);
-    print_error(result);
-    return result == 0;
+    return set_affinity_result_message(result, message);
   }
   // Invalid core number passed
+  message = "Invalid core number : '" + std::to_string(core) + "' passed! The system has " +
+            std::to_string(number_of_cores) +
+            " cores. Parsed core number should be between 0 and " +
+            std::to_string(number_of_cores - 1);
   return false;
 #endif
 }
