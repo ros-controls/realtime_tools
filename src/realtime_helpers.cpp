@@ -129,10 +129,10 @@ bool set_thread_affinity(int pid, int core, std::string & message)
     }
     switch (errno) {
       case EFAULT:
-        message = "Call of sched_setaffinity with invalid cpuset";
+        message = "Call of sched_setaffinity with invalid cpuset!";
         break;
       case EINVAL:
-        message = "Call of sched_setaffinity with an invalid cpu core";
+        message = "Call of sched_setaffinity with an invalid cpu core!";
         break;
       case ESRCH:
         message =
