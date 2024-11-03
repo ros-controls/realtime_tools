@@ -58,7 +58,7 @@ bool lock_memory(std::string & message);
  * \param[in] core - the number of the core. If a negative number is passed, the affinity is reset to the default
  * \returns true if configuring the scheduler succeeded, false otherwise
 */
-bool set_preferred_core(int core);
+bool set_cpu_affinity(int core);
 
 /**
  * \returns The amount of available cpu cores
