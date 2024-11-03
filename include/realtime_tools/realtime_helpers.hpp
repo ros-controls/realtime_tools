@@ -61,14 +61,14 @@ bool lock_memory(std::string & message);
  * Configure the caller thread affinity - Tell the scheduler to prefer a certain
  * core for the current thread.
  * \note The threads created by the calling thread will inherit the affinity.
- * \param[in] core the cpu number of the core. If a negative number is passed,
- * the affinity is reset to the default.
  * \param[in] pid the process id of the thread to set the affinity for. If 0 is
  * passed, the affinity is set for the calling thread.
+ * \param[in] core the cpu number of the core. If a negative number is passed,
+ * the affinity is reset to the default.
  * \param[out] message a message describing the result of the operation
  * \returns true if configuring the scheduler succeeded, false otherwise
 */
-bool set_thread_affinity(int core, int pid, std::string & message);
+bool set_thread_affinity(int pid, int core, std::string & message);
 
 /**
  * Method to get the amount of available cpu cores

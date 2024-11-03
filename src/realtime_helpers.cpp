@@ -116,7 +116,7 @@ bool lock_memory(std::string & message)
 #endif
 }
 
-bool set_thread_affinity(int core, int pid, std::string & message)
+bool set_thread_affinity(int pid, int core, std::string & message)
 {
 #ifdef _WIN32
   message = "Thread affinity is not supported on Windows.";

@@ -52,12 +52,12 @@ TEST(thread_priority, set_thread_affinity_invalid_too_many_cores)
   std::string message;
   const auto count = realtime_tools::get_number_of_available_processors();
   // We should always have at least one core
-  EXPECT_FALSE(realtime_tools::set_thread_affinity(count + 10, 0, message));
+  EXPECT_FALSE(realtime_tools::set_thread_affinity(0, count + 10, message));
 }
 
 TEST(thread_priority, set_thread_affinity_valid_reset)
 {
   std::string message;
   // Reset core affinity
-  EXPECT_TRUE(realtime_tools::set_thread_affinity(-1, 0, message));
+  EXPECT_TRUE(realtime_tools::set_thread_affinity(0, -1, message));
 }
