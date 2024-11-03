@@ -67,9 +67,12 @@ bool lock_memory(std::string & message);
 bool set_cpu_affinity(int core);
 
 /**
- * \returns The amount of available cpu cores
+ * Method to get the amount of available cpu cores
+ * \ref https://man7.org/linux/man-pages/man3/sysconf.3.html
+ * \ref https://stackoverflow.com/a/150971
+ * \returns The number of processors currently online (available)
 */
-int get_core_count();
+int get_number_of_available_processors();
 
 }  // namespace realtime_tools
 

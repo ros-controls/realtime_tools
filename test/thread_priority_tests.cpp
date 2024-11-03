@@ -35,7 +35,7 @@
 
 TEST(thread_priority, get_core_count)
 {
-  const auto count = realtime_tools::get_core_count();
+  const auto count = realtime_tools::get_number_of_available_processors();
 
   EXPECT_EQ(count, std::thread::hardware_concurrency());
 }
@@ -48,7 +48,7 @@ TEST(thread_priority, set_cpu_affinity_valid)
 
 TEST(thread_priority, set_cpu_affinity_invalid_too_many_cores)
 {
-  const auto count = realtime_tools::get_core_count();
+  const auto count = realtime_tools::get_number_of_available_processors();
   // We should always have at least one core
   EXPECT_FALSE(realtime_tools::set_cpu_affinity(count + 10));
 }

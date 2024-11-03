@@ -141,7 +141,7 @@ bool set_cpu_affinity(int core)
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
   // Obtain amount of cores/
-  const auto number_of_cores = get_core_count();
+  const auto number_of_cores = get_number_of_available_processors();
 
   // Reset affinity by setting it to all cores
   if (core < 0) {
@@ -166,6 +166,15 @@ bool set_cpu_affinity(int core)
   return false;
 }
 
-int get_core_count() { return sysconf(_SC_NPROCESSORS_ONLN); }
+int get_number_of_available_processors()
+{
+#ifdef _WIN32
+  SYSTEM_INFO sysinfo;
+  GetSystemInfo(&sysinfo);
+  return sysinfo.dwNumberOfProcessors;
+#else
+  return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+}
 
 }  // namespace realtime_tools
