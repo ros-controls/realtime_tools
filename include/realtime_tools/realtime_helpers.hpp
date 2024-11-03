@@ -64,7 +64,7 @@ bool lock_memory(std::string & message);
  * the affinity is reset to the default
  * \returns true if configuring the scheduler succeeded, false otherwise
 */
-bool set_cpu_affinity(int core);
+bool set_thread_affinity(int core);
 
 /**
  * Method to get the amount of available cpu cores
