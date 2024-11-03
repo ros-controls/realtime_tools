@@ -47,15 +47,21 @@ bool has_realtime_kernel();
 bool configure_sched_fifo(int priority);
 
 /**
- * Locks the memory pages of the calling thread to prevent page faults. By calling this method, the programs locks all pages mapped into the address space of the calling process and future mappings. This means that the kernel will not swap out the pages to disk i.e., the pages are guaranteed to stay in RAM until later unlocked - which is important for realtime applications.
+ * Locks the memory pages of the calling thread to prevent page faults.
+ * By calling this method, the programs locks all pages mapped into the address
+ * space of the calling process and future mappings. This means that the kernel
+ * will not swap out the pages to disk i.e., the pages are guaranteed to stay in
+ * RAM until later unlocked - which is important for realtime applications.
  * \param[out] message a message describing the result of the operation
  * \returns true if memory locking succeeded, false otherwise
 */
 bool lock_memory(std::string & message);
 
 /**
- * Configure the caller thread affinity - Tell the scheduler to prefer a certain core for the current thread
- * \param[in] core - the number of the core. If a negative number is passed, the affinity is reset to the default
+ * Configure the caller thread affinity - Tell the scheduler to prefer a certain
+ * core for the current thread
+ * \param[in] core the cpu number of the core. If a negative number is passed,
+ * the affinity is reset to the default
  * \returns true if configuring the scheduler succeeded, false otherwise
 */
 bool set_cpu_affinity(int core);
