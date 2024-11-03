@@ -116,27 +116,31 @@ bool lock_memory(std::string & message)
 #endif
 }
 
-static void print_error(const int errc)
-{
-  switch (errc) {
-    case 0:
-      return;
-    case EFAULT:
-      std::cerr << "Call of sched_setaffinity with invalid cpuset" << std::endl;
-      return;
-    case EINVAL:
-      std::cerr << "Call of sched_setaffinity with an invalid cpu core" << std::endl;
-      return;
-    case ESRCH:
-      std::cerr << "Call of sched_setaffinity with and invalid thread id/process id" << std::endl;
-      return;
-    default:
-      std::cerr << "Error code: " << errc << ": " << std::string(strerror(errc)) << std::endl;
-  }
-}
-
 bool set_thread_affinity(int core, int pid)
 {
+  auto print_error = [](int result) {
+    if (result == 0) {
+      return;
+    }
+    switch (errno) {
+      case EFAULT:
+        std::cerr << "Call of sched_setaffinity with invalid cpuset" << std::endl;
+        return;
+      case EINVAL:
+        std::cerr << "Call of sched_setaffinity with an invalid cpu core" << std::endl;
+        return;
+      case ESRCH:
+        std::cerr
+          << "Call of sched_setaffinity with a thread id/process id that is invalid or not found!"
+          << std::endl;
+        return;
+      case EPERM:
+        std::cerr << "Call of sched_setaffinity with insufficient privileges!" << std::endl;
+        return;
+      default:
+        std::cerr << "Error code: " << errno << ": " << std::string(strerror(errno)) << std::endl;
+    }
+  };
   // Allow attaching the thread/process to a certain cpu core
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
