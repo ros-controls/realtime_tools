@@ -34,7 +34,7 @@
 // Deprecation notice
 #ifdef _WIN32
 #pragma message( \
-  "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_tools' library.")
+  "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_tools' library.")  //NOLINT
 #else
 #warning \
   "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_tools' library." //NOLINT
