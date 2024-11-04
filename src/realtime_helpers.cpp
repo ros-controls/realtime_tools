@@ -157,7 +157,7 @@ std::pair<bool, std::string> set_thread_affinity(int pid, int core)
     for (auto i = 0; i < number_of_cores; i++) {
       CPU_SET(i, &cpuset);
     }
-    // And actually tell the schedular to set the affinity of the currently calling thread
+    // And actually tell the schedular to set the affinity of the thread of respective pid
     const auto result =
       set_affinity_result_message(sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset), message);
     return std::make_pair(result, message);
@@ -166,7 +166,7 @@ std::pair<bool, std::string> set_thread_affinity(int pid, int core)
   if (core < number_of_cores) {
     // Set the passed core to the cpu set
     CPU_SET(core, &cpuset);
-    // And actually tell the schedular to set the affinity of the currently calling thread
+    // And actually tell the schedular to set the affinity of the thread of respective pid
     const auto result =
       set_affinity_result_message(sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset), message);
     return std::make_pair(result, message);
