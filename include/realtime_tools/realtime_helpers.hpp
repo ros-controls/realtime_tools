@@ -72,6 +72,17 @@ bool lock_memory(std::string & message);
 std::pair<bool, std::string> set_thread_affinity(int pid, int core);
 
 /**
+ * Configure the current thread affinity - Tell the scheduler to prefer a certain
+ * core for the current thread.
+ * \note The threads created by the calling thread will inherit the affinity.
+ * \param[in] core the cpu number of the core. If a negative number is passed,
+ * the affinity is reset to the default.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_current_thread_affinity(int core);
+
+/**
  * Method to get the amount of available cpu cores
  * \ref https://man7.org/linux/man-pages/man3/sysconf.3.html
  * \ref https://stackoverflow.com/a/150971

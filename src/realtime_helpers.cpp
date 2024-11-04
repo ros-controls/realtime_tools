@@ -181,6 +181,11 @@ std::pair<bool, std::string> set_thread_affinity(int pid, int core)
 #endif
 }
 
+std::pair<bool, std::string> set_current_thread_affinity(int core)
+{
+  return set_thread_affinity(0, core);
+}
+
 int get_number_of_available_processors()
 {
 #ifdef _WIN32

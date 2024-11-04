@@ -58,3 +58,9 @@ TEST(thread_priority, set_thread_affinity_valid_reset)
   // Reset core affinity
   EXPECT_TRUE(realtime_tools::set_thread_affinity(0, -1).first);
 }
+
+TEST(thread_priority, set_current_thread_affinity_valid)
+{
+  // We should always have at least one core
+  EXPECT_TRUE(realtime_tools::set_current_thread_affinity(0).first);
+}
