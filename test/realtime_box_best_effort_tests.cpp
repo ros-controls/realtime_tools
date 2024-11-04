@@ -86,9 +86,7 @@ TEST(RealtimeBoxBestEffort, non_default_constructable)
 }
 TEST(RealtimeBoxBestEffort, standard_get)
 {
-  DefaultConstructable data_construct;
-  data_construct.a = 1000;
-  RealtimeBoxBestEffort<DefaultConstructable> box(data_construct);
+  RealtimeBoxBestEffort<DefaultConstructable> box(DefaultConstructable{1000});
 
   DefaultConstructable data;
   box.get(data);
