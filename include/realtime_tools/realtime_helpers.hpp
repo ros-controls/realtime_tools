@@ -30,6 +30,7 @@
 #define REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 
 #include <string>
+#include <utility>
 
 namespace realtime_tools
 {
@@ -65,10 +66,10 @@ bool lock_memory(std::string & message);
  * passed, the affinity is set for the calling thread.
  * \param[in] core the cpu number of the core. If a negative number is passed,
  * the affinity is reset to the default.
- * \param[out] message a message describing the result of the operation
- * \returns true if configuring the scheduler succeeded, false otherwise
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
 */
-bool set_thread_affinity(int pid, int core, std::string & message);
+std::pair<bool, std::string> set_thread_affinity(int pid, int core);
 
 /**
  * Method to get the amount of available cpu cores

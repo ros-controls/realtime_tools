@@ -116,11 +116,12 @@ bool lock_memory(std::string & message)
 #endif
 }
 
-bool set_thread_affinity(int pid, int core, std::string & message)
+std::pair<bool, std::string> set_thread_affinity(int pid, int core)
 {
+  std::string message;
 #ifdef _WIN32
   message = "Thread affinity is not supported on Windows.";
-  return false;
+  return std::make_pair(false, message);
 #else
   auto set_affinity_result_message = [](int result, std::string & message) -> bool {
     if (result == 0) {
@@ -158,23 +159,25 @@ bool set_thread_affinity(int pid, int core, std::string & message)
       CPU_SET(i, &cpuset);
     }
     // And actually tell the schedular to set the affinity of the currently calling thread
-    const auto result = sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset);
-    return set_affinity_result_message(result, message);
+    const auto result =
+      set_affinity_result_message(sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset), message);
+    return std::make_pair(result, message);
   }
 
   if (core < number_of_cores) {
     // Set the passed core to the cpu set
     CPU_SET(core, &cpuset);
     // And actually tell the schedular to set the affinity of the currently calling thread
-    const auto result = sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset);
-    return set_affinity_result_message(result, message);
+    const auto result =
+      set_affinity_result_message(sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset), message);
+    return std::make_pair(result, message);
   }
   // Invalid core number passed
   message = "Invalid core number : '" + std::to_string(core) + "' passed! The system has " +
             std::to_string(number_of_cores) +
             " cores. Parsed core number should be between 0 and " +
             std::to_string(number_of_cores - 1);
-  return false;
+  return std::make_pair(false, message);
 #endif
 }
 
