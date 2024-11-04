@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.0 (2024-11-04)
+------------------
 * Add methods to set the thread affinity (`#186 <https://github.com/ros-controls/realtime_tools/issues/186>`_)
 * Fix pre-commit of `#187 <https://github.com/ros-controls/realtime_tools/issues/187>`_ (`#188 <https://github.com/ros-controls/realtime_tools/issues/188>`_)
 * Removing thread_priority.hpp warning for Windows Systems (`#187 <https://github.com/ros-controls/realtime_tools/issues/187>`_)
