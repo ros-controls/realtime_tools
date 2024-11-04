@@ -40,7 +40,6 @@
 
 #include <cstring>
 #include <fstream>
-#include <iostream>
 
 namespace realtime_tools
 {
