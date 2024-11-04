@@ -34,6 +34,8 @@
 #include <sched.h>
 #include <sys/capability.h>
 #include <sys/mman.h>
+
+#include <unistd.h>
 #endif
 
 #include <cstring>
@@ -112,4 +114,86 @@ bool lock_memory(std::string & message)
   }
 #endif
 }
+
+std::pair<bool, std::string> set_thread_affinity(int pid, int core)
+{
+  std::string message;
+#ifdef _WIN32
+  message = "Thread affinity is not supported on Windows.";
+  return std::make_pair(false, message);
+#else
+  auto set_affinity_result_message = [](int result, std::string & message) -> bool {
+    if (result == 0) {
+      message = "Thread affinity set successfully!";
+      return true;
+    }
+    switch (errno) {
+      case EFAULT:
+        message = "Call of sched_setaffinity with invalid cpuset!";
+        break;
+      case EINVAL:
+        message = "Call of sched_setaffinity with an invalid cpu core!";
+        break;
+      case ESRCH:
+        message =
+          "Call of sched_setaffinity with a thread id/process id that is invalid or not found!";
+        break;
+      case EPERM:
+        message = "Call of sched_setaffinity with insufficient privileges!";
+        break;
+      default:
+        message = "Unknown error code: " + std::string(strerror(errno));
+    }
+    return false;
+  };
+  // Allow attaching the thread/process to a certain cpu core
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  // Obtain available processors
+  const auto number_of_cores = get_number_of_available_processors();
+
+  // Reset affinity by setting it to all cores
+  if (core < 0) {
+    for (auto i = 0; i < number_of_cores; i++) {
+      CPU_SET(i, &cpuset);
+    }
+    // And actually tell the schedular to set the affinity of the thread of respective pid
+    const auto result =
+      set_affinity_result_message(sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset), message);
+    return std::make_pair(result, message);
+  }
+
+  if (core < number_of_cores) {
+    // Set the passed core to the cpu set
+    CPU_SET(core, &cpuset);
+    // And actually tell the schedular to set the affinity of the thread of respective pid
+    const auto result =
+      set_affinity_result_message(sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset), message);
+    return std::make_pair(result, message);
+  }
+  // Invalid core number passed
+  message = "Invalid core number : '" + std::to_string(core) + "' passed! The system has " +
+            std::to_string(number_of_cores) +
+            " cores. Parsed core number should be between 0 and " +
+            std::to_string(number_of_cores - 1);
+  return std::make_pair(false, message);
+#endif
+}
+
+std::pair<bool, std::string> set_current_thread_affinity(int core)
+{
+  return set_thread_affinity(0, core);
+}
+
+int get_number_of_available_processors()
+{
+#ifdef _WIN32
+  SYSTEM_INFO sysinfo;
+  GetSystemInfo(&sysinfo);
+  return sysinfo.dwNumberOfProcessors;
+#else
+  return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+}
+
 }  // namespace realtime_tools

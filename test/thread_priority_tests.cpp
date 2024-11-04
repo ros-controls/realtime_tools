@@ -1,4 +1,4 @@
-// Copyright (c) 2022, PickNik, Inc.
+// Copyright (c) 2024, Lennart Nachtigall
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the PickNik Inc. nor the names of its
+//    * Neither the name of the Willow Garage, Inc. nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -26,18 +26,41 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef REALTIME_TOOLS__THREAD_PRIORITY_HPP_
-#define REALTIME_TOOLS__THREAD_PRIORITY_HPP_
+// Author: Lennart Nachtigall
 
-#include "realtime_tools/realtime_helpers.hpp"
+#include <gmock/gmock.h>
+#include <thread>
 
-// Deprecation notice
-#ifdef _WIN32
-#pragma message( \
-  "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_tools' library.")  //NOLINT
-#else
-#warning \
-  "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_tools' library." //NOLINT
-#endif
+#include <realtime_tools/realtime_helpers.hpp>
 
-#endif  // REALTIME_TOOLS__THREAD_PRIORITY_HPP_
+TEST(thread_priority, get_core_count)
+{
+  const auto count = realtime_tools::get_number_of_available_processors();
+
+  EXPECT_EQ(count, std::thread::hardware_concurrency());
+}
+
+TEST(thread_priority, set_thread_affinity_valid)
+{
+  // We should always have at least one core
+  EXPECT_TRUE(realtime_tools::set_thread_affinity(0, 0).first);
+}
+
+TEST(thread_priority, set_thread_affinity_invalid_too_many_cores)
+{
+  const auto count = realtime_tools::get_number_of_available_processors();
+  // We should always have at least one core
+  EXPECT_FALSE(realtime_tools::set_thread_affinity(0, count + 10).first);
+}
+
+TEST(thread_priority, set_thread_affinity_valid_reset)
+{
+  // Reset core affinity
+  EXPECT_TRUE(realtime_tools::set_thread_affinity(0, -1).first);
+}
+
+TEST(thread_priority, set_current_thread_affinity_valid)
+{
+  // We should always have at least one core
+  EXPECT_TRUE(realtime_tools::set_current_thread_affinity(0).first);
+}
