@@ -2,6 +2,22 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add methods to set the thread affinity (`#186 <https://github.com/ros-controls/realtime_tools/issues/186>`_)
+* Fix pre-commit of `#187 <https://github.com/ros-controls/realtime_tools/issues/187>`_ (`#188 <https://github.com/ros-controls/realtime_tools/issues/188>`_)
+* Removing thread_priority.hpp warning for Windows Systems (`#187 <https://github.com/ros-controls/realtime_tools/issues/187>`_)
+* Fix build error with clang (`#183 <https://github.com/ros-controls/realtime_tools/issues/183>`_)
+* Bump version of pre-commit hooks (`#182 <https://github.com/ros-controls/realtime_tools/issues/182>`_)
+* [AsyncFunctionHandler] return execution time in nanoseconds (`#181 <https://github.com/ros-controls/realtime_tools/issues/181>`_)
+* Rename thread_priority to realtime_helpers header (`#178 <https://github.com/ros-controls/realtime_tools/issues/178>`_)
+* Include <functional> in realtime_box_best_effort (`#173 <https://github.com/ros-controls/realtime_tools/issues/173>`_)
+* Bump version of pre-commit hooks (`#171 <https://github.com/ros-controls/realtime_tools/issues/171>`_)
+* Add fixes to the code to work for the windows systems (`#180 <https://github.com/ros-controls/realtime_tools/issues/180>`_)
+* Update thread_priority.cpp (`#170 <https://github.com/ros-controls/realtime_tools/issues/170>`_)
+* Add a helper method to lock the pages of memory in the RAM (`#175 <https://github.com/ros-controls/realtime_tools/issues/175>`_)
+* Contributors: Christoph Fröhlich, Felix Exner (fexner), Gilmar Correia, Luca Della Vedova, Sai Kishor Kothakota, github-actions[bot]
+
 2.7.0 (2024-10-29)
 ------------------
 * [AsyncFunctionHandler] Add exception handling (`#172 <https://github.com/ros-controls/realtime_tools/issues/172>`_)
