@@ -21,7 +21,7 @@
 
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
-  <build_depend>libcap-dev</build_depend>
+  <depend>libcap-dev</depend>
 
   <test_depend>ament_cmake_gmock</test_depend>
   <test_depend>lifecycle_msgs</test_depend>
