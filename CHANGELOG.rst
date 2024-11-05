@@ -2,6 +2,12 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix libcap-dev dependency (`#189 <https://github.com/ros-controls/realtime_tools/issues/189>`_)
+  Update libcap-dev dependency
+* Contributors: Sai Kishor Kothakota
+
 2.8.0 (2024-11-04)
 ------------------
 * Add methods to set the thread affinity (`#186 <https://github.com/ros-controls/realtime_tools/issues/186>`_)
