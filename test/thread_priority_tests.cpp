@@ -42,21 +42,43 @@ TEST(thread_priority, get_core_count)
 
 TEST(thread_priority, set_thread_affinity_valid)
 {
+  // create a basic thread for the test
+  std::thread t([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
   // We should always have at least one core
-  EXPECT_TRUE(realtime_tools::set_thread_affinity(0, 0).first);
+  EXPECT_TRUE(realtime_tools::set_thread_affinity(t.native_handle(), 0).first);
+  t.join();
 }
 
 TEST(thread_priority, set_thread_affinity_invalid_too_many_cores)
 {
   const auto count = realtime_tools::get_number_of_available_processors();
+  // create a basic thread for the test
+  std::thread t([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
   // We should always have at least one core
-  EXPECT_FALSE(realtime_tools::set_thread_affinity(0, count + 10).first);
+  EXPECT_FALSE(realtime_tools::set_thread_affinity(t.native_handle(), count + 10).first);
+  t.join();
+}
+
+TEST(thread_priority, set_current_thread_affinity_invalid_too_many_cores)
+{
+  const auto count = realtime_tools::get_number_of_available_processors();
+  // We should always have at least one core
+  EXPECT_FALSE(realtime_tools::set_current_thread_affinity(count + 10).first);
 }
 
 TEST(thread_priority, set_thread_affinity_valid_reset)
 {
+  // create a basic thread for the test
+  std::thread t([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
   // Reset core affinity
-  EXPECT_TRUE(realtime_tools::set_thread_affinity(0, -1).first);
+  EXPECT_TRUE(realtime_tools::set_thread_affinity(t.native_handle(), -1).first);
+  t.join();
+}
+
+TEST(thread_priority, set_current_thread_affinity_valid_reset)
+{
+  // Reset core affinity
+  EXPECT_TRUE(realtime_tools::set_current_thread_affinity(-1).first);
 }
 
 TEST(thread_priority, set_current_thread_affinity_valid)

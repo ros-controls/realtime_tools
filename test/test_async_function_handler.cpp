@@ -131,6 +131,10 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering)
   ASSERT_THROW(async_class.trigger(), std::runtime_error);
   async_class.get_handler().start_thread();
 
+  ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
+  ASSERT_TRUE(
+    realtime_tools::set_thread_affinity(async_class.get_handler().get_thread().native_handle(), 0)
+      .first);
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
   auto trigger_status = async_class.trigger();
   ASSERT_TRUE(trigger_status.first);
@@ -277,8 +281,13 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering_with_different_return_state_an
 {
   realtime_tools::TestAsyncFunctionHandler async_class;
   async_class.initialize();
+  ASSERT_FALSE(async_class.get_handler().get_thread().joinable());
+  ASSERT_FALSE(
+    realtime_tools::set_thread_affinity(async_class.get_handler().get_thread(), 0).first);
   async_class.get_handler().start_thread();
 
+  ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
+  ASSERT_TRUE(realtime_tools::set_thread_affinity(async_class.get_handler().get_thread(), 0).first);
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
   auto trigger_status = async_class.trigger();
   ASSERT_TRUE(trigger_status.first);
