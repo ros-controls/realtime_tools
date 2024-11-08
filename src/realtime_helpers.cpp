@@ -122,27 +122,26 @@ std::pair<bool, std::string> set_thread_affinity(pthread_t thread, int core)
   message = "Thread affinity is not supported on Windows.";
   return std::make_pair(false, message);
 #else
-  auto set_affinity_result_message = [](int result, std::string & message) -> bool {
+  auto set_affinity_result_message = [](int result, std::string & msg) -> bool {
     if (result == 0) {
-      message = "Thread affinity set successfully!";
+      msg = "Thread affinity set successfully!";
       return true;
     }
     switch (errno) {
       case EFAULT:
-        message = "Call of sched_setaffinity with invalid cpuset!";
+        msg = "Call of sched_setaffinity with invalid cpuset!";
         break;
       case EINVAL:
-        message = "Call of sched_setaffinity with an invalid cpu core!";
+        msg = "Call of sched_setaffinity with an invalid cpu core!";
         break;
       case ESRCH:
-        message =
-          "Call of sched_setaffinity with a thread id/process id that is invalid or not found!";
+        msg = "Call of sched_setaffinity with a thread id/process id that is invalid or not found!";
         break;
       case EPERM:
-        message = "Call of sched_setaffinity with insufficient privileges!";
+        msg = "Call of sched_setaffinity with insufficient privileges!";
         break;
       default:
-        message = "Unknown error code: " + std::string(strerror(errno));
+        msg = "Unknown error code: " + std::string(strerror(errno));
     }
     return false;
   };
@@ -194,12 +193,12 @@ std::pair<bool, std::string> set_current_thread_affinity(int core)
   return set_thread_affinity(pthread_self(), core);
 }
 
-int get_number_of_available_processors()
+int64_t get_number_of_available_processors()
 {
 #ifdef _WIN32
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);
-  return sysinfo.dwNumberOfProcessors;
+  return static_cast<int64_t>(sysinfo.dwNumberOfProcessors);
 #else
   return sysconf(_SC_NPROCESSORS_ONLN);
 #endif

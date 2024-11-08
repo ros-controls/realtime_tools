@@ -51,9 +51,9 @@ TEST(thread_priority, set_thread_affinity_valid)
 
 TEST(thread_priority, set_thread_affinity_invalid_too_many_cores)
 {
-  const auto count = realtime_tools::get_number_of_available_processors();
   // create a basic thread for the test
   std::thread t([]() { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+  const int count = static_cast<int>(realtime_tools::get_number_of_available_processors());
   // We should always have at least one core
   EXPECT_FALSE(realtime_tools::set_thread_affinity(t.native_handle(), count + 10).first);
   t.join();
