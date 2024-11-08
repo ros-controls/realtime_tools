@@ -88,7 +88,7 @@ std::pair<bool, std::string> set_current_thread_affinity(int core);
  * \ref https://stackoverflow.com/a/150971
  * \returns The number of processors currently online (available)
 */
-int get_number_of_available_processors();
+int64_t get_number_of_available_processors();
 
 }  // namespace realtime_tools
 

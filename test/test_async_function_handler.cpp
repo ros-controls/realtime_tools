@@ -242,8 +242,8 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   async_class.deactivate();
   async_class.get_handler().wait_for_trigger_cycle_to_finish();
   for (int i = 0; i < 50; i++) {
-    const auto trigger_status = async_class.trigger();
-    ASSERT_FALSE(trigger_status.first);
+    const auto trigger_status_deactivated = async_class.trigger();
+    ASSERT_FALSE(trigger_status_deactivated.first);
     ASSERT_EQ(async_class.get_counter(), total_cycles)
       << "The trigger should fail for any state different than ACTIVE";
   }
