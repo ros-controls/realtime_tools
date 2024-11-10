@@ -30,6 +30,7 @@
 #define REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 
 #include <string>
+#include <thread>
 #include <utility>
 
 namespace realtime_tools
@@ -60,16 +61,27 @@ bool lock_memory(std::string & message);
 
 /**
  * Configure the caller thread affinity - Tell the scheduler to prefer a certain
- * core for the current thread.
+ * core for the given thread handle.
  * \note The threads created by the calling thread will inherit the affinity.
- * \param[in] pid the process id of the thread to set the affinity for. If 0 is
- * passed, the affinity is set for the calling thread.
+ * \param[in] thread the thread handle of the thread
  * \param[in] core the cpu number of the core. If a negative number is passed,
  * the affinity is reset to the default.
  * \returns a pair of a boolean indicating whether the operation succeeded or not
  * and a message describing the result of the operation
 */
-std::pair<bool, std::string> set_thread_affinity(int pid, int core);
+std::pair<bool, std::string> set_thread_affinity(pthread_t thread, int core);
+
+/**
+ * Configure the caller thread affinity - Tell the scheduler to prefer a certain
+ * core for the given thread.
+ * \note The threads created by the calling thread will inherit the affinity.
+ * \param[in] thread the reference of the thread
+ * \param[in] core the cpu number of the core. If a negative number is passed,
+ * the affinity is reset to the default.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_thread_affinity(std::thread & thread, int core);
 
 /**
  * Configure the current thread affinity - Tell the scheduler to prefer a certain

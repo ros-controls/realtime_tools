@@ -236,6 +236,12 @@ public:
    */
   std::thread & get_thread() { return thread_; }
 
+  /// Get the const version of async worker thread
+  /**
+   * @return The async callback thread
+   */
+  const std::thread & get_thread() const { return thread_; }
+
   /// Check if the async callback method is in progress
   /**
    * @return True if the async callback method is in progress, false otherwise

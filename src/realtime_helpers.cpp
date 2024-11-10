@@ -115,7 +115,7 @@ bool lock_memory(std::string & message)
 #endif
 }
 
-std::pair<bool, std::string> set_thread_affinity(int pid, int core)
+std::pair<bool, std::string> set_thread_affinity(pthread_t thread, int core)
 {
   std::string message;
 #ifdef _WIN32
@@ -157,8 +157,8 @@ std::pair<bool, std::string> set_thread_affinity(int pid, int core)
       CPU_SET(i, &cpuset);
     }
     // And actually tell the schedular to set the affinity of the thread of respective pid
-    const auto result =
-      set_affinity_result_message(sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset), message);
+    const auto result = set_affinity_result_message(
+      pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset), message);
     return std::make_pair(result, message);
   }
 
@@ -166,8 +166,8 @@ std::pair<bool, std::string> set_thread_affinity(int pid, int core)
     // Set the passed core to the cpu set
     CPU_SET(core, &cpuset);
     // And actually tell the schedular to set the affinity of the thread of respective pid
-    const auto result =
-      set_affinity_result_message(sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset), message);
+    const auto result = set_affinity_result_message(
+      pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset), message);
     return std::make_pair(result, message);
   }
   // Invalid core number passed
@@ -179,9 +179,18 @@ std::pair<bool, std::string> set_thread_affinity(int pid, int core)
 #endif
 }
 
+std::pair<bool, std::string> set_thread_affinity(std::thread & thread, int core)
+{
+  if (!thread.joinable()) {
+    return std::make_pair(
+      false, "Unable to set the thread affinity, as the thread is not joinable!");
+  }
+  return set_thread_affinity(thread.native_handle(), core);
+}
+
 std::pair<bool, std::string> set_current_thread_affinity(int core)
 {
-  return set_thread_affinity(0, core);
+  return set_thread_affinity(pthread_self(), core);
 }
 
 int64_t get_number_of_available_processors()
