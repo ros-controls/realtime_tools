@@ -85,7 +85,7 @@ TEST(RealtimeBox, non_default_constructable)
 }
 TEST(RealtimeBox, standard_get)
 {
-  RealtimeBox<DefaultConstructable> box(DefaultConstructable{.a = 1000});
+  RealtimeBox<DefaultConstructable> box(DefaultConstructable{1000});
 
   DefaultConstructable data;
   box.get(data);
@@ -121,7 +121,7 @@ TEST(RealtimeBox, assignment_operator)
 }
 TEST(RealtimeBox, typecast_operator)
 {
-  RealtimeBox<DefaultConstructable> box(DefaultConstructable{.a = 100, .str = ""});
+  RealtimeBox<DefaultConstructable> box(DefaultConstructable{100, ""});
 
   // Use non RT access
   DefaultConstructable data = box;
@@ -129,7 +129,7 @@ TEST(RealtimeBox, typecast_operator)
   EXPECT_EQ(data.a, 100);
 
   // Use RT access -> returns std::nullopt if the mutex could not be locked
-  std::optional<DefaultConstructable> rt_data_access = box;
+  std::optional<DefaultConstructable> rt_data_access = box.tryGet();
 
   if (rt_data_access) {
     EXPECT_EQ(rt_data_access->a, 100);
