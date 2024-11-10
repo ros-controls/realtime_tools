@@ -218,3 +218,39 @@ TEST(RealtimeBox, set_and_get_existing)
   box.get(output);
   EXPECT_EQ('z', output);
 }
+
+TEST(RealtimeBox, copy_assign)
+{
+  RealtimeBox<char> box_a('a');
+  RealtimeBox<char> box_b('b');
+
+  //Assign b to a -> a should now contain b
+  box_a = box_b;
+
+  EXPECT_EQ('b', box_a.try_get().value());
+}
+TEST(RealtimeBox, copy)
+{
+  RealtimeBox<char> box_b('b');
+  RealtimeBox<char> box_a(box_b);
+
+  EXPECT_EQ('b', box_a.try_get().value());
+}
+
+TEST(RealtimeBox, move_assign)
+{
+  RealtimeBox<char> box_a('a');
+  RealtimeBox<char> box_b('b');
+
+  //Move  b to a -> a should now contain b
+  box_a = std::move(box_b);
+
+  EXPECT_EQ('b', box_a.try_get().value());
+}
+TEST(RealtimeBox, move)
+{
+  RealtimeBox<char> box_b('b');
+  RealtimeBox<char> box_a(std::move(box_b));
+
+  EXPECT_EQ('b', box_a.try_get().value());
+}

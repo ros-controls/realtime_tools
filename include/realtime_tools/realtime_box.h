@@ -71,6 +71,34 @@ public:
   constexpr explicit RealtimeBox(const T & init = T{}) : value_(init) {}
   constexpr explicit RealtimeBox(const T && init) : value_(std::move(init)) {}
 
+  //Copy constructor
+  constexpr RealtimeBox(const RealtimeBox & o)
+  {
+    //Lock the other box mutex
+    std::unique_lock<mutex_t> lock(o.lock_);
+    //We do not need to lock our own mutex because we are currently in the process of being created
+    value_ = o.value_;
+  }
+  //Copy assignment constructor
+  constexpr RealtimeBox & operator=(const RealtimeBox & o)
+  {
+    //Check for self assignment (and a potential deadlock)
+    if (&o != this) {
+      //Lock the other box mutex
+      std::unique_lock<mutex_t> lock_other(o.lock_);
+      std::unique_lock<mutex_t> lock_self(lock_);
+
+      value_ = o.value_;
+    }
+    return *this;
+  }
+  constexpr RealtimeBox(RealtimeBox && o)
+  {
+    //Lock the other box mutex
+    std::unique_lock<mutex_t> lock(o.lock_);
+    //We do not need to lock our own mutex because we are currently in the process of being created
+    value_ = std::move(o.value_);
+  }
   // Only enabled for types that can be constructed from an initializer list
   template <typename U = T>
   constexpr RealtimeBox(
@@ -78,6 +106,18 @@ public:
     std::enable_if_t<std::is_constructible_v<U, std::initializer_list>>)
   : value_(init)
   {
+  }
+  constexpr RealtimeBox & operator=(RealtimeBox && o)
+  {
+    //Check for self assignment (and a potential deadlock)
+    if (&o != this) {
+      //Lock the other box mutex
+      std::unique_lock<mutex_t> lock_other(o.lock_);
+      std::unique_lock<mutex_t> lock_self(lock_);
+
+      value_ = std::move(o.value_);
+    }
+    return *this;
   }
 
   /**
