@@ -224,7 +224,7 @@ TEST(RealtimeBox, copy_assign)
   RealtimeBox<char> box_a('a');
   RealtimeBox<char> box_b('b');
 
-  //Assign b to a -> a should now contain b
+  // Assign b to a -> a should now contain b
   box_a = box_b;
 
   EXPECT_EQ('b', box_a.try_get().value());
@@ -242,7 +242,7 @@ TEST(RealtimeBox, move_assign)
   RealtimeBox<char> box_a('a');
   RealtimeBox<char> box_b('b');
 
-  //Move  b to a -> a should now contain b
+  // Move  b to a -> a should now contain b
   box_a = std::move(box_b);
 
   EXPECT_EQ('b', box_a.try_get().value());
