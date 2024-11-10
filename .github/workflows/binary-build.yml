@@ -20,10 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, iron, humble]
+        ROS_DISTRO: [humble, iron, jazzy, rolling]
         ROS_REPO: [main, testing]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: ${{ matrix.ROS_REPO }}
-      upstream_workspace: realtime_tools-not-released.${{ matrix.ROS_DISTRO }}.repos
       ref_for_scheduled_build: master

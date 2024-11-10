@@ -29,21 +29,15 @@
 #ifndef REALTIME_TOOLS__THREAD_PRIORITY_HPP_
 #define REALTIME_TOOLS__THREAD_PRIORITY_HPP_
 
-namespace realtime_tools
-{
-/**
- * Detect if realtime kernel is present.
- * \returns true if realtime kernel is detected
- */
-bool has_realtime_kernel();
+#include "realtime_tools/realtime_helpers.hpp"
 
-/**
- * Configure SCHED_FIFO thread priority for the thread that calls this function
- * \param[in] priority the priority of this thread from 0-99
- * \returns true if configuring scheduler succeeded
- */
-bool configure_sched_fifo(int priority);
-
-}  // namespace realtime_tools
+// Deprecation notice
+#ifdef _WIN32
+#pragma message( \
+  "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_tools' library.")  //NOLINT
+#else
+#warning \
+  "This header include is deprecated. Please update your code to use 'realtime_helpers.hpp' header and link against 'realtime_tools' library." //NOLINT
+#endif
 
 #endif  // REALTIME_TOOLS__THREAD_PRIORITY_HPP_

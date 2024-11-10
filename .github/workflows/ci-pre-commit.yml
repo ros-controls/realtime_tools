@@ -12,7 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, iron, humble]
+        ROS_DISTRO: [humble, iron, jazzy, rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
-      os_name: ubuntu-22.04

@@ -31,6 +31,7 @@
 #ifndef REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_H_
 #define REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_H_
 
+#include <functional>
 #include <initializer_list>
 #include <mutex>
 #include <optional>
@@ -70,7 +71,7 @@ public:
   template <typename U = T>
   constexpr RealtimeBoxBestEffort(
     const std::initializer_list<U> & init,
-    std::enable_if_t<std::is_constructible_v<U, std::initializer_list>>)
+    std::enable_if_t<std::is_constructible_v<U, std::initializer_list<U>>>)
   : value_(init)
   {
   }
