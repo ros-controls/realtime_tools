@@ -129,7 +129,7 @@ TEST(RealtimeBox, typecast_operator)
   EXPECT_EQ(data.a, 100);
 
   // Use RT access -> returns std::nullopt if the mutex could not be locked
-  std::optional<DefaultConstructable> rt_data_access = box.tryGet();
+  std::optional<DefaultConstructable> rt_data_access = box.try_get();
 
   if (rt_data_access) {
     EXPECT_EQ(rt_data_access->a, 100);
@@ -153,7 +153,7 @@ TEST(RealtimeBox, pointer_type)
 
   box.get([](const auto & i) { EXPECT_EQ(*i, 200); });
 
-  box.tryGet([](const auto & i) { EXPECT_EQ(*i, 200); });
+  box.try_get([](const auto & i) { EXPECT_EQ(*i, 200); });
 }
 
 TEST(RealtimeBox, smart_ptr_type)
@@ -170,29 +170,9 @@ TEST(RealtimeBox, smart_ptr_type)
 
   box.get([](const auto & i) { EXPECT_EQ(*i, 200); });
 
-  box.trySet([](const auto & p) { *p = 10; });
+  box.try_set([](const auto & p) { *p = 10; });
 
-  box.tryGet([](const auto & p) { EXPECT_EQ(*p, 10); });
-}
-
-TEST(RealtimeBox, deprecated_note)
-{
-  int a = 100;
-  int * ptr = &a;
-
-  RealtimeBox<int *> box(ptr);
-
-  int * res;
-  box.get(res);
-  EXPECT_EQ(*res, 100);
-
-  EXPECT_EQ(*box.get(), 100);
-
-  std::shared_ptr<int> sptr = std::make_shared<int>(10);
-
-  RealtimeBox<std::shared_ptr<int>> sbox(sptr);
-
-  EXPECT_EQ(*sbox.get(), 10);
+  box.try_get([](const auto & p) { EXPECT_EQ(*p, 10); });
 }
 
 // These are the tests from the old RealtimeBox implementation
