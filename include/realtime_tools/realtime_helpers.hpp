@@ -29,9 +29,9 @@
 #ifndef REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 #define REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 
+#include <pthread.h>
 #include <string>
 #include <thread>
-#include <pthread.h>
 #include <utility>
 
 namespace realtime_tools
