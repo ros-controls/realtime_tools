@@ -31,6 +31,7 @@
 
 #include <string>
 #include <thread>
+#include <pthread.h>
 #include <utility>
 
 namespace realtime_tools
