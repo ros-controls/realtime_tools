@@ -115,16 +115,13 @@ bool lock_memory(std::string & message)
 #endif
 }
 
-#ifdef _WIN32
-std::pair<bool, std::string> set_thread_affinity(HANDLE thread, int core)
-{
-  std::string message = "Thread affinity is not supported on Windows.";
-  return std::make_pair(false, message);
-}
-#else
-std::pair<bool, std::string> set_thread_affinity(pthread_t thread, int core)
+std::pair<bool, std::string> set_thread_affinity(NATIVE_THREAD_HANDLE thread, int core)
 {
   std::string message;
+#ifdef _WIN32
+  message = "Thread affinity is not supported on Windows.";
+  return std::make_pair(false, message);
+#else
   auto set_affinity_result_message = [](int result, std::string & msg) -> bool {
     if (result == 0) {
       msg = "Thread affinity set successfully!";
@@ -179,8 +176,8 @@ std::pair<bool, std::string> set_thread_affinity(pthread_t thread, int core)
             " cores. Parsed core number should be between 0 and " +
             std::to_string(number_of_cores - 1);
   return std::make_pair(false, message);
-}
 #endif
+}
 
 std::pair<bool, std::string> set_thread_affinity(std::thread & thread, int core)
 {
