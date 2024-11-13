@@ -28,9 +28,7 @@
 
 #include "realtime_tools/realtime_helpers.hpp"
 
-#ifdef _WIN32
-#include <windows.h>
-#else
+#ifdef UNIX
 #include <sched.h>
 #include <sys/capability.h>
 #include <sys/mman.h>
