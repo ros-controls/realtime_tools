@@ -34,6 +34,7 @@
 #include <utility>
 
 #ifdef _WIN32
+#include <windows.h>
 using NATIVE_THREAD_HANDLE = HANDLE;
 #else
 using NATIVE_THREAD_HANDLE = pthread_t;
