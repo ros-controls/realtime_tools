@@ -29,10 +29,16 @@
 #ifndef REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 #define REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 
-#include <pthread.h>
 #include <string>
 #include <thread>
 #include <utility>
+
+#ifdef _WIN32
+#include <windows.h>
+using NATIVE_THREAD_HANDLE = HANDLE;
+#else
+using NATIVE_THREAD_HANDLE = pthread_t;
+#endif
 
 namespace realtime_tools
 {
@@ -70,7 +76,7 @@ bool lock_memory(std::string & message);
  * \returns a pair of a boolean indicating whether the operation succeeded or not
  * and a message describing the result of the operation
 */
-std::pair<bool, std::string> set_thread_affinity(pthread_t thread, int core);
+std::pair<bool, std::string> set_thread_affinity(NATIVE_THREAD_HANDLE thread, int core);
 
 /**
  * Configure the caller thread affinity - Tell the scheduler to prefer a certain
