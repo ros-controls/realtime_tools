@@ -24,6 +24,13 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @brief A pthread mutex wrapper that provides a mutex with the priority inheritance
+ * protocol and a priority ceiling of 99.
+ * The mutex is also error checked and robust.
+ * This mutex is intended to be used in real-time contexts.
+ * @note This mutex is not recursive.
+ */
 namespace realtime_tools
 {
 class mutex
@@ -90,6 +97,10 @@ public:
       std::cerr << "Failed to destroy mutex : " << std::strerror(res) << std::endl;
     }
   }
+
+  mutex(const mutex &) = delete;
+
+  mutex & operator=(const mutex &) = delete;
 
   const pthread_mutex_t * get_mutex() const { return &mutex_; }
 
