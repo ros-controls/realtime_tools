@@ -28,7 +28,7 @@
 
 #include "realtime_tools/realtime_helpers.hpp"
 
-#ifdef __unix__
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <sched.h>
 #include <sys/capability.h>
 #include <sys/mman.h>
