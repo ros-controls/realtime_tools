@@ -30,6 +30,8 @@
 #define REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 
 #include <string>
+#include <thread>
+#include <utility>
 
 namespace realtime_tools
 {
@@ -47,11 +49,58 @@ bool has_realtime_kernel();
 bool configure_sched_fifo(int priority);
 
 /**
- * Locks the memory pages of the calling thread to prevent page faults. By calling this method, the programs locks all pages mapped into the address space of the calling process and future mappings. This means that the kernel will not swap out the pages to disk i.e., the pages are guaranteed to stay in RAM until later unlocked - which is important for realtime applications.
+ * Locks the memory pages of the calling thread to prevent page faults.
+ * By calling this method, the programs locks all pages mapped into the address
+ * space of the calling process and future mappings. This means that the kernel
+ * will not swap out the pages to disk i.e., the pages are guaranteed to stay in
+ * RAM until later unlocked - which is important for realtime applications.
  * \param[out] message a message describing the result of the operation
  * \returns true if memory locking succeeded, false otherwise
 */
 bool lock_memory(std::string & message);
+
+/**
+ * Configure the caller thread affinity - Tell the scheduler to prefer a certain
+ * core for the given thread handle.
+ * \note The threads created by the calling thread will inherit the affinity.
+ * \param[in] thread the thread handle of the thread
+ * \param[in] core the cpu number of the core. If a negative number is passed,
+ * the affinity is reset to the default.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_thread_affinity(pthread_t thread, int core);
+
+/**
+ * Configure the caller thread affinity - Tell the scheduler to prefer a certain
+ * core for the given thread.
+ * \note The threads created by the calling thread will inherit the affinity.
+ * \param[in] thread the reference of the thread
+ * \param[in] core the cpu number of the core. If a negative number is passed,
+ * the affinity is reset to the default.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_thread_affinity(std::thread & thread, int core);
+
+/**
+ * Configure the current thread affinity - Tell the scheduler to prefer a certain
+ * core for the current thread.
+ * \note The threads created by the calling thread will inherit the affinity.
+ * \param[in] core the cpu number of the core. If a negative number is passed,
+ * the affinity is reset to the default.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_current_thread_affinity(int core);
+
+/**
+ * Method to get the amount of available cpu cores
+ * \ref https://man7.org/linux/man-pages/man3/sysconf.3.html
+ * \ref https://stackoverflow.com/a/150971
+ * \returns The number of processors currently online (available)
+*/
+int64_t get_number_of_available_processors();
 
 }  // namespace realtime_tools
 

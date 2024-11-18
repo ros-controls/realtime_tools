@@ -156,6 +156,18 @@ public:
    */
   T get_last_return_value() const { return async_callback_return_; }
 
+  /// Get the current callback time
+  /**
+   * @return The current callback time
+   */
+  const rclcpp::Time & get_current_callback_time() const { return current_callback_time_; }
+
+  /// Get the current callback period
+  /**
+   * @return The current callback period
+   */
+  const rclcpp::Duration & get_current_callback_period() const { return current_callback_period_; }
+
   /// Resets the internal variables of the AsyncFunctionHandler
   /**
    * A method to reset the internal variables of the AsyncFunctionHandler.
@@ -169,6 +181,8 @@ public:
     std::unique_lock<std::mutex> lock(async_mtx_);
     stop_async_callback_ = false;
     trigger_in_progress_ = false;
+    current_callback_time_ = rclcpp::Time(0, 0, RCL_CLOCK_UNINITIALIZED);
+    current_callback_period_ = rclcpp::Duration(0, 0);
     last_execution_time_ = std::chrono::nanoseconds(0);
     async_callback_return_ = T();
     async_exception_ptr_ = nullptr;
@@ -221,6 +235,12 @@ public:
    * @return The async callback thread
    */
   std::thread & get_thread() { return thread_; }
+
+  /// Get the const version of async worker thread
+  /**
+   * @return The async callback thread
+   */
+  const std::thread & get_thread() const { return thread_; }
 
   /// Check if the async callback method is in progress
   /**
@@ -304,7 +324,7 @@ public:
   }
 
 private:
-  rclcpp::Time current_callback_time_;
+  rclcpp::Time current_callback_time_ = rclcpp::Time(0, 0, RCL_CLOCK_UNINITIALIZED);
   rclcpp::Duration current_callback_period_{0, 0};
 
   std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> async_function_;

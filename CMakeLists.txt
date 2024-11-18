@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 project(realtime_tools LANGUAGES CXX)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-  add_compile_options(-Wall -Wextra)
+  add_compile_options(-Wall -Wextra -Wpedantic -Werror=conversion -Werror=unused-but-set-variable
+  -Werror=return-type -Werror=shadow -Werror=format)
 endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -51,6 +52,9 @@ if(BUILD_TESTING)
   find_package(lifecycle_msgs REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
   find_package(test_msgs REQUIRED)
+
+  ament_add_gmock(thread_priority_tests test/thread_priority_tests.cpp)
+  target_link_libraries(thread_priority_tests thread_priority)
 
   ament_add_gmock(realtime_box_tests test/realtime_box_tests.cpp)
   target_link_libraries(realtime_box_tests realtime_tools)
