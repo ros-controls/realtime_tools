@@ -33,12 +33,15 @@
  */
 namespace realtime_tools
 {
-class priority_inheritance_mutex
+namespace priority_inheritance
+{
+template <int MutexType>
+class MutexBase
 {
 public:
   using native_handle_type = pthread_mutex_t *;
 
-  priority_inheritance_mutex()
+  MutexBase()
   {
     pthread_mutexattr_t attr;
 
@@ -49,8 +52,9 @@ public:
         std::string("Failed to initialize mutex attribute : ") + std::strerror(res_attr));
     }
 
-    // Set the mutex type to PTHREAD_MUTEX_ERRORCHECK
-    const auto res_type = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
+    // Set the mutex type to MutexType
+    const auto res_type = pthread_mutexattr_settype(&attr, MutexType);
+
     if (res_type != 0) {
       throw std::runtime_error(
         std::string("Failed to set mutex type : ") + std::strerror(res_type));
@@ -85,7 +89,7 @@ public:
     }
   }
 
-  ~priority_inheritance_mutex()
+  ~MutexBase()
   {
     const auto res = pthread_mutex_destroy(&mutex_);
     if (res != 0) {
@@ -93,15 +97,13 @@ public:
     }
   }
 
-  priority_inheritance_mutex(const priority_inheritance_mutex &) = delete;
+  MutexBase(const MutexBase &) = delete;
 
-  priority_inheritance_mutex & operator=(const priority_inheritance_mutex &) = delete;
+  MutexBase & operator=(const MutexBase &) = delete;
 
   native_handle_type native_handle() { return &mutex_; }
 
-  const native_handle_type native_handle() const { return &mutex_; }
-
-  void lock()
+  virtual void lock()
   {
     const auto res = pthread_mutex_lock(&mutex_);
     if (res != 0) {
@@ -117,7 +119,7 @@ public:
     }
   }
 
-  void unlock()
+  virtual void unlock()
   {
     // As per the requirements of BasicLockable concept, unlock should not throw
     const auto res = pthread_mutex_unlock(&mutex_);
@@ -126,7 +128,7 @@ public:
     }
   }
 
-  bool try_lock()
+  virtual bool try_lock()
   {
     const auto res = pthread_mutex_trylock(&mutex_);
     if (res != 0) {
@@ -149,6 +151,10 @@ private:
   pthread_mutex_t mutex_;
 };
 
+using mutex = MutexBase<PTHREAD_MUTEX_NORMAL>;
+using error_mutex = MutexBase<PTHREAD_MUTEX_ERRORCHECK>;
+using recursive_mutex = MutexBase<PTHREAD_MUTEX_RECURSIVE>;
+}  // namespace priority_inheritance
 }  // namespace realtime_tools
 
 #endif  // REALTIME_TOOLS__MUTEX_HPP_
