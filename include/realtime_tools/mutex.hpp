@@ -33,10 +33,12 @@
  */
 namespace realtime_tools
 {
-class mutex
+class priority_inheritance_mutex
 {
 public:
-  mutex()
+  using native_handle_type = pthread_mutex_t *;
+
+  priority_inheritance_mutex()
   {
     pthread_mutexattr_t attr;
 
@@ -90,7 +92,7 @@ public:
     }
   }
 
-  ~mutex()
+  ~priority_inheritance_mutex()
   {
     const auto res = pthread_mutex_destroy(&mutex_);
     if (res != 0) {
@@ -98,13 +100,13 @@ public:
     }
   }
 
-  mutex(const mutex &) = delete;
+  priority_inheritance_mutex(const priority_inheritance_mutex &) = delete;
 
-  mutex & operator=(const mutex &) = delete;
+  priority_inheritance_mutex & operator=(const priority_inheritance_mutex &) = delete;
 
-  const pthread_mutex_t * get_mutex() const { return &mutex_; }
+  native_handle_type native_handle() { return &mutex_; }
 
-  pthread_mutex_t * get_mutex() { return &mutex_; }
+  const native_handle_type native_handle() const { return &mutex_; }
 
   void lock()
   {
