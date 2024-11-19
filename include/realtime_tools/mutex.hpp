@@ -63,13 +63,6 @@ public:
         std::string("Failed to set mutex protocol : ") + std::strerror(res_protocol));
     }
 
-    // Set the mutex attribute to have a priority ceiling of 99
-    const auto res_ceiling = pthread_mutexattr_setprioceiling(&attr, 99);
-    if (res_ceiling != 0) {
-      throw std::runtime_error(
-        std::string("Failed to set mutex prio ceiling : ") + std::strerror(res_ceiling));
-    }
-
     // Set the mutex attribute robustness to PTHREAD_MUTEX_ROBUST
     const auto res_robust = pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_ROBUST);
     if (res_robust != 0) {
