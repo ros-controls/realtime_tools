@@ -113,6 +113,8 @@ public:
           throw std::runtime_error(
             std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
         }
+        std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
+                  << std::endl;
       } else {
         throw std::runtime_error(std::string("Failed to lock mutex : ") + std::strerror(res));
       }
@@ -140,6 +142,8 @@ public:
           throw std::runtime_error(
             std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
         }
+        std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
+                  << std::endl;
       } else {
         throw std::runtime_error(std::string("Failed to try lock mutex : ") + std::strerror(res));
       }
