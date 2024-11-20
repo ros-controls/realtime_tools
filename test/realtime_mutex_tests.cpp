@@ -25,10 +25,8 @@ TEST(PriorityInheritanceMutexTests, lock_unlock)
 {
   // The mutex is locked and unlocked correctly
   realtime_tools::priority_inheritance::mutex mutex;
-  {
-    mutex.lock();
-    mutex.unlock();
-  }
+  mutex.lock();
+  mutex.unlock();
 }
 
 TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded)

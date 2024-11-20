@@ -123,18 +123,19 @@ public:
   virtual void lock()
   {
     const auto res = pthread_mutex_lock(&mutex_);
-    if (res != 0) {
-      if (res == EOWNERDEAD) {
-        const auto res_consistent = pthread_mutex_consistent(&mutex_);
-        if (res_consistent != 0) {
-          throw std::runtime_error(
-            std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
-        }
-        std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
-                  << std::endl;
-      } else {
-        throw std::runtime_error(std::string("Failed to lock mutex : ") + std::strerror(res));
+    if (res == 0) {
+      return;
+    }
+    if (res == EOWNERDEAD) {
+      const auto res_consistent = pthread_mutex_consistent(&mutex_);
+      if (res_consistent != 0) {
+        throw std::runtime_error(
+          std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
       }
+      std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
+                << std::endl;
+    } else {
+      throw std::runtime_error(std::string("Failed to lock mutex : ") + std::strerror(res));
     }
   }
 
@@ -150,20 +151,22 @@ public:
   virtual bool try_lock()
   {
     const auto res = pthread_mutex_trylock(&mutex_);
-    if (res != 0) {
-      if (res == EBUSY) {
-        return false;
-      } else if (res == EOWNERDEAD) {
-        const auto res_consistent = pthread_mutex_consistent(&mutex_);
-        if (res_consistent != 0) {
-          throw std::runtime_error(
-            std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
-        }
-        std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
-                  << std::endl;
-      } else {
-        throw std::runtime_error(std::string("Failed to try lock mutex : ") + std::strerror(res));
+    if (res == 0) {
+      return true;
+    }
+    if (res == EBUSY) {
+      return false;
+    }
+    if (res == EOWNERDEAD) {
+      const auto res_consistent = pthread_mutex_consistent(&mutex_);
+      if (res_consistent != 0) {
+        throw std::runtime_error(
+          std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
       }
+      std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
+                << std::endl;
+    } else {
+      throw std::runtime_error(std::string("Failed to try lock mutex : ") + std::strerror(res));
     }
     return true;
   }
