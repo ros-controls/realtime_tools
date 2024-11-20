@@ -28,9 +28,7 @@
 
 #include "realtime_tools/realtime_helpers.hpp"
 
-#ifdef _WIN32
-#include <windows.h>
-#else
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <sched.h>
 #include <sys/capability.h>
 #include <sys/mman.h>
@@ -115,7 +113,7 @@ bool lock_memory(std::string & message)
 #endif
 }
 
-std::pair<bool, std::string> set_thread_affinity(pthread_t thread, int core)
+std::pair<bool, std::string> set_thread_affinity(NATIVE_THREAD_HANDLE thread, int core)
 {
   std::string message;
 #ifdef _WIN32
@@ -190,7 +188,11 @@ std::pair<bool, std::string> set_thread_affinity(std::thread & thread, int core)
 
 std::pair<bool, std::string> set_current_thread_affinity(int core)
 {
+#ifdef _WIN32
+  return set_thread_affinity(GetCurrentThread(), core);
+#else
   return set_thread_affinity(pthread_self(), core);
+#endif
 }
 
 int64_t get_number_of_available_processors()
