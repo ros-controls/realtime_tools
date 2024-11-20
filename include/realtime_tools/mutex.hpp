@@ -35,7 +35,15 @@ namespace realtime_tools
 {
 namespace priority_inheritance
 {
-template <int MutexType>
+/**
+ * @brief A class template that provides a pthread mutex with the priority inheritance protocol
+ *
+ * @tparam MutexType The type of the mutex. It can be one of the following: PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_DEFAULT
+ * @tparam MutexProtocol The protocol of the mutex. It can be one of the following: PTHREAD_PRIO_NONE, PTHREAD_PRIO_INHERIT, PTHREAD_PRIO_PROTECT
+ * @tparam MutexCeiling The priority ceiling of the mutex. It can be any integer value valid for the scheduling policy of the thread. It is only used if MutexProtocol is PTHREAD_PRIO_PROTECT
+ * @tparam MutexRobustness The robustness of the mutex. It can be one of the following: PTHREAD_MUTEX_STALLED, PTHREAD_MUTEX_ROBUST
+ */
+template <int MutexType, int MutexProtocol, int MutexCeiling, int MutexRobustness>
 class MutexBase
 {
 public:
@@ -60,15 +68,24 @@ public:
         std::string("Failed to set mutex type : ") + std::strerror(res_type));
     }
 
-    // Set the mutex attribute to use the protocol PTHREAD_PRIO_INHERIT
-    const auto res_protocol = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
+    // Set the mutex attribute to use the protocol MutexProtocol
+    const auto res_protocol = pthread_mutexattr_setprotocol(&attr, MutexProtocol);
     if (res_protocol != 0) {
       throw std::runtime_error(
         std::string("Failed to set mutex protocol : ") + std::strerror(res_protocol));
     }
 
-    // Set the mutex attribute robustness to PTHREAD_MUTEX_ROBUST
-    const auto res_robust = pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_ROBUST);
+    if (MutexProtocol == PTHREAD_PRIO_PROTECT) {
+      // Set the mutex attribute to use the priority ceiling
+      const auto res_ceiling = pthread_mutexattr_setprioceiling(&attr, MutexCeiling);
+      if (res_ceiling != 0) {
+        throw std::runtime_error(
+          std::string("Failed to set mutex priority ceiling : ") + std::strerror(res_ceiling));
+      }
+    }
+
+    // Set the mutex attribute robustness to MutexRobustness
+    const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness);
     if (res_robust != 0) {
       throw std::runtime_error(
         std::string("Failed to set mutex robustness : ") + std::strerror(res_robust));
@@ -155,9 +172,11 @@ private:
   pthread_mutex_t mutex_;
 };
 
-using mutex = MutexBase<PTHREAD_MUTEX_NORMAL>;
-using error_mutex = MutexBase<PTHREAD_MUTEX_ERRORCHECK>;
-using recursive_mutex = MutexBase<PTHREAD_MUTEX_RECURSIVE>;
+using mutex = MutexBase<PTHREAD_MUTEX_NORMAL, PTHREAD_PRIO_INHERIT, -1, PTHREAD_MUTEX_ROBUST>;
+using error_mutex =
+  MutexBase<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_PRIO_INHERIT, -1, PTHREAD_MUTEX_ROBUST>;
+using recursive_mutex =
+  MutexBase<PTHREAD_MUTEX_RECURSIVE, PTHREAD_PRIO_INHERIT, -1, PTHREAD_MUTEX_ROBUST>;
 }  // namespace priority_inheritance
 }  // namespace realtime_tools
 
