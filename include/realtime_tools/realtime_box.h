@@ -258,7 +258,7 @@ public:
   template <typename U = T, typename = typename std::enable_if_t<!is_ptr_or_smart_ptr<U>>>
   [[nodiscard]] operator std::optional<T>() const
   {
-    return try_set();
+    return try_get();
   }
 
   // In case one wants to actually use a pointer
