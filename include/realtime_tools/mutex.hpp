@@ -56,53 +56,51 @@ public:
     // Initialize the mutex attributes
     const auto res_attr = pthread_mutexattr_init(&attr);
     if (res_attr != 0) {
-      throw std::runtime_error(
-        std::string("Failed to initialize mutex attribute : ") + std::strerror(res_attr));
+      throw std::system_error(
+        res_attr, std::generic_category(), "Failed to initialize mutex attribute");
     }
 
     // Set the mutex type to MutexType
     const auto res_type = pthread_mutexattr_settype(&attr, MutexType);
 
     if (res_type != 0) {
-      throw std::runtime_error(
-        std::string("Failed to set mutex type : ") + std::strerror(res_type));
+      throw std::system_error(res_type, std::generic_category(), "Failed to set mutex type");
     }
 
     // Set the mutex attribute to use the protocol MutexProtocol
     const auto res_protocol = pthread_mutexattr_setprotocol(&attr, MutexProtocol);
     if (res_protocol != 0) {
-      throw std::runtime_error(
-        std::string("Failed to set mutex protocol : ") + std::strerror(res_protocol));
+      throw std::system_error(
+        res_protocol, std::generic_category(), "Failed to set mutex protocol");
     }
 
     if (MutexProtocol == PTHREAD_PRIO_PROTECT) {
       // Set the mutex attribute to use the priority ceiling
       const auto res_ceiling = pthread_mutexattr_setprioceiling(&attr, MutexCeiling);
       if (res_ceiling != 0) {
-        throw std::runtime_error(
-          std::string("Failed to set mutex priority ceiling : ") + std::strerror(res_ceiling));
+        throw std::system_error(
+          res_ceiling, std::generic_category(), "Failed to set mutex priority ceiling");
       }
     }
 
     // Set the mutex attribute robustness to MutexRobustness
     const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness);
     if (res_robust != 0) {
-      throw std::runtime_error(
-        std::string("Failed to set mutex robustness : ") + std::strerror(res_robust));
+      throw std::system_error(
+        res_robust, std::generic_category(), "Failed to set mutex robustness");
     }
 
     // Initialize the mutex with the attributes
     const auto res_init = pthread_mutex_init(&mutex_, &attr);
     if (res_init != 0) {
-      throw std::runtime_error(
-        std::string("Failed to initialize mutex : ") + std::strerror(res_init));
+      throw std::system_error(res_init, std::generic_category(), "Failed to initialize mutex");
     }
 
     // Destroy the mutex attributes
     const auto res_destroy = pthread_mutexattr_destroy(&attr);
     if (res_destroy != 0) {
-      throw std::runtime_error(
-        std::string("Failed to destroy mutex attribute : ") + std::strerror(res_destroy));
+      throw std::system_error(
+        res_destroy, std::generic_category(), "Failed to destroy mutex attribute");
     }
   }
 
