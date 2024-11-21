@@ -116,7 +116,7 @@ public:
 
   MutexBase & operator=(const MutexBase &) = delete;
 
-  native_handle_type native_handle() { return &mutex_; }
+  native_handle_type native_handle() noexcept { return &mutex_; }
 
   void lock()
   {
@@ -137,7 +137,7 @@ public:
     }
   }
 
-  void unlock()
+  void unlock() noexcept
   {
     // As per the requirements of BasicLockable concept, unlock should not throw
     const auto res = pthread_mutex_unlock(&mutex_);
