@@ -120,7 +120,7 @@ public:
 
   native_handle_type native_handle() { return &mutex_; }
 
-  virtual void lock()
+  void lock()
   {
     const auto res = pthread_mutex_lock(&mutex_);
     if (res == 0) {
@@ -139,7 +139,7 @@ public:
     }
   }
 
-  virtual void unlock()
+  void unlock()
   {
     // As per the requirements of BasicLockable concept, unlock should not throw
     const auto res = pthread_mutex_unlock(&mutex_);
@@ -148,7 +148,7 @@ public:
     }
   }
 
-  virtual bool try_lock()
+  bool try_lock()
   {
     const auto res = pthread_mutex_trylock(&mutex_);
     if (res == 0) {
