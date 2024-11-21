@@ -21,6 +21,7 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -52,6 +53,17 @@ public:
   MutexBase()
   {
     pthread_mutexattr_t attr;
+
+    const auto attr_destroy = [](pthread_mutexattr_t * mutex_attr) {
+      // Destroy the mutex attributes
+      const auto res_destroy = pthread_mutexattr_destroy(mutex_attr);
+      if (res_destroy != 0) {
+        throw std::system_error(
+          res_destroy, std::generic_category(), "Failed to destroy mutex attribute");
+      }
+    };
+    using attr_cleanup_t = std::unique_ptr<pthread_mutexattr_t, decltype(attr_destroy)>;
+    auto attr_cleanup = attr_cleanup_t(&attr, attr_destroy);
 
     // Initialize the mutex attributes
     const auto res_attr = pthread_mutexattr_init(&attr);
@@ -94,13 +106,6 @@ public:
     const auto res_init = pthread_mutex_init(&mutex_, &attr);
     if (res_init != 0) {
       throw std::system_error(res_init, std::generic_category(), "Failed to initialize mutex");
-    }
-
-    // Destroy the mutex attributes
-    const auto res_destroy = pthread_mutexattr_destroy(&attr);
-    if (res_destroy != 0) {
-      throw std::system_error(
-        res_destroy, std::generic_category(), "Failed to destroy mutex attribute");
     }
   }
 
