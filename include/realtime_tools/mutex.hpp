@@ -40,11 +40,9 @@ namespace priority_inheritance
  * @brief A class template that provides a pthread mutex with the priority inheritance protocol
  *
  * @tparam MutexType The type of the mutex. It can be one of the following: PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_DEFAULT
- * @tparam MutexProtocol The protocol of the mutex. It can be one of the following: PTHREAD_PRIO_NONE, PTHREAD_PRIO_INHERIT, PTHREAD_PRIO_PROTECT
- * @tparam MutexCeiling The priority ceiling of the mutex. It can be any integer value valid for the scheduling policy of the thread. It is only used if MutexProtocol is PTHREAD_PRIO_PROTECT
  * @tparam MutexRobustness The robustness of the mutex. It can be one of the following: PTHREAD_MUTEX_STALLED, PTHREAD_MUTEX_ROBUST
  */
-template <int MutexType, int MutexProtocol, int MutexCeiling, int MutexRobustness>
+template <int MutexType, int MutexRobustness>
 class MutexBase
 {
 public:
@@ -79,20 +77,11 @@ public:
       throw std::system_error(res_type, std::generic_category(), "Failed to set mutex type");
     }
 
-    // Set the mutex attribute to use the protocol MutexProtocol
-    const auto res_protocol = pthread_mutexattr_setprotocol(&attr, MutexProtocol);
+    // Set the mutex attribute to use the protocol PTHREAD_PRIO_INHERIT
+    const auto res_protocol = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
     if (res_protocol != 0) {
       throw std::system_error(
         res_protocol, std::generic_category(), "Failed to set mutex protocol");
-    }
-
-    if (MutexProtocol == PTHREAD_PRIO_PROTECT) {
-      // Set the mutex attribute to use the priority ceiling
-      const auto res_ceiling = pthread_mutexattr_setprioceiling(&attr, MutexCeiling);
-      if (res_ceiling != 0) {
-        throw std::system_error(
-          res_ceiling, std::generic_category(), "Failed to set mutex priority ceiling");
-      }
     }
 
     // Set the mutex attribute robustness to MutexRobustness
@@ -178,11 +167,9 @@ private:
   pthread_mutex_t mutex_;
 };
 
-using mutex = MutexBase<PTHREAD_MUTEX_NORMAL, PTHREAD_PRIO_INHERIT, -1, PTHREAD_MUTEX_ROBUST>;
-using error_mutex =
-  MutexBase<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_PRIO_INHERIT, -1, PTHREAD_MUTEX_ROBUST>;
-using recursive_mutex =
-  MutexBase<PTHREAD_MUTEX_RECURSIVE, PTHREAD_PRIO_INHERIT, -1, PTHREAD_MUTEX_ROBUST>;
+using mutex = MutexBase<PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_ROBUST>;
+using error_mutex = MutexBase<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_ROBUST>;
+using recursive_mutex = MutexBase<PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ROBUST>;
 }  // namespace priority_inheritance
 }  // namespace realtime_tools
 
