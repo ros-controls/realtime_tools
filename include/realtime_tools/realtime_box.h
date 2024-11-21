@@ -278,7 +278,8 @@ private:
 
 // Only kept for compatibility reasons
 template <typename T, typename mutex_type = std::mutex>
-using RealtimeBoxBestEffort [[deprecated ("Use RealtimeBox instead")]] = RealtimeBoxBase<T, mutex_type>;
+using RealtimeBoxBestEffort [[deprecated("Use RealtimeBox instead")]] =
+  RealtimeBoxBase<T, mutex_type>;
 
 // Provide specialisations for different mutex types
 template <typename T>
