@@ -55,21 +55,19 @@ constexpr auto is_ptr_or_smart_ptr = rcpputils::is_pointer<T>::value;
     Only use the get/set methods that take function pointer for accessing the internal value.
 */
 template <class T, typename mutex_type = std::mutex>
-class RealtimeBox
+class RealtimeBoxBase
 {
-  static_assert(
-    std::is_same_v<mutex_type, std::mutex> || std::is_same_v<mutex_type, std::recursive_mutex>);
   static_assert(std::is_copy_constructible_v<T>, "Passed type must be copy constructible");
 
 public:
   using mutex_t = mutex_type;
   using type = T;
   // Provide various constructors
-  constexpr explicit RealtimeBox(const T & init = T{}) : value_(init) {}
-  constexpr explicit RealtimeBox(const T && init) : value_(std::move(init)) {}
+  constexpr explicit RealtimeBoxBase(const T & init = T{}) : value_(init) {}
+  constexpr explicit RealtimeBoxBase(const T && init) : value_(std::move(init)) {}
 
   // Copy constructor
-  constexpr RealtimeBox(const RealtimeBox & o)
+  constexpr RealtimeBoxBase(const RealtimeBoxBase & o)
   {
     // Lock the other box mutex
     std::unique_lock<mutex_t> lock(o.lock_);
@@ -77,7 +75,7 @@ public:
     value_ = o.value_;
   }
   // Copy assignment constructor
-  constexpr RealtimeBox & operator=(const RealtimeBox & o)
+  constexpr RealtimeBoxBase & operator=(const RealtimeBoxBase & o)
   {
     // Check for self assignment (and a potential deadlock)
     if (&o != this) {
@@ -89,7 +87,7 @@ public:
     }
     return *this;
   }
-  constexpr RealtimeBox(RealtimeBox && o)
+  constexpr RealtimeBox(RealtimeBoxBase && o)
   {
     // Lock the other box mutex
     std::unique_lock<mutex_t> lock(o.lock_);
@@ -98,13 +96,13 @@ public:
   }
   // Only enabled for types that can be constructed from an initializer list
   template <typename U = T>
-  constexpr RealtimeBox(
+  constexpr RealtimeBoxBase(
     const std::initializer_list<U> & init,
     std::enable_if_t<std::is_constructible_v<U, std::initializer_list>>)
   : value_(init)
   {
   }
-  constexpr RealtimeBox & operator=(RealtimeBox && o)
+  constexpr RealtimeBoxBase & operator=(RealtimeBoxBase && o)
   {
     // Check for self assignment (and a potential deadlock)
     if (&o != this) {
@@ -275,6 +273,23 @@ private:
   // from within realtime.
   mutable mutex_t lock_;
 };
+
+//Introduce some easier to use names
+
+// Only kept for compatibility reasons
+template <typename T, typename mutex_type = std::mutex>
+using RealtimeBoxBestEffort [[deprecated]] = RealtimeBox<T, mutex_type>;
+
+// Provide specialisations for different mutex types
+template <typename T>
+using RealtimeBoxStandard = RealtimeBox<T, std::mutex>;
+
+template <typename T>
+using RealtimeBoxRecursive = RealtimeBox<T, std::recursive_mutex>;
+
+// This is the specialisation we recommend to use in the end
+template <typename T>
+using RealtimeBox = RealtimeBoxDefault<T>;
 
 }  // namespace realtime_tools
 
