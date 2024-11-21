@@ -274,7 +274,7 @@ private:
   mutable mutex_t lock_;
 };
 
-//Introduce some easier to use names
+// Introduce some easier to use names
 
 // Only kept for compatibility reasons
 template <typename T, typename mutex_type = std::mutex>
