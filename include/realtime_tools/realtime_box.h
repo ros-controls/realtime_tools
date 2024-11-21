@@ -87,7 +87,7 @@ public:
     }
     return *this;
   }
-  constexpr RealtimeBox(RealtimeBoxBase && o)
+  constexpr RealtimeBoxBase(RealtimeBoxBase && o)
   {
     // Lock the other box mutex
     std::unique_lock<mutex_t> lock(o.lock_);
@@ -278,18 +278,18 @@ private:
 
 // Only kept for compatibility reasons
 template <typename T, typename mutex_type = std::mutex>
-using RealtimeBoxBestEffort [[deprecated]] = RealtimeBox<T, mutex_type>;
+using RealtimeBoxBestEffort [[deprecated]] = RealtimeBoxBase<T, mutex_type>;
 
 // Provide specialisations for different mutex types
 template <typename T>
-using RealtimeBoxStandard = RealtimeBox<T, std::mutex>;
+using RealtimeBoxStandard = RealtimeBoxBase<T, std::mutex>;
 
 template <typename T>
-using RealtimeBoxRecursive = RealtimeBox<T, std::recursive_mutex>;
+using RealtimeBoxRecursive = RealtimeBoxBase<T, std::recursive_mutex>;
 
 // This is the specialisation we recommend to use in the end
 template <typename T>
-using RealtimeBox = RealtimeBoxDefault<T>;
+using RealtimeBox = RealtimeBoxStandard<T>;
 
 }  // namespace realtime_tools
 
