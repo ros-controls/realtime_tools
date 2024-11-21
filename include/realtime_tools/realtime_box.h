@@ -1,3 +1,4 @@
+// Copyright (c) 2009, Willow Garage, Inc.
 // Copyright (c) 2024, Lennart Nachtigall
 //
 // Redistribution and use in source and binary forms, with or without
@@ -53,10 +54,6 @@ constexpr auto is_ptr_or_smart_ptr = rcpputils::is_pointer<T>::value;
     You can use pointers with this box but the access will be different.
     Only use the get/set methods that take function pointer for accessing the internal value.
 */
-
-// Provide a specialisation for non pointer types
-// NOTE: When migrating to a safe access only version just remove the specialisation for pointer
-// and let this be the only version!
 template <class T, typename mutex_type = std::mutex>
 class RealtimeBox
 {
