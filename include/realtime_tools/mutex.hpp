@@ -17,8 +17,8 @@
 #ifndef REALTIME_TOOLS__MUTEX_HPP_
 #define REALTIME_TOOLS__MUTEX_HPP_
 
-#include <errno.h>
 #include <pthread.h>
+#include <cerrno>
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
