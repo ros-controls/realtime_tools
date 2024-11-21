@@ -36,6 +36,8 @@ namespace realtime_tools
 {
 namespace priority_inheritance
 {
+namespace detail
+{
 /**
  * @brief A class template that provides a pthread mutex with the priority inheritance protocol
  *
@@ -43,12 +45,12 @@ namespace priority_inheritance
  * @tparam MutexRobustness The robustness of the mutex. It can be one of the following: PTHREAD_MUTEX_STALLED, PTHREAD_MUTEX_ROBUST
  */
 template <int MutexType, int MutexRobustness>
-class MutexBase
+class mutex
 {
 public:
   using native_handle_type = pthread_mutex_t *;
 
-  MutexBase()
+  mutex()
   {
     pthread_mutexattr_t attr;
 
@@ -98,7 +100,7 @@ public:
     }
   }
 
-  ~MutexBase()
+  ~mutex()
   {
     const auto res = pthread_mutex_destroy(&mutex_);
     if (res != 0) {
@@ -106,9 +108,9 @@ public:
     }
   }
 
-  MutexBase(const MutexBase &) = delete;
+  mutex(const mutex &) = delete;
 
-  MutexBase & operator=(const MutexBase &) = delete;
+  mutex & operator=(const mutex &) = delete;
 
   native_handle_type native_handle() noexcept { return &mutex_; }
 
@@ -166,10 +168,10 @@ public:
 private:
   pthread_mutex_t mutex_;
 };
-
-using mutex = MutexBase<PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_ROBUST>;
-using error_mutex = MutexBase<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_ROBUST>;
-using recursive_mutex = MutexBase<PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ROBUST>;
+}  // namespace detail
+using mutex = detail::mutex<PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_ROBUST>;
+using error_mutex = detail::mutex<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_ROBUST>;
+using recursive_mutex = detail::mutex<PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ROBUST>;
 }  // namespace priority_inheritance
 }  // namespace realtime_tools
 
