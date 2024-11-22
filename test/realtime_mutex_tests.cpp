@@ -222,11 +222,15 @@ TEST(PriorityInheritanceMutexTests, try_lock_mutex)
   {
     realtime_tools::priority_inheritance::mutex mutex;
     ASSERT_TRUE(mutex.try_lock());
-    ASSERT_FALSE(mutex.try_lock());
-    ASSERT_FALSE(mutex.try_lock());
+    ASSERT_THROW(mutex.try_lock(), std::system_error)
+      << "Mutex is already locked in the same thread";
+    std::thread t([&mutex]() {
+      ASSERT_FALSE(mutex.try_lock())
+        << "try_lock should pass when checking from a different thread";
+    });
+    t.join();
     mutex.unlock();
     ASSERT_TRUE(mutex.try_lock());
-    ASSERT_FALSE(mutex.try_lock());
     mutex.unlock();
   }
 
@@ -275,15 +279,15 @@ TEST(PriorityInheritanceMutexTests, native_handle_mutex)
   }
 }
 
-TEST(PriorityInheritanceMutexTests, test_error_mutex)
+TEST(PriorityInheritanceMutexTests, test_mutex_lock_functionality)
 {
   // Trying to lock again should throw an exception
-  realtime_tools::priority_inheritance::error_mutex mutex;
+  realtime_tools::priority_inheritance::mutex mutex;
   mutex.lock();
-  ASSERT_THROW(mutex.lock(), std::runtime_error);
+  ASSERT_THROW(mutex.lock(), std::system_error);
   mutex.unlock();
   ASSERT_NO_THROW(mutex.lock());
-  ASSERT_THROW(mutex.try_lock(), std::runtime_error);
+  ASSERT_THROW(mutex.try_lock(), std::system_error);
   mutex.unlock();
   ASSERT_NO_THROW(mutex.try_lock());
   mutex.unlock();
@@ -307,7 +311,7 @@ TEST(PriorityInheritanceMutexTests, test_lock_constructors)
 
 TEST(PriorityInheritanceMutexTests, test_deadlock_detection)
 {
-  realtime_tools::priority_inheritance::error_mutex mutex;
+  realtime_tools::priority_inheritance::mutex mutex;
   mutex.lock();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   ASSERT_THROW(mutex.try_lock(), std::system_error);

@@ -170,8 +170,7 @@ private:
   pthread_mutex_t mutex_;
 };
 }  // namespace detail
-using mutex = detail::mutex<PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_ROBUST>;
-using error_mutex = detail::mutex<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_ROBUST>;
+using mutex = detail::mutex<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_ROBUST>;
 using recursive_mutex = detail::mutex<PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ROBUST>;
 }  // namespace priority_inheritance
 }  // namespace realtime_tools
