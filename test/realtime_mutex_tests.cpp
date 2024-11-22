@@ -305,6 +305,19 @@ TEST(PriorityInheritanceMutexTests, test_lock_constructors)
   }
 }
 
+TEST(PriorityInheritanceMutexTests, test_deadlock_detection)
+{
+  realtime_tools::priority_inheritance::error_mutex mutex;
+  mutex.lock();
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  ASSERT_THROW(mutex.try_lock(), std::system_error);
+  ASSERT_THROW(mutex.lock(), std::system_error);
+  // In a different thread, try to lock the mutex should not throw an exception
+  std::thread t([&mutex]() { ASSERT_FALSE(mutex.try_lock()); });
+  t.join();
+  mutex.unlock();
+}
+
 int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);

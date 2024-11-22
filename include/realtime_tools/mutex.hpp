@@ -82,15 +82,13 @@ public:
     // Set the mutex attribute to use the protocol PTHREAD_PRIO_INHERIT
     const auto res_protocol = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
     if (res_protocol != 0) {
-      throw std::system_error(
-        res_protocol, std::system_category(), "Failed to set mutex protocol");
+      throw std::system_error(res_protocol, std::system_category(), "Failed to set mutex protocol");
     }
 
     // Set the mutex attribute robustness to MutexRobustness
     const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness);
     if (res_robust != 0) {
-      throw std::system_error(
-        res_robust, std::system_category(), "Failed to set mutex robustness");
+      throw std::system_error(res_robust, std::system_category(), "Failed to set mutex robustness");
     }
 
     // Initialize the mutex with the attributes
@@ -128,6 +126,8 @@ public:
       }
       std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
                 << std::endl;
+    } else if (res == EDEADLK) {
+      throw std::system_error(res, std::system_category(), "Deadlock detected");
     } else {
       throw std::runtime_error(std::string("Failed to lock mutex : ") + std::strerror(res));
     }
@@ -150,8 +150,7 @@ public:
     }
     if (res == EBUSY) {
       return false;
-    }
-    if (res == EOWNERDEAD) {
+    } else if (res == EOWNERDEAD) {
       const auto res_consistent = pthread_mutex_consistent(&mutex_);
       if (res_consistent != 0) {
         throw std::runtime_error(
@@ -159,6 +158,8 @@ public:
       }
       std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
                 << std::endl;
+    } else if (res == EDEADLK) {
+      throw std::system_error(res, std::system_category(), "Deadlock detected");
     } else {
       throw std::runtime_error(std::string("Failed to try lock mutex : ") + std::strerror(res));
     }
