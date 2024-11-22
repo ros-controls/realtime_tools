@@ -69,34 +69,34 @@ public:
     const auto res_attr = pthread_mutexattr_init(&attr);
     if (res_attr != 0) {
       throw std::system_error(
-        res_attr, std::generic_category(), "Failed to initialize mutex attribute");
+        res_attr, std::system_category(), "Failed to initialize mutex attribute");
     }
 
     // Set the mutex type to MutexType
     const auto res_type = pthread_mutexattr_settype(&attr, MutexType);
 
     if (res_type != 0) {
-      throw std::system_error(res_type, std::generic_category(), "Failed to set mutex type");
+      throw std::system_error(res_type, std::system_category(), "Failed to set mutex type");
     }
 
     // Set the mutex attribute to use the protocol PTHREAD_PRIO_INHERIT
     const auto res_protocol = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
     if (res_protocol != 0) {
       throw std::system_error(
-        res_protocol, std::generic_category(), "Failed to set mutex protocol");
+        res_protocol, std::system_category(), "Failed to set mutex protocol");
     }
 
     // Set the mutex attribute robustness to MutexRobustness
     const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness);
     if (res_robust != 0) {
       throw std::system_error(
-        res_robust, std::generic_category(), "Failed to set mutex robustness");
+        res_robust, std::system_category(), "Failed to set mutex robustness");
     }
 
     // Initialize the mutex with the attributes
     const auto res_init = pthread_mutex_init(&mutex_, &attr);
     if (res_init != 0) {
-      throw std::system_error(res_init, std::generic_category(), "Failed to initialize mutex");
+      throw std::system_error(res_init, std::system_category(), "Failed to initialize mutex");
     }
   }
 
