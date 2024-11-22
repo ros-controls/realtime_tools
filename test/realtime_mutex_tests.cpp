@@ -289,6 +289,22 @@ TEST(PriorityInheritanceMutexTests, test_error_mutex)
   mutex.unlock();
 }
 
+TEST(PriorityInheritanceMutexTests, test_lock_constructors)
+{
+  realtime_tools::priority_inheritance::mutex mutex;
+  {
+    std::unique_lock<realtime_tools::priority_inheritance::mutex> lock(mutex, std::defer_lock);
+    ASSERT_FALSE(lock.owns_lock());
+    lock.lock();
+    ASSERT_TRUE(lock.owns_lock());
+    lock.unlock();
+  }
+  {
+    std::unique_lock<realtime_tools::priority_inheritance::mutex> lock(mutex, std::try_to_lock);
+    ASSERT_TRUE(lock.owns_lock());
+  }
+}
+
 int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
