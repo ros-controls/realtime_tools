@@ -1,4 +1,5 @@
 // Copyright (c) 2009, Willow Garage, Inc.
+// Copyright (c) 2024, Lennart Nachtigall
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -27,50 +28,270 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // Author: Stuart Glaser
+// Author: Lennart Nachtigall
 
-#ifndef REALTIME_TOOLS__REALTIME_BOX_H__
-#define REALTIME_TOOLS__REALTIME_BOX_H__
+#ifndef REALTIME_TOOLS__REALTIME_BOX_H_
+#define REALTIME_TOOLS__REALTIME_BOX_H_
 
+#include <functional>
+#include <initializer_list>
 #include <mutex>
-#include <string>
+#include <optional>
+#include <utility>
+
+#include <rcpputils/pointer_traits.hpp>
 
 namespace realtime_tools
 {
+
+template <typename T>
+constexpr auto is_ptr_or_smart_ptr = rcpputils::is_pointer<T>::value;
+
 /*!
+    A Box that ensures thread safe access to the boxed contents.
+    Access is best effort. If it can not lock it will return.
 
-  Strongly suggested that you use an std::shared_ptr in this box to
-  guarantee realtime safety.
-
- */
-template <class T>
-class RealtimeBox
+    NOTE about pointers:
+    You can use pointers with this box but the access will be different.
+    Only use the get/set methods that take function pointer for accessing the internal value.
+*/
+template <class T, typename mutex_type = std::mutex>
+class RealtimeBoxBase
 {
+  static_assert(std::is_copy_constructible_v<T>, "Passed type must be copy constructible");
+
 public:
-  explicit RealtimeBox(const T & initial = T()) : thing_(initial) {}
+  using mutex_t = mutex_type;
+  using type = T;
+  // Provide various constructors
+  constexpr explicit RealtimeBoxBase(const T & init = T{}) : value_(init) {}
+  constexpr explicit RealtimeBoxBase(const T && init) : value_(std::move(init)) {}
 
-  void set(const T & value)
+  // Copy constructor
+  constexpr RealtimeBoxBase(const RealtimeBoxBase & o)
   {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
-    thing_ = value;
+    // Lock the other box mutex
+    std::unique_lock<mutex_t> lock(o.lock_);
+    // We do not need to lock our own mutex because we are currently in the process of being created
+    value_ = o.value_;
+  }
+  // Copy assignment constructor
+  constexpr RealtimeBoxBase & operator=(const RealtimeBoxBase & o)
+  {
+    // Check for self assignment (and a potential deadlock)
+    if (&o != this) {
+      // Lock the other box mutex
+      std::unique_lock<mutex_t> lock_other(o.lock_);
+      std::unique_lock<mutex_t> lock_self(lock_);
+
+      value_ = o.value_;
+    }
+    return *this;
+  }
+  constexpr RealtimeBoxBase(RealtimeBoxBase && o)
+  {
+    // Lock the other box mutex
+    std::unique_lock<mutex_t> lock(o.lock_);
+    // We do not need to lock our own mutex because we are currently in the process of being created
+    value_ = std::move(o.value_);
+  }
+  // Only enabled for types that can be constructed from an initializer list
+  template <typename U = T>
+  constexpr RealtimeBoxBase(
+    const std::initializer_list<U> & init,
+    std::enable_if_t<std::is_constructible_v<U, std::initializer_list<U>>>)
+  : value_(init)
+  {
+  }
+  constexpr RealtimeBoxBase & operator=(RealtimeBoxBase && o)
+  {
+    // Check for self assignment (and a potential deadlock)
+    if (&o != this) {
+      // Lock the other box mutex
+      std::unique_lock<mutex_t> lock_other(o.lock_);
+      std::unique_lock<mutex_t> lock_self(lock_);
+
+      value_ = std::move(o.value_);
+    }
+    return *this;
   }
 
-  void get(T & ref)
+  /**
+   * @brief set a new content with best effort
+   * @return false if mutex could not be locked
+   * @note disabled for pointer types
+   */
+  template <typename U = T>
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, bool> try_set(const T & value)
   {
-    std::lock_guard<std::mutex> guard(thing_lock_RT_);
-    ref = thing_;
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
+    if (!guard.try_lock()) {
+      return false;
+    }
+    value_ = value;
+    return true;
   }
+  /**
+   * @brief access the content readable with best effort
+   * @return false if the mutex could not be locked
+   * @note only safe way to access pointer type content (rw)
+   */
+  bool try_set(const std::function<void(T &)> & func)
+  {
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
+    if (!guard.try_lock()) {
+      return false;
+    }
+
+    func(value_);
+    return true;
+  }
+  /**
+   * @brief get the content with best effort
+   * @return std::nullopt if content could not be access, otherwise the content is returned
+   */
+  template <typename U = T>
+  [[nodiscard]] typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, std::optional<U>> try_get() const
+  {
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
+    if (!guard.try_lock()) {
+      return std::nullopt;
+    }
+    return value_;
+  }
+  /**
+   * @brief access the content (r) with best effort
+   * @return false if the mutex could not be locked
+   * @note only safe way to access pointer type content (r)
+   */
+  bool try_get(const std::function<void(const T &)> & func)
+  {
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
+    if (!guard.try_lock()) {
+      return false;
+    }
+
+    func(value_);
+    return true;
+  }
+
+  /**
+   * @brief set the content and wait until the mutex could be locked (RealtimeBox behavior)
+   * @return true
+   */
+  template <typename U = T>
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> set(const T & value)
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    // cppcheck-suppress missingReturn
+    value_ = value;
+  }
+  /**
+   * @brief access the content (rw) and wait until the mutex could locked
+   */
+  void set(const std::function<void(T &)> & func)
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    func(value_);
+  }
+
+  /**
+   * @brief get the content and wait until the mutex could be locked (RealtimeBox behaviour)
+   * @return copy of the value
+   */
+  template <typename U = T>
+  [[nodiscard]] typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, U> get() const
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    return value_;
+  }
+  /**
+   * @brief get the content and wait until the mutex could be locked
+   * @note same signature as in the existing RealtimeBox<T>
+   */
+  template <typename U = T>
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> get(T & in) const
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    // cppcheck-suppress missingReturn
+    in = value_;
+  }
+  /**
+   * @brief access the content (r) and wait until the mutex could be locked
+   * @note only safe way to access pointer type content (r)
+   * @note same signature as in the existing RealtimeBox<T>
+   */
+  void get(const std::function<void(const T &)> & func)
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    func(value_);
+  }
+
+  /**
+   * @brief provide a custom assignment operator for easier usage
+   * @note only to be used from non-RT!
+   */
+  template <typename U = T>
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> operator=(const T & value)
+  {
+    set(value);
+  }
+
+  /**
+   * @brief provide a custom conversion operator
+   * @note Can only be used from non-RT!
+   */
+  template <typename U = T, typename = typename std::enable_if_t<!is_ptr_or_smart_ptr<U>>>
+  [[nodiscard]] operator T() const
+  {
+    // Only makes sense with the getNonRT method otherwise we would return an std::optional
+    return get();
+  }
+  /**
+   * @brief provide a custom conversion operator
+   * @note Can be used from non-RT and RT contexts
+   */
+  template <typename U = T, typename = typename std::enable_if_t<!is_ptr_or_smart_ptr<U>>>
+  [[nodiscard]] operator std::optional<T>() const
+  {
+    return try_get();
+  }
+
+  // In case one wants to actually use a pointer
+  // in this implementation we allow accessing the lock directly.
+  // Note: Be careful with lock.unlock().
+  // It may only be called from the thread that locked the mutex!
+  [[nodiscard]] const mutex_t & get_mutex() const { return lock_; }
+  [[nodiscard]] mutex_t & get_mutex() { return lock_; }
 
 private:
-  // The thing that's in the box.
-  T thing_;
+  T value_;
 
   // Protects access to the thing in the box.  This mutex is
   // guaranteed to be locked for no longer than the duration of the
   // copy, so as long as the copy is realtime safe and the OS has
   // priority inheritance for mutexes, this lock can be safely locked
   // from within realtime.
-  std::mutex thing_lock_RT_;
+  mutable mutex_t lock_;
 };
+
+// Introduce some easier to use names
+
+// Only kept for compatibility reasons
+template <typename T, typename mutex_type = std::mutex>
+using RealtimeBoxBestEffort [[deprecated("Use RealtimeBox instead")]] =
+  RealtimeBoxBase<T, mutex_type>;
+
+// Provide specialisations for different mutex types
+template <typename T>
+using RealtimeBoxStandard = RealtimeBoxBase<T, std::mutex>;
+
+template <typename T>
+using RealtimeBoxRecursive = RealtimeBoxBase<T, std::recursive_mutex>;
+
+// This is the specialisation we recommend to use in the end
+template <typename T>
+using RealtimeBox = RealtimeBoxStandard<T>;
 
 }  // namespace realtime_tools
 

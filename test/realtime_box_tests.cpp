@@ -1,3 +1,4 @@
+// Copyright (c) 2024, Lennart Nachtigall
 // Copyright (c) 2019, Open Source Robotics Foundation, Inc.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -10,7 +11,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the Open Source Robotics Foundation, Inc. nor the names of its
+//    * Neither the name of the Willow Garage, Inc. nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -29,28 +30,174 @@
 #include <gmock/gmock.h>
 #include <realtime_tools/realtime_box.h>
 
+struct DefaultConstructable
+{
+  int a = 10;
+  std::string str = "hallo";
+};
+
+struct NonDefaultConstructable
+{
+  NonDefaultConstructable(int a_, const std::string & str_) : a(a_), str(str_) {}
+  int a;
+  std::string str;
+};
+
+struct FromInitializerList
+{
+  FromInitializerList(std::initializer_list<int> list)
+  {
+    std::copy(list.begin(), list.end(), data.begin());
+  }
+  std::array<int, 3> data;
+};
+
 using realtime_tools::RealtimeBox;
 
-class DefaultConstructable
+TEST(RealtimeBox, empty_construct)
 {
-public:
-  DefaultConstructable() : number_(42) {}
-  ~DefaultConstructable() {}
-  int number_;
-};
+  RealtimeBox<DefaultConstructable> box;
+
+  auto value = box.get();
+  EXPECT_EQ(value.a, 10);
+  EXPECT_EQ(value.str, "hallo");
+}
 
 TEST(RealtimeBox, default_construct)
 {
-  DefaultConstructable thing;
+  DefaultConstructable data;
+  data.a = 100;
+
+  RealtimeBox<DefaultConstructable> box(data);
+
+  auto value = box.get();
+  EXPECT_EQ(value.a, 100);
+  EXPECT_EQ(value.str, "hallo");
+}
+
+TEST(RealtimeBox, non_default_constructable)
+{
+  RealtimeBox<NonDefaultConstructable> box(NonDefaultConstructable(-10, "hello"));
+
+  auto value = box.get();
+  EXPECT_EQ(value.a, -10);
+  EXPECT_EQ(value.str, "hello");
+}
+TEST(RealtimeBox, standard_get)
+{
+  RealtimeBox<DefaultConstructable> box(DefaultConstructable{1000});
+
+  DefaultConstructable data;
+  box.get(data);
+  EXPECT_EQ(data.a, 1000);
+  data.a = 10000;
+
+  box.set(data);
+
+  auto value = box.get();
+  EXPECT_EQ(value.a, 10000);
+}
+
+TEST(RealtimeBox, initializer_list)
+{
+  RealtimeBox<FromInitializerList> box({1, 2, 3});
+
+  auto value = box.get();
+  EXPECT_EQ(value.data[0], 1);
+  EXPECT_EQ(value.data[1], 2);
+  EXPECT_EQ(value.data[2], 3);
+}
+
+TEST(RealtimeBox, assignment_operator)
+{
+  DefaultConstructable data;
+  data.a = 1000;
+  RealtimeBox<DefaultConstructable> box;
+  // Assignment operator is always non RT!
+  box = data;
+
+  auto value = box.get();
+  EXPECT_EQ(value.a, 1000);
+}
+TEST(RealtimeBox, typecast_operator)
+{
+  RealtimeBox<DefaultConstructable> box(DefaultConstructable{100, ""});
+
+  // Use non RT access
+  DefaultConstructable data = box;
+
+  EXPECT_EQ(data.a, 100);
+
+  // Use RT access -> returns std::nullopt if the mutex could not be locked
+  std::optional<DefaultConstructable> rt_data_access = box.try_get();
+
+  if (rt_data_access) {
+    EXPECT_EQ(rt_data_access->a, 100);
+  }
+}
+
+TEST(RealtimeBox, pointer_type)
+{
+  int a = 100;
+  int * ptr = &a;
+
+  RealtimeBox<int *> box(ptr);
+  // This does not and should not compile!
+  // auto value = box.get();
+
+  // Instead access it via a passed function.
+  // This assures that we access the data within the scope of the lock
+  box.get([](const auto & i) { EXPECT_EQ(*i, 100); });
+
+  box.set([](auto & i) { *i = 200; });
+
+  box.get([](const auto & i) { EXPECT_EQ(*i, 200); });
+
+  box.try_get([](const auto & i) { EXPECT_EQ(*i, 200); });
+}
+
+TEST(RealtimeBox, smart_ptr_type)
+{
+  std::shared_ptr<int> ptr = std::make_shared<int>(100);
+
+  RealtimeBox<std::shared_ptr<int>> box(ptr);
+
+  // Instead access it via a passed function.
+  // This assures that we access the data within the scope of the lock
+  box.get([](const auto & i) { EXPECT_EQ(*i, 100); });
+
+  box.set([](auto & i) { *i = 200; });
+
+  box.get([](const auto & i) { EXPECT_EQ(*i, 200); });
+
+  box.try_set([](const auto & p) { *p = 10; });
+
+  box.try_get([](const auto & p) { EXPECT_EQ(*p, 10); });
+}
+
+// These are the tests from the old RealtimeBox implementation
+// They are therefore suffixed with _existing
+
+class DefaultConstructable_existing
+{
+public:
+  DefaultConstructable_existing() : number_(42) {}
+  ~DefaultConstructable_existing() {}
+  int number_;
+};
+
+TEST(RealtimeBox, default_construct_existing)
+{
+  DefaultConstructable_existing thing;
   thing.number_ = 5;
 
-  RealtimeBox<DefaultConstructable> box;
+  RealtimeBox<DefaultConstructable_existing> box;
   box.get(thing);
 
   EXPECT_EQ(42, thing.number_);
 }
 
-TEST(RealtimeBox, initial_value)
+TEST(RealtimeBox, initial_value_existing)
 {
   RealtimeBox<double> box(3.14);
   double num = 0.0;
@@ -58,7 +205,7 @@ TEST(RealtimeBox, initial_value)
   EXPECT_DOUBLE_EQ(3.14, num);
 }
 
-TEST(RealtimeBox, set_and_get)
+TEST(RealtimeBox, set_and_get_existing)
 {
   RealtimeBox<char> box('a');
 
@@ -70,4 +217,40 @@ TEST(RealtimeBox, set_and_get)
   char output = 'a';
   box.get(output);
   EXPECT_EQ('z', output);
+}
+
+TEST(RealtimeBox, copy_assign)
+{
+  RealtimeBox<char> box_a('a');
+  RealtimeBox<char> box_b('b');
+
+  // Assign b to a -> a should now contain b
+  box_a = box_b;
+
+  EXPECT_EQ('b', box_a.try_get().value());
+}
+TEST(RealtimeBox, copy)
+{
+  RealtimeBox<char> box_b('b');
+  RealtimeBox<char> box_a(box_b);
+
+  EXPECT_EQ('b', box_a.try_get().value());
+}
+
+TEST(RealtimeBox, move_assign)
+{
+  RealtimeBox<char> box_a('a');
+  RealtimeBox<char> box_b('b');
+
+  // Move  b to a -> a should now contain b
+  box_a = std::move(box_b);
+
+  EXPECT_EQ('b', box_a.try_get().value());
+}
+TEST(RealtimeBox, move)
+{
+  RealtimeBox<char> box_b('b');
+  RealtimeBox<char> box_a(std::move(box_b));
+
+  EXPECT_EQ('b', box_a.try_get().value());
 }
