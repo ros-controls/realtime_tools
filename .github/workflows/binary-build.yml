@@ -15,21 +15,21 @@ on:
     - cron: '03 1 * * *'
 
 jobs:
-  binary-main:
+  binary:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
     strategy:
       fail-fast: false
       matrix:
         ROS_DISTRO: [humble, jazzy, rolling]
-        ROS_REPO: [main]
+        ROS_REPO: [main, testing]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: ${{ matrix.ROS_REPO }}
       ref_for_scheduled_build: master
-  build-testing-downstream:
+  build-downstream:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@test_downstream
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         ROS_DISTRO: [humble, jazzy, rolling]
         ROS_REPO: [testing]
@@ -37,5 +37,6 @@ jobs:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: ${{ matrix.ROS_REPO }}
       ref_for_scheduled_build: master
+      not_test_build: true
       downstream_workspace: https://raw.githubusercontent.com/ros-controls/ros2_control_ci/refs/heads/master/ros_controls.${{ matrix.ROS_DISTRO }}.repos
       not_test_downstream: true
