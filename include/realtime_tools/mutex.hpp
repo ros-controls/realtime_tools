@@ -34,8 +34,6 @@
  */
 namespace realtime_tools
 {
-namespace priority_inheritance
-{
 namespace detail
 {
 /**
@@ -170,9 +168,8 @@ private:
   pthread_mutex_t mutex_;
 };
 }  // namespace detail
-using mutex = detail::mutex<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_ROBUST>;
-using recursive_mutex = detail::mutex<PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ROBUST>;
-}  // namespace priority_inheritance
+using prio_inherit_mutex = detail::mutex<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_ROBUST>;
+using prio_inherit_recursive_mutex = detail::mutex<PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ROBUST>;
 }  // namespace realtime_tools
 
 #endif  // REALTIME_TOOLS__MUTEX_HPP_

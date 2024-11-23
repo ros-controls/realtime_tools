@@ -24,7 +24,7 @@
 TEST(PriorityInheritanceMutexTests, lock_unlock)
 {
   // The mutex is locked and unlocked correctly
-  realtime_tools::priority_inheritance::mutex mutex;
+  realtime_tools::prio_inherit_mutex mutex;
   mutex.lock();
   mutex.unlock();
 }
@@ -32,7 +32,7 @@ TEST(PriorityInheritanceMutexTests, lock_unlock)
 TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded)
 {
   // The mutex is locked and unlocked correctly in a multithreaded environment
-  realtime_tools::priority_inheritance::mutex mutex;
+  realtime_tools::prio_inherit_mutex mutex;
   std::thread t1([&mutex]() {
     mutex.lock();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -50,7 +50,7 @@ TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded)
 TEST(PriorityInheritanceMutexTests, recursive_lock_lock_unlock_multithreaded)
 {
   // The mutex is locked and unlocked correctly in a multithreaded environment
-  realtime_tools::priority_inheritance::recursive_mutex mutex;
+  realtime_tools::prio_inherit_recursive_mutex mutex;
   std::thread t1([&mutex]() {
     mutex.lock();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -72,8 +72,8 @@ TEST(PriorityInheritanceMutexTests, recursive_lock_lock_unlock_multithreaded)
 TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_multiple_mutexes)
 {
   // The mutex is locked and unlocked correctly in a multithreaded environment with multiple mutexes
-  realtime_tools::priority_inheritance::mutex mutex1;
-  realtime_tools::priority_inheritance::mutex mutex2;
+  realtime_tools::prio_inherit_mutex mutex1;
+  realtime_tools::prio_inherit_mutex mutex2;
   std::thread t1([&mutex1, &mutex2]() {
     mutex1.lock();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -97,8 +97,8 @@ TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_multiple_mutexes)
 TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_multiple_mutexes_different_types)
 {
   // The mutex is locked and unlocked correctly in a multithreaded environment with multiple mutexes
-  realtime_tools::priority_inheritance::mutex mutex1;
-  realtime_tools::priority_inheritance::recursive_mutex mutex2;
+  realtime_tools::prio_inherit_mutex mutex1;
+  realtime_tools::prio_inherit_recursive_mutex mutex2;
   std::thread t1([&mutex1, &mutex2]() {
     mutex1.lock();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -122,7 +122,7 @@ TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_multiple_mutexes_d
 TEST(PriorityInheritanceMutexTests, lock_unlock_recursive_mutex)
 {
   // Test to check that the mutex is recursive
-  realtime_tools::priority_inheritance::recursive_mutex mutex;
+  realtime_tools::prio_inherit_recursive_mutex mutex;
   mutex.lock();
   mutex.lock();
   mutex.unlock();
@@ -131,8 +131,8 @@ TEST(PriorityInheritanceMutexTests, lock_unlock_recursive_mutex)
 
 TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_recursive_mutex_multiple_mutexes)
 {
-  realtime_tools::priority_inheritance::recursive_mutex mutex1;
-  realtime_tools::priority_inheritance::recursive_mutex mutex2;
+  realtime_tools::prio_inherit_recursive_mutex mutex1;
+  realtime_tools::prio_inherit_recursive_mutex mutex2;
   std::thread t1([&mutex1, &mutex2]() {
     mutex1.lock();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -155,7 +155,7 @@ TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_recursive_mutex_mu
 
 TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_mutex_one_thread_dies)
 {
-  realtime_tools::priority_inheritance::mutex mutex;
+  realtime_tools::prio_inherit_mutex mutex;
   std::thread t1([&mutex]() {
     mutex.lock();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -174,7 +174,7 @@ TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_mutex_one_thread_d
 
 TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_recursive_mutex_one_thread_dies)
 {
-  realtime_tools::priority_inheritance::recursive_mutex mutex;
+  realtime_tools::prio_inherit_recursive_mutex mutex;
   std::thread t1([&mutex]() {
     mutex.lock();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -193,34 +193,34 @@ TEST(PriorityInheritanceMutexTests, lock_unlock_multithreaded_recursive_mutex_on
 
 TEST(PriorityInheritanceMutexTests, lock_guard_mutex)
 {
-  realtime_tools::priority_inheritance::mutex mutex;
+  realtime_tools::prio_inherit_mutex mutex;
   {
-    std::lock_guard<realtime_tools::priority_inheritance::mutex> lock(mutex);
+    std::lock_guard<realtime_tools::prio_inherit_mutex> lock(mutex);
   }
 
-  realtime_tools::priority_inheritance::recursive_mutex recursive_mutex;
+  realtime_tools::prio_inherit_recursive_mutex recursive_mutex;
   {
-    std::lock_guard<realtime_tools::priority_inheritance::recursive_mutex> lock(recursive_mutex);
+    std::lock_guard<realtime_tools::prio_inherit_recursive_mutex> lock(recursive_mutex);
   }
 }
 
 TEST(PriorityInheritanceMutexTests, unique_lock_mutex)
 {
-  realtime_tools::priority_inheritance::mutex mutex;
+  realtime_tools::prio_inherit_mutex mutex;
   {
-    std::unique_lock<realtime_tools::priority_inheritance::mutex> lock(mutex);
+    std::unique_lock<realtime_tools::prio_inherit_mutex> lock(mutex);
   }
 
-  realtime_tools::priority_inheritance::recursive_mutex recursive_mutex;
+  realtime_tools::prio_inherit_recursive_mutex recursive_mutex;
   {
-    std::unique_lock<realtime_tools::priority_inheritance::recursive_mutex> lock(recursive_mutex);
+    std::unique_lock<realtime_tools::prio_inherit_recursive_mutex> lock(recursive_mutex);
   }
 }
 
 TEST(PriorityInheritanceMutexTests, try_lock_mutex)
 {
   {
-    realtime_tools::priority_inheritance::mutex mutex;
+    realtime_tools::prio_inherit_mutex mutex;
     ASSERT_TRUE(mutex.try_lock());
     ASSERT_THROW(mutex.try_lock(), std::system_error)
       << "Mutex is already locked in the same thread";
@@ -235,7 +235,7 @@ TEST(PriorityInheritanceMutexTests, try_lock_mutex)
   }
 
   {
-    realtime_tools::priority_inheritance::recursive_mutex recursive_mutex;
+    realtime_tools::prio_inherit_recursive_mutex recursive_mutex;
     ASSERT_TRUE(recursive_mutex.try_lock());
     ASSERT_TRUE(recursive_mutex.try_lock());
     ASSERT_TRUE(recursive_mutex.try_lock());
@@ -247,8 +247,8 @@ TEST(PriorityInheritanceMutexTests, try_lock_mutex)
 
 TEST(PriorityInheritanceMutexTests, standard_lock_test)
 {
-  realtime_tools::priority_inheritance::mutex mutex1;
-  realtime_tools::priority_inheritance::mutex mutex2;
+  realtime_tools::prio_inherit_mutex mutex1;
+  realtime_tools::prio_inherit_mutex mutex2;
   {
     std::lock(mutex1, mutex2);
     // do work
@@ -267,13 +267,13 @@ TEST(PriorityInheritanceMutexTests, standard_lock_test)
 TEST(PriorityInheritanceMutexTests, native_handle_mutex)
 {
   {
-    realtime_tools::priority_inheritance::mutex mutex;
+    realtime_tools::prio_inherit_mutex mutex;
     auto native_handle = mutex.native_handle();
     ASSERT_NE(native_handle, nullptr);
   }
 
   {
-    realtime_tools::priority_inheritance::recursive_mutex recursive_mutex;
+    realtime_tools::prio_inherit_recursive_mutex recursive_mutex;
     auto native_handle = recursive_mutex.native_handle();
     ASSERT_NE(native_handle, nullptr);
   }
@@ -282,7 +282,7 @@ TEST(PriorityInheritanceMutexTests, native_handle_mutex)
 TEST(PriorityInheritanceMutexTests, test_mutex_lock_functionality)
 {
   // Trying to lock again should throw an exception
-  realtime_tools::priority_inheritance::mutex mutex;
+  realtime_tools::prio_inherit_mutex mutex;
   mutex.lock();
   ASSERT_THROW(mutex.lock(), std::system_error);
   mutex.unlock();
@@ -295,23 +295,23 @@ TEST(PriorityInheritanceMutexTests, test_mutex_lock_functionality)
 
 TEST(PriorityInheritanceMutexTests, test_lock_constructors)
 {
-  realtime_tools::priority_inheritance::mutex mutex;
+  realtime_tools::prio_inherit_mutex mutex;
   {
-    std::unique_lock<realtime_tools::priority_inheritance::mutex> lock(mutex, std::defer_lock);
+    std::unique_lock<realtime_tools::prio_inherit_mutex> lock(mutex, std::defer_lock);
     ASSERT_FALSE(lock.owns_lock());
     lock.lock();
     ASSERT_TRUE(lock.owns_lock());
     lock.unlock();
   }
   {
-    std::unique_lock<realtime_tools::priority_inheritance::mutex> lock(mutex, std::try_to_lock);
+    std::unique_lock<realtime_tools::prio_inherit_mutex> lock(mutex, std::try_to_lock);
     ASSERT_TRUE(lock.owns_lock());
   }
 }
 
 TEST(PriorityInheritanceMutexTests, test_deadlock_detection)
 {
-  realtime_tools::priority_inheritance::mutex mutex;
+  realtime_tools::prio_inherit_mutex mutex;
   mutex.lock();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   ASSERT_THROW(mutex.try_lock(), std::system_error);
