@@ -99,7 +99,7 @@ public:
   template <typename U = T>
   constexpr RealtimeBoxBase(
     const std::initializer_list<U> & init,
-    std::enable_if_t<std::is_constructible_v<U, std::initializer_list>>)
+    std::enable_if_t<std::is_constructible_v<U, std::initializer_list<U>>>)
   : value_(init)
   {
   }
