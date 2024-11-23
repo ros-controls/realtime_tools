@@ -38,5 +38,5 @@ jobs:
       ros_repo: ${{ matrix.ROS_REPO }}
       ref_for_scheduled_build: master
       not_test_build: true
-      downstream_workspace: ros_controls.${{ matrix.ROS_DISTRO }}.repos
+      downstream_workspace: https://raw.githubusercontent.com/ros-controls/ros2_control_ci/refs/heads/master/ros_controls.${{ matrix.ROS_DISTRO }}.repos
       not_test_downstream: true
