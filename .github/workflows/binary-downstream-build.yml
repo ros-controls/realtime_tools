@@ -1,6 +1,6 @@
-name: Binary Build
-# author: Denis Štogl <denis@stoglrobotics.de>
-# description: 'Build & test all dependencies from released (binary) packages.'
+name: Downstream Build
+# description: 'Build & test downstream packages from source.'
+# author: Christoph Froehlich <christoph.froehlich@ait.ac.at>
 
 on:
   workflow_dispatch:
