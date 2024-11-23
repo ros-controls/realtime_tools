@@ -10,19 +10,19 @@ on:
   push:
     branches:
       - master
-  schedule:
-    # Run every morning to detect flakiness and broken dependencies
-    - cron: '03 1 * * *'
 
 jobs:
-  binary:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+  build-downstream:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@test_downstream
     strategy:
       fail-fast: false
       matrix:
         ROS_DISTRO: [humble, jazzy, rolling]
-        ROS_REPO: [main, testing]
+        ROS_REPO: [testing]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: ${{ matrix.ROS_REPO }}
       ref_for_scheduled_build: master
+      not_test_build: true
+      downstream_workspace: ros_controls.${{ matrix.ROS_DISTRO }}.repos
+      not_test_downstream: true
