@@ -14,6 +14,8 @@ if(WIN32)
     NOMINMAX
     WIN32_LEAN_AND_MEAN
   )
+  # set the same behavior for windows as it is on linux
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
