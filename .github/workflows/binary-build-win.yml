@@ -1,4 +1,4 @@
-name: Binary Build Windows
+name: Windows Binary Build
 # author: Christoph Fröhlich <christoph.froehlich@ait.ac.at>
 # description: 'Build & test all dependencies from released (binary) windows packages.'
 
