@@ -153,6 +153,37 @@ public:
   }
 
   /**
+   * @brief set a new content with best effort
+   * @return false if mutex could not be locked
+   * @note disabled for pointer types
+   * @deprecated Use try_set(const T & value) instead!
+   */
+  template <typename U = T>
+  [[deprecated("Use try_set(const T & value) instead!")]]
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, bool> trySet(const T & value)
+  {
+    std::unique_lock<mutex_t> guard(lock_, std::defer_lock);
+    if (!guard.try_lock()) {
+      return false;
+    }
+    value_ = value;
+    return true;
+  }
+
+  /**
+   * @brief access the content readable with best effort
+   * @return false if the mutex could not be locked
+   * @note only safe way to access pointer type content (rw)
+   * @deprecated Use try_set(const std::function<void(T &)> & func) instead!
+   */
+  template <typename U = T>
+  [[deprecated("Use try_set(const std::function<void(T &)> & func) instead!")]]
+  bool trySet(const std::function<void(T &)> & func)
+  {
+    return try_set(func);
+  }
+
+  /**
    * @brief get the content with best effort
    * @return std::nullopt if content could not be access, otherwise the content is returned
    */
@@ -180,6 +211,31 @@ public:
 
     func(value_);
     return true;
+  }
+
+  /**
+   * @brief get the content with best effort
+   * @return std::nullopt if content could not be access, otherwise the content is returned
+   * @deprecated Use try_get() instead!
+   */
+  template <typename U = T>
+  [[deprecated("Use try_get() instead!")]] [[nodiscard]]
+  typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, std::optional<U>> tryGet() const
+  {
+    return try_get();
+  }
+
+  /**
+   * @brief access the content (r) with best effort
+   * @return false if the mutex could not be locked
+   * @note only safe way to access pointer type content (r)
+   * @deprecated Use try_get(const std::function<void(const T &)> & func) instead!
+   */
+  template <typename U = T>
+  [[deprecated("Use try_get(const std::function<void(const T &)> & func) instead!")]]
+  bool tryGet(const std::function<void(const T &)> & func)
+  {
+    return try_get(func);
   }
 
   /**
@@ -311,6 +367,12 @@ public:
   // It may only be called from the thread that locked the mutex!
   [[nodiscard]] const mutex_t & get_mutex() const { return lock_; }
   [[nodiscard]] mutex_t & get_mutex() { return lock_; }
+
+  [[nodiscard]] [[deprecated("Use get_mutex() instead!")]] mutex_t & getMutex() { return lock_; }
+  [[nodiscard]] [[deprecated("Use get_mutex() instead!")]] const mutex_t & getMutex() const
+  {
+    return lock_;
+  }
 
 private:
   T value_;
