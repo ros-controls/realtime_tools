@@ -75,6 +75,7 @@ public:
     // We do not need to lock our own mutex because we are currently in the process of being created
     value_ = o.value_;
   }
+
   // Copy assignment constructor
   constexpr RealtimeBoxBase & operator=(const RealtimeBoxBase & o)
   {
@@ -88,6 +89,7 @@ public:
     }
     return *this;
   }
+
   constexpr RealtimeBoxBase(RealtimeBoxBase && o)
   {
     // Lock the other box mutex
@@ -95,6 +97,7 @@ public:
     // We do not need to lock our own mutex because we are currently in the process of being created
     value_ = std::move(o.value_);
   }
+
   // Only enabled for types that can be constructed from an initializer list
   template <typename U = T>
   constexpr RealtimeBoxBase(
@@ -103,6 +106,7 @@ public:
   : value_(init)
   {
   }
+
   constexpr RealtimeBoxBase & operator=(RealtimeBoxBase && o)
   {
     // Check for self assignment (and a potential deadlock)
@@ -131,6 +135,7 @@ public:
     value_ = value;
     return true;
   }
+
   /**
    * @brief access the content readable with best effort
    * @return false if the mutex could not be locked
@@ -146,6 +151,7 @@ public:
     func(value_);
     return true;
   }
+
   /**
    * @brief get the content with best effort
    * @return std::nullopt if content could not be access, otherwise the content is returned
@@ -159,6 +165,7 @@ public:
     }
     return value_;
   }
+
   /**
    * @brief access the content (r) with best effort
    * @return false if the mutex could not be locked
@@ -247,6 +254,7 @@ public:
     // Only makes sense with the getNonRT method otherwise we would return an std::optional
     return get();
   }
+
   /**
    * @brief provide a custom conversion operator
    * @note Can be used from non-RT and RT contexts
