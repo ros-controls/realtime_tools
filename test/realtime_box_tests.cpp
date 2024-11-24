@@ -173,6 +173,10 @@ TEST(RealtimeBox, smart_ptr_type)
   box.try_set([](const auto & p) { *p = 10; });
 
   box.try_get([](const auto & p) { EXPECT_EQ(*p, 10); });
+
+  // Test that we are able to set the nullptr for pointer types
+  RealtimeBox<std::shared_ptr<int>> box2;
+  box2.set(nullptr);
 }
 
 // These are the tests from the old RealtimeBox implementation
