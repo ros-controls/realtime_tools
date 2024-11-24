@@ -183,8 +183,9 @@ public:
   }
 
   /**
-   * @brief set the content and wait until the mutex could be locked (RealtimeBox behavior)
-   * @return true
+   * @brief Wait until the mutex can be locked and set the content (RealtimeBox behavior)
+   * @note disabled for pointer types
+   * @note same signature as in the existing RealtimeBox<T>
    */
   template <typename U = T>
   typename std::enable_if_t<!is_ptr_or_smart_ptr<U>, void> set(const T & value)
@@ -193,17 +194,39 @@ public:
     // cppcheck-suppress missingReturn
     value_ = value;
   }
+
   /**
-   * @brief access the content (rw) and wait until the mutex could locked
+   * @brief Wait until the mutex can be locked and set the content (RealtimeBox behavior)
+   * @note same signature as in the existing RealtimeBox<T>
+   * @note Not the safest way to access pointer type content (rw)
+   * @deprecated Use set(const std::function<void(T &)> & func) instead!
+   */
+  template <typename U = T>
+  [[deprecated("Use set(const std::function<void(T &)> & func) instead!")]]
+  typename std::enable_if_t<is_ptr_or_smart_ptr<U>, void> set(const T & value)
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    // cppcheck-suppress missingReturn
+    value_ = value;
+  }
+
+  /**
+   * @brief wait until the mutex could be locked and access the content (rw)
    */
   void set(const std::function<void(T &)> & func)
   {
     std::lock_guard<mutex_t> guard(lock_);
+    if (!func) {
+      if constexpr (is_ptr_or_smart_ptr<T>) {
+        value_ = nullptr;
+        return;
+      }
+    }
     func(value_);
   }
 
   /**
-   * @brief get the content and wait until the mutex could be locked (RealtimeBox behaviour)
+   * @brief Wait until the mutex could be locked and get the content (RealtimeBox behaviour)
    * @return copy of the value
    */
   template <typename U = T>
@@ -212,8 +235,9 @@ public:
     std::lock_guard<mutex_t> guard(lock_);
     return value_;
   }
+
   /**
-   * @brief get the content and wait until the mutex could be locked
+   * @brief Wait until the mutex could be locked and get the content (r)
    * @note same signature as in the existing RealtimeBox<T>
    */
   template <typename U = T>
@@ -223,8 +247,24 @@ public:
     // cppcheck-suppress missingReturn
     in = value_;
   }
+
   /**
-   * @brief access the content (r) and wait until the mutex could be locked
+   * @brief Wait until the mutex could be locked and get the content (r)
+   * @note same signature as in the existing RealtimeBox<T>
+   * @note Not the safest way to access pointer type content (r)
+   * @deprecated Use get(const std::function<void(const T &)> & func) instead!
+   */
+  template <typename U = T>
+  [[deprecated("Use get(const std::function<void(const T &)> & func) instead!")]]
+  typename std::enable_if_t<is_ptr_or_smart_ptr<U>, void> get(T & in) const
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    // cppcheck-suppress missingReturn
+    in = value_;
+  }
+
+  /**
+   * @brief Wait until the mutex could be locked and access the content (r)
    * @note only safe way to access pointer type content (r)
    * @note same signature as in the existing RealtimeBox<T>
    */
