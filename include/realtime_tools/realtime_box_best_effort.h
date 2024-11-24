@@ -26,5 +26,4 @@
   "This header include is deprecated. Please update your code to use 'realtime_box.h' header." //NOLINT
 #endif
 
-
 #endif  // REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_H_
