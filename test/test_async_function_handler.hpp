@@ -24,9 +24,9 @@
 namespace realtime_tools
 {
 enum class return_type : std::uint8_t {
-  OK = 0,
-  ERROR = 1,
-  DEACTIVATE = 2,
+  Ok = 0,
+  Error = 1,
+  Deactivate = 2,
 };
 
 class TestAsyncFunctionHandler
