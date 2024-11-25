@@ -27,7 +27,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <gmock/gmock.h>
-#include <realtime_tools/realtime_box.h>
+
+#include <array>
+
+#include "realtime_tools/realtime_box.h"
 
 using realtime_tools::RealtimeBox;
 
