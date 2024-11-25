@@ -32,6 +32,7 @@ jobs:
       ros_distro: rolling
       ros_repo: testing
       ref_for_scheduled_build: master
+      additional_debs: clang
       c_compiler: clang
       cxx_compiler: clang++
       not_test_build: true
