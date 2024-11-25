@@ -40,13 +40,20 @@ namespace realtime_tools
 {
 namespace detail
 {
+enum mutex_type_t {
+  NORMAL = PTHREAD_MUTEX_NORMAL,
+  ERRORCHECK = PTHREAD_MUTEX_ERRORCHECK,
+  RECURSIVE = PTHREAD_MUTEX_RECURSIVE
+};
+
+enum mutex_robustness_t { STALLED = PTHREAD_MUTEX_STALLED, ROBUST = PTHREAD_MUTEX_ROBUST };
 /**
  * @brief A class template that provides a pthread mutex with the priority inheritance protocol
  *
  * @tparam MutexType The type of the mutex. It can be one of the following: PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_DEFAULT
  * @tparam MutexRobustness The robustness of the mutex. It can be one of the following: PTHREAD_MUTEX_STALLED, PTHREAD_MUTEX_ROBUST
  */
-template <int MutexType, int MutexRobustness>
+template <mutex_type_t MutexType, mutex_robustness_t MutexRobustness>
 class mutex
 {
 public:
@@ -172,8 +179,8 @@ private:
   pthread_mutex_t mutex_;
 };
 }  // namespace detail
-using prio_inherit_mutex = detail::mutex<PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_ROBUST>;
-using prio_inherit_recursive_mutex = detail::mutex<PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ROBUST>;
+using prio_inherit_mutex = detail::mutex<detail::ERRORCHECK, detail::ROBUST>;
+using prio_inherit_recursive_mutex = detail::mutex<detail::RECURSIVE, detail::ROBUST>;
 }  // namespace realtime_tools
 
 #endif  // REALTIME_TOOLS__MUTEX_HPP_
