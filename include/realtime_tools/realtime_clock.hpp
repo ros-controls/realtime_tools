@@ -35,8 +35,8 @@
  * Author: Wim Meeussen
  */
 
-#ifndef REALTIME_TOOLS__REALTIME_CLOCK_H_
-#define REALTIME_TOOLS__REALTIME_CLOCK_H_
+#ifndef REALTIME_TOOLS__REALTIME_CLOCK_HPP_
+#define REALTIME_TOOLS__REALTIME_CLOCK_HPP_
 
 #include <mutex>
 #include <thread>
@@ -98,4 +98,4 @@ private:
 };  // class
 
 }  // namespace realtime_tools
-#endif  // REALTIME_TOOLS__REALTIME_CLOCK_H_
+#endif  // REALTIME_TOOLS__REALTIME_CLOCK_HPP_

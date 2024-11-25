@@ -28,7 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <gmock/gmock.h>
-#include <realtime_tools/realtime_box.h>
+#include <realtime_tools/realtime_box.hpp>
 
 struct DefaultConstructable
 {

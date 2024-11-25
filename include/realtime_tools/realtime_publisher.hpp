@@ -34,8 +34,8 @@
  *
  * Author: Stuart Glaser
  */
-#ifndef REALTIME_TOOLS__REALTIME_PUBLISHER_H_
-#define REALTIME_TOOLS__REALTIME_PUBLISHER_H_
+#ifndef REALTIME_TOOLS__REALTIME_PUBLISHER_HPP_
+#define REALTIME_TOOLS__REALTIME_PUBLISHER_HPP_
 
 #include <atomic>
 #include <chrono>
@@ -218,4 +218,4 @@ template <class Msg>
 using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg>>;
 
 }  // namespace realtime_tools
-#endif  // REALTIME_TOOLS__REALTIME_PUBLISHER_H_
+#endif  // REALTIME_TOOLS__REALTIME_PUBLISHER_HPP_

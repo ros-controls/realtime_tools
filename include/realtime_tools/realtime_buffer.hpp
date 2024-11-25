@@ -35,8 +35,8 @@
  * Author: Wim Meeussen
  */
 
-#ifndef REALTIME_TOOLS__REALTIME_BUFFER_H_
-#define REALTIME_TOOLS__REALTIME_BUFFER_H_
+#ifndef REALTIME_TOOLS__REALTIME_BUFFER_HPP_
+#define REALTIME_TOOLS__REALTIME_BUFFER_HPP_
 
 #include <chrono>
 #include <mutex>
@@ -176,4 +176,4 @@ private:
 };  // class
 
 }  // namespace realtime_tools
-#endif  // REALTIME_TOOLS__REALTIME_BUFFER_H_
+#endif  // REALTIME_TOOLS__REALTIME_BUFFER_HPP_

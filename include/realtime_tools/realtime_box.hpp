@@ -30,8 +30,8 @@
 // Author: Stuart Glaser
 // Author: Lennart Nachtigall
 
-#ifndef REALTIME_TOOLS__REALTIME_BOX_H_
-#define REALTIME_TOOLS__REALTIME_BOX_H_
+#ifndef REALTIME_TOOLS__REALTIME_BOX_HPP_
+#define REALTIME_TOOLS__REALTIME_BOX_HPP_
 
 #include <functional>
 #include <initializer_list>
@@ -405,4 +405,4 @@ using RealtimeBox = RealtimeBoxStandard<T>;
 
 }  // namespace realtime_tools
 
-#endif  // REALTIME_TOOLS__REALTIME_BOX_H_
+#endif  // REALTIME_TOOLS__REALTIME_BOX_HPP_
