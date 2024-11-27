@@ -210,6 +210,15 @@ std::pair<bool, std::string> set_current_thread_affinity(int core)
 #endif
 }
 
+std::pair<bool, std::string> set_current_thread_affinity(const std::vector<int> & cores)
+{
+#ifdef _WIN32
+  return set_thread_affinity(GetCurrentThread(), cores);
+#else
+  return set_thread_affinity(pthread_self(), cores);
+#endif
+}
+
 int64_t get_number_of_available_processors()
 {
 #ifdef _WIN32
