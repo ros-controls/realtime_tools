@@ -31,7 +31,7 @@
 
 #include <array>
 
-#include "realtime_tools/realtime_box.h"
+#include "realtime_tools/realtime_box.hpp"
 
 struct DefaultConstructable
 {
