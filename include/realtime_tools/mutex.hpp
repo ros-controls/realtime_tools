@@ -17,6 +17,10 @@
 #ifndef REALTIME_TOOLS__MUTEX_HPP_
 #define REALTIME_TOOLS__MUTEX_HPP_
 
+#ifdef _WIN32
+#error "The mutex.hpp header is not supported on Windows platforms"
+#endif
+
 #include <pthread.h>
 #include <cerrno>
 #include <cstring>
