@@ -322,6 +322,18 @@ TEST(PriorityInheritanceMutexTests, test_deadlock_detection)
   mutex.unlock();
 }
 
+TEST(PriorityInheritanceMutexTests, test_mutex_reflection)
+{
+  static_assert(
+    std::is_same<
+      realtime_tools::prio_inherit_mutex::type,
+      realtime_tools::detail::error_mutex_type_t>::value == true);
+  static_assert(
+    std::is_same<
+      realtime_tools::prio_inherit_recursive_mutex::type,
+      realtime_tools::detail::recursive_mutex_type_t>::value == true);
+}
+
 int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);

@@ -40,24 +40,38 @@ namespace realtime_tools
 {
 namespace detail
 {
-enum mutex_type_t {
-  NORMAL = PTHREAD_MUTEX_NORMAL,
-  ERRORCHECK = PTHREAD_MUTEX_ERRORCHECK,
-  RECURSIVE = PTHREAD_MUTEX_RECURSIVE
+struct error_mutex_type_t
+{
+  static constexpr int value = PTHREAD_MUTEX_ERRORCHECK;
 };
 
-enum mutex_robustness_t { STALLED = PTHREAD_MUTEX_STALLED, ROBUST = PTHREAD_MUTEX_ROBUST };
+struct recursive_mutex_type_t
+{
+  static constexpr int value = PTHREAD_MUTEX_RECURSIVE;
+};
+
+struct stalled_robustness_t
+{
+  static constexpr int value = PTHREAD_MUTEX_STALLED;
+};
+
+struct robust_robustness_t
+{
+  static constexpr int value = PTHREAD_MUTEX_ROBUST;
+};
 /**
  * @brief A class template that provides a pthread mutex with the priority inheritance protocol
  *
  * @tparam MutexType The type of the mutex. It can be one of the following: PTHREAD_MUTEX_NORMAL, PTHREAD_MUTEX_RECURSIVE, PTHREAD_MUTEX_ERRORCHECK, PTHREAD_MUTEX_DEFAULT
  * @tparam MutexRobustness The robustness of the mutex. It can be one of the following: PTHREAD_MUTEX_STALLED, PTHREAD_MUTEX_ROBUST
  */
-template <mutex_type_t MutexType, mutex_robustness_t MutexRobustness>
+template <typename MutexType, typename MutexRobustness>
 class mutex
 {
 public:
   using native_handle_type = pthread_mutex_t *;
+  using type = MutexType;
+  using robustness = MutexRobustness;
 
   mutex()
   {
@@ -82,7 +96,7 @@ public:
     }
 
     // Set the mutex type to MutexType
-    const auto res_type = pthread_mutexattr_settype(&attr, MutexType);
+    const auto res_type = pthread_mutexattr_settype(&attr, MutexType::value);
 
     if (res_type != 0) {
       throw std::system_error(res_type, std::system_category(), "Failed to set mutex type");
@@ -95,7 +109,7 @@ public:
     }
 
     // Set the mutex attribute robustness to MutexRobustness
-    const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness);
+    const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness::value);
     if (res_robust != 0) {
       throw std::system_error(res_robust, std::system_category(), "Failed to set mutex robustness");
     }
@@ -179,8 +193,9 @@ private:
   pthread_mutex_t mutex_;
 };
 }  // namespace detail
-using prio_inherit_mutex = detail::mutex<detail::ERRORCHECK, detail::ROBUST>;
-using prio_inherit_recursive_mutex = detail::mutex<detail::RECURSIVE, detail::ROBUST>;
+using prio_inherit_mutex = detail::mutex<detail::error_mutex_type_t, detail::robust_robustness_t>;
+using prio_inherit_recursive_mutex =
+  detail::mutex<detail::recursive_mutex_type_t, detail::robust_robustness_t>;
 }  // namespace realtime_tools
 
 #endif  // REALTIME_TOOLS__MUTEX_HPP_
