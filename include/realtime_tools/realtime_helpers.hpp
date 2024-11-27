@@ -32,6 +32,7 @@
 #include <string>
 #include <thread>
 #include <utility>
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -65,6 +66,19 @@ bool configure_sched_fifo(int priority);
  * \returns true if memory locking succeeded, false otherwise
 */
 bool lock_memory(std::string & message);
+
+/**
+ * Configure the caller thread affinity - Tell the scheduler to prefer a certain
+ * core for the given thread handle.
+ * \note The threads created by the calling thread will inherit the affinity.
+ * \param[in] thread the thread handle of the thread
+ * \param[in] core the cpu numbers of the core. If an empty vector is passed,
+ * the affinity is reset to the default.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_thread_affinity(
+  NATIVE_THREAD_HANDLE thread, const std::vector<int> & cores);
 
 /**
  * Configure the caller thread affinity - Tell the scheduler to prefer a certain
