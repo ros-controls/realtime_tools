@@ -39,7 +39,7 @@
 #include "rclcpp/utilities.hpp"
 #include "rclcpp_action/create_client.hpp"
 #include "rclcpp_action/create_server.hpp"
-#include "realtime_tools/realtime_server_goal_handle.h"
+#include "realtime_tools/realtime_server_goal_handle.hpp"
 #include "test_msgs/action/fibonacci.hpp"
 
 using test_msgs::action::Fibonacci;
