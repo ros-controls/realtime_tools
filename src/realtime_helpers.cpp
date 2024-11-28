@@ -64,11 +64,10 @@ bool configure_sched_fifo(int priority)
 #endif
 }
 
-bool lock_memory(std::string & message)
+std::pair<bool, std::string> lock_memory()
 {
 #ifdef _WIN32
-  message = "Memory locking is not supported on Windows.";
-  return false;
+  return {false, "Memory locking is not supported on Windows."};
 #else
   auto is_capable = [](cap_value_t v) -> bool {
     bool rc = false;
@@ -86,6 +85,7 @@ bool lock_memory(std::string & message)
     return rc;
   };
 
+  std::string message;
   if (mlockall(MCL_CURRENT | MCL_FUTURE) == -1) {
     if (!is_capable(CAP_IPC_LOCK)) {
       message = "No proper privileges to lock the memory!";
@@ -105,10 +105,10 @@ bool lock_memory(std::string & message)
     } else {
       message = "Unknown error occurred!";
     }
-    return false;
+    return {false, message};
   } else {
     message = "Memory locked successfully!";
-    return true;
+    return {true, message};
   }
 #endif
 }

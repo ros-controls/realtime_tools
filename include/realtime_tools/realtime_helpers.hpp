@@ -62,9 +62,10 @@ bool configure_sched_fifo(int priority);
  * will not swap out the pages to disk i.e., the pages are guaranteed to stay in
  * RAM until later unlocked - which is important for realtime applications.
  * \param[out] message a message describing the result of the operation
- * \returns true if memory locking succeeded, false otherwise
+ * \returns  a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
 */
-bool lock_memory(std::string & message);
+std::pair<bool, std::string> lock_memory();
 
 /**
  * Configure the caller thread affinity - Tell the scheduler to prefer a certain
