@@ -32,6 +32,7 @@
 #include <string>
 #include <thread>
 #include <utility>
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -62,9 +63,36 @@ bool configure_sched_fifo(int priority);
  * will not swap out the pages to disk i.e., the pages are guaranteed to stay in
  * RAM until later unlocked - which is important for realtime applications.
  * \param[out] message a message describing the result of the operation
- * \returns true if memory locking succeeded, false otherwise
+ * \returns true if memory locking succeeded, false otherwise.
 */
+
+[[deprecated("Use std::pair<bool, std::string> lock_memory() instead.")]]
 bool lock_memory(std::string & message);
+
+/**
+ * Locks the memory pages of the calling thread to prevent page faults.
+ * By calling this method, the programs locks all pages mapped into the address
+ * space of the calling process and future mappings. This means that the kernel
+ * will not swap out the pages to disk i.e., the pages are guaranteed to stay in
+ * RAM until later unlocked - which is important for realtime applications.
+ * \param[out] message a message describing the result of the operation
+ * \returns  a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> lock_memory();
+
+/**
+ * Configure the caller thread affinity - Tell the scheduler to prefer a certain
+ * set of cores for the given thread handle.
+ * \note The threads created by the calling thread will inherit the affinity.
+ * \param[in] thread the thread handle of the thread
+ * \param[in] core the cpu numbers of the core. If an empty vector is passed,
+ * the affinity is reset to the default.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_thread_affinity(
+  NATIVE_THREAD_HANDLE thread, const std::vector<int> & cores);
 
 /**
  * Configure the caller thread affinity - Tell the scheduler to prefer a certain
@@ -100,6 +128,17 @@ std::pair<bool, std::string> set_thread_affinity(std::thread & thread, int core)
  * and a message describing the result of the operation
 */
 std::pair<bool, std::string> set_current_thread_affinity(int core);
+
+/**
+ * Configure the current thread affinity - Tell the scheduler to prefer a certain
+ * set of cores for the current thread.
+ * \note The threads created by the calling thread will inherit the affinity.
+ * \param[in] core the cpu numbers of the core. If an empty vector is passed,
+ * the affinity is reset to the default.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_current_thread_affinity(const std::vector<int> & cores);
 
 /**
  * Method to get the amount of available cpu cores
