@@ -69,7 +69,7 @@ bool lock_memory(std::string & message);
 
 /**
  * Configure the caller thread affinity - Tell the scheduler to prefer a certain
- * core for the given thread handle.
+ * set of cores for the given thread handle.
  * \note The threads created by the calling thread will inherit the affinity.
  * \param[in] thread the thread handle of the thread
  * \param[in] core the cpu numbers of the core. If an empty vector is passed,
@@ -117,7 +117,7 @@ std::pair<bool, std::string> set_current_thread_affinity(int core);
 
 /**
  * Configure the current thread affinity - Tell the scheduler to prefer a certain
- * core for the current thread.
+ * set of cores for the current thread.
  * \note The threads created by the calling thread will inherit the affinity.
  * \param[in] core the cpu numbers of the core. If an empty vector is passed,
  * the affinity is reset to the default.
