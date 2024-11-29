@@ -136,6 +136,7 @@ public:
 
     msg_ = msg;
     unlockAndPublish();
+    return true;
   }
 
   /**  \brief Unlock the msg_ variable
