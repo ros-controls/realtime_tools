@@ -59,15 +59,15 @@ enum class RealtimePublisherPollingMode { Polling, NonPolling };
 #else
 #undef NON_POLLING
 #define NON_POLLING RealtimePublisherPollingMode::NonPolling
-// Note this is the only way to somehow deprecate a define as #warning is not portable
-namespace
-{
-[[deprecated(
-  "NON_POLLING_DEFINE is deprecated - use RealtimePublisher<MessageT, "
-  "RealtimePublisherPollingMode...>")]]
-static constexpr int NON_POLLING_define_is_deprecated = 0;
-static constexpr int trigger_NON_POLLING_define_is_deprecated = NON_POLLING_define_is_deprecated;
-}  // namespace
+
+// Deprecation notice
+#ifdef _WIN32
+#pragma message( \
+  "NON_POLLING define is deprecated. Please update your code to use RealtimePublisher<MessageT, RealtimePublisherPollingMode...>")  //NOLINT
+#else
+#warning \
+  "NON_POLLING define is deprecated. Please update your code to use RealtimePublisher<MessageT, RealtimePublisherPollingMode...>" //NOLINT
+#endif
 #endif
 
 /**
