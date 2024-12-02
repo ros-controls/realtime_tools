@@ -190,6 +190,7 @@ public:
 
     this->msg_ = msg;
     unlockAndPublish();
+    return true;
   }
 
   /**
@@ -311,6 +312,7 @@ public:
 
     this->msg_ = msg;
     unlockAndPublish();
+    return true;
   }
 
   /**
