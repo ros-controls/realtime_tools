@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2024-12-03)
+------------------
 * remove unused state\_ field (`#215 <https://github.com/ros-controls/realtime_tools/issues/215>`_)
 * Bump version of pre-commit hooks (`#213 <https://github.com/ros-controls/realtime_tools/issues/213>`_)
 * Add job for clang build (`#207 <https://github.com/ros-controls/realtime_tools/issues/207>`_)
