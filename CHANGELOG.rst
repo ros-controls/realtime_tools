@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2024-12-03)
+------------------
 * Overloading the set_thread_affinity method for Windows compatibility (`#193 <https://github.com/ros-controls/realtime_tools/issues/193>`_)
 * Remove iron workflows and update readme (`#184 <https://github.com/ros-controls/realtime_tools/issues/184>`_)
 * Add method to get the current callback time and period (`#192 <https://github.com/ros-controls/realtime_tools/issues/192>`_)
