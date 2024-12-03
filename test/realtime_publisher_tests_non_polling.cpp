@@ -93,3 +93,44 @@ TEST(RealtimePublisherNonPolling, rt_publish)
   EXPECT_STREQ(expected_msg, str_callback.msg_.string_value.c_str());
   rclcpp::shutdown();
 }
+
+TEST(RealtimePublisher, rt_try_publish)
+{
+  rclcpp::init(0, nullptr);
+  const size_t ATTEMPTS = 10;
+  const std::chrono::milliseconds DELAY(250);
+
+  const char * expected_msg = "Hello World";
+  auto node = std::make_shared<rclcpp::Node>("construct_move_destruct");
+  rclcpp::QoS qos(10);
+  qos.reliable().transient_local();
+  auto pub = node->create_publisher<StringMsg>("~/rt_publish", qos);
+  RealtimePublisher<StringMsg> rt_pub(pub);
+
+  // try publish a latched message
+  bool publish_success = false;
+  for (std::size_t i = 0; i < ATTEMPTS; ++i) {
+    StringMsg msg;
+    msg.string_value = expected_msg;
+
+    if (rt_pub.tryPublish(msg)) {
+      publish_success = true;
+      break;
+    }
+    std::this_thread::sleep_for(DELAY);
+  }
+  ASSERT_TRUE(publish_success);
+
+  // make sure subscriber gets it
+  StringCallback str_callback;
+
+  auto sub = node->create_subscription<StringMsg>(
+    "~/rt_publish", qos,
+    std::bind(&StringCallback::callback, &str_callback, std::placeholders::_1));
+  for (size_t i = 0; i < ATTEMPTS && str_callback.msg_.string_value.empty(); ++i) {
+    rclcpp::spin_some(node);
+    std::this_thread::sleep_for(DELAY);
+  }
+  EXPECT_STREQ(expected_msg, str_callback.msg_.string_value.c_str());
+  rclcpp::shutdown();
+}
