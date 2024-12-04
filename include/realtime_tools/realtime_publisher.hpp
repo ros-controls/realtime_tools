@@ -132,7 +132,9 @@ public:
    */
   bool tryPublish(const MessageT & msg)
   {
-    if (!trylock()) return false;
+    if (!trylock()) {
+      return false;
+    }
 
     msg_ = msg;
     unlockAndPublish();
