@@ -6,6 +6,18 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   -Werror=return-type -Werror=shadow -Werror=format)
 endif()
 
+if(WIN32)
+  add_compile_definitions(
+    # For math constants
+    _USE_MATH_DEFINES
+    # Minimize Windows namespace collision
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN
+  )
+  # set the same behavior for windows as it is on linux
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
   rclcpp_action

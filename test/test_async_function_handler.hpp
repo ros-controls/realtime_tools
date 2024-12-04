@@ -25,7 +25,7 @@ namespace realtime_tools
 {
 enum class return_type : std::uint8_t {
   OK = 0,
-  ERROR = 1,
+  FAILURE = 1,
   DEACTIVATE = 2,
 };
 
