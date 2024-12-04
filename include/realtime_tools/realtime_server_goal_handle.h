@@ -47,8 +47,6 @@ private:
   using ResultSharedPtr = typename Action::Result::SharedPtr;
   using FeedbackSharedPtr = typename Action::Feedback::SharedPtr;
 
-  uint8_t state_;
-
   bool req_abort_;
   bool req_cancel_;
   bool req_succeed_;
