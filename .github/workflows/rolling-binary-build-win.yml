@@ -1,4 +1,4 @@
-name: Windows Binary Build
+name: Rolling Windows Binary Build
 # author: Christoph Fröhlich <christoph.froehlich@ait.ac.at>
 # description: 'Build & test all dependencies from released (binary) windows packages.'
 

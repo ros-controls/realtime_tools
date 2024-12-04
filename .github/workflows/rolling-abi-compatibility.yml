@@ -1,4 +1,4 @@
-name: ABI Compatibility Check
+name: Rolling ABI Compatibility Check
 on:
   workflow_dispatch:
   pull_request:
@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, jazzy, rolling]
+        ROS_DISTRO: [jazzy, rolling]
     steps:
       - uses: actions/checkout@v4
       - uses: ros-industrial/industrial_ci@master

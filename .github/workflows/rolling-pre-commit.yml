@@ -1,4 +1,4 @@
-name: Pre-Commit
+name: Rolling Pre-Commit
 
 on:
   workflow_dispatch:
@@ -12,6 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, jazzy, rolling]
+        ROS_DISTRO: [jazzy, rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
