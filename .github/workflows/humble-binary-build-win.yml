@@ -4,14 +4,14 @@ name: Humble Windows Binary Build
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - humble
-    # types:
-    #   - labeled
-  push:
-    branches:
-      - humble
+  # pull_request:
+  #   branches:
+  #     - humble
+  #   types:
+  #     - labeled
+  # push:
+  #   branches:
+  #     - humble
   # issue_comment:
   #   types:
   #     - created
