@@ -1,4 +1,4 @@
-name: Coverage Build
+name: Rolling Coverage Build
 on:
   workflow_dispatch:
   push:
@@ -7,6 +7,11 @@ on:
   pull_request:
     branches:
       - master
+
+concurrency:
+  # cancel previous runs of the same workflow, except for pushes on master branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, '/refs/heads') }}
 
 jobs:
   coverage:
