@@ -1,4 +1,4 @@
-name: Debian Build
+name: Rolling Debian Build
 on:
   workflow_dispatch:
   pull_request:
@@ -8,6 +8,10 @@ on:
     # Run every day to detect flakiness and broken dependencies
     - cron: '33 2 * * *'
 
+concurrency:
+  # cancel previous runs of the same workflow, except for pushes on master branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, '/refs/heads') }}
 
 jobs:
   debian_source_build:
@@ -15,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, jazzy, rolling]
+        ROS_DISTRO: [jazzy, rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref_for_scheduled_build: master
