@@ -1,9 +1,9 @@
-name: Source Build
+name: Humble Source Build
 on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - humble
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * *'
@@ -18,15 +18,9 @@ jobs:
         - ROS_DISTRO: humble
           CONTAINER: ""
           OS_NAME: ubuntu-22.04
-        - ROS_DISTRO: jazzy
-          CONTAINER: ubuntu:24.04
-          OS_NAME: ubuntu-latest
-        - ROS_DISTRO: rolling
-          CONTAINER: ubuntu:24.04
-          OS_NAME: ubuntu-latest
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
-      ref: master
+      ref: humble
       ros2_repo_branch: ${{ matrix.ROS_DISTRO }}
       os_name: ${{ matrix.OS_NAME }}
       container: ${{ matrix.CONTAINER }}

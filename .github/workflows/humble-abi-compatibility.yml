@@ -1,22 +1,23 @@
-name: ABI Compatibility Check
+name: Humble ABI Compatibility Check
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - humble
+
+concurrency:
+  # cancel previous runs of the same workflow, except for pushes on humble branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, '/refs/heads') }}
 
 jobs:
   abi_check:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        ROS_DISTRO: [humble, jazzy, rolling]
     steps:
       - uses: actions/checkout@v4
       - uses: ros-industrial/industrial_ci@master
         env:
-          ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
+          ROS_DISTRO: humble
           ROS_REPO: main
           ABICHECK_URL: github:${{ github.repository }}#${{ github.base_ref }}
           NOT_TEST_BUILD: true
