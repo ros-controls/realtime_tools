@@ -17,4 +17,8 @@
 
 #include "realtime_tools/realtime_server_goal_handle.hpp"
 
+// Deprecation notice
+#pragma message( \
+  "This header include is deprecated. Please update your code to use 'realtime_server_goal_handle.hpp' header.")  //NOLINT
+
 #endif  // REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_H_

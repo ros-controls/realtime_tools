@@ -17,4 +17,8 @@
 
 #include "realtime_tools/realtime_buffer.hpp"
 
+// Deprecation notice
+#pragma message( \
+  "This header include is deprecated. Please update your code to use 'realtime_buffer.hpp' header.")  //NOLINT
+
 #endif  // REALTIME_TOOLS__REALTIME_BUFFER_H_
