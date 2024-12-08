@@ -38,7 +38,7 @@
 #include "rclcpp/executors.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/utilities.hpp"
-#include "realtime_tools/realtime_publisher.h"
+#include "realtime_tools/realtime_publisher.hpp"
 #include "test_msgs/msg/strings.hpp"
 
 using StringMsg = test_msgs::msg::Strings;
