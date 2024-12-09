@@ -153,8 +153,9 @@ public:
 #endif
   }
 
-protected:
-  std::thread thread_;
+  std::thread & get_thread() { return thread_; }
+  
+  const std::thread & get_thread() const { return thread_; }
 
 private:
   // non-copyable
