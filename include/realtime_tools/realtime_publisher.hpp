@@ -153,6 +153,10 @@ public:
 #endif
   }
 
+  std::thread & get_thread() { return thread_; }
+  
+  const std::thread & get_thread() const { return thread_; }
+
 private:
   // non-copyable
   RealtimePublisher(const RealtimePublisher &) = delete;
@@ -201,8 +205,6 @@ private:
   PublisherSharedPtr publisher_;
   std::atomic<bool> is_running_;
   std::atomic<bool> keep_running_;
-
-  std::thread thread_;
 
   std::mutex msg_mutex_;  // Protects msg_
 
