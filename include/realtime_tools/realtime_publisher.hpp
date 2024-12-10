@@ -205,6 +205,7 @@ private:
   PublisherSharedPtr publisher_;
   std::atomic<bool> is_running_;
   std::atomic<bool> keep_running_;
+
   std::thread thread_;
 
   std::mutex msg_mutex_;  // Protects msg_
