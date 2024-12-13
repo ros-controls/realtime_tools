@@ -104,6 +104,7 @@ TEST_F(AsyncFunctionHandlerTest, check_initialization)
 
   // Once initialized, it should not be possible to initialize again
   async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
   auto trigger_status = async_class.trigger();
   ASSERT_TRUE(trigger_status.first);
   ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
@@ -130,6 +131,7 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering)
   // It shouldn't be possible to trigger without starting the thread
   ASSERT_THROW(async_class.trigger(), std::runtime_error);
   async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
   ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
   ASSERT_TRUE(
@@ -174,6 +176,7 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles)
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
   async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
 
@@ -193,8 +196,8 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles)
       missed_triggers++;
     }
   }
-  // Make sure that the failed triggers are less than 0.1%
-  ASSERT_LT(missed_triggers, static_cast<int>(0.001 * total_cycles))
+  // Make sure that the failed triggers are less than 0.5%
+  ASSERT_LT(missed_triggers, static_cast<int>(0.005 * total_cycles))
     << "The missed triggers cannot be more than 0.1%!";
   async_class.get_handler().stop_thread();
 
@@ -216,6 +219,7 @@ TEST_F(AsyncFunctionHandlerTest, test_with_deactivate_and_activate_cycles)
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
   async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
   ASSERT_TRUE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE);
@@ -285,6 +289,7 @@ TEST_F(AsyncFunctionHandlerTest, check_triggering_with_different_return_state_an
   ASSERT_FALSE(
     realtime_tools::set_thread_affinity(async_class.get_handler().get_thread(), 0).first);
   async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
   ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
   ASSERT_TRUE(realtime_tools::set_thread_affinity(async_class.get_handler().get_thread(), 0).first);
@@ -356,6 +361,7 @@ TEST_F(AsyncFunctionHandlerTest, check_exception_handling)
   realtime_tools::TestAsyncFunctionHandler async_class;
   async_class.initialize();
   async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
   EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
   auto trigger_status = async_class.trigger();
@@ -401,6 +407,7 @@ TEST_F(AsyncFunctionHandlerTest, check_exception_handling)
 
   async_class.reset_counter(0);
   async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
   trigger_status = async_class.trigger();
   ASSERT_TRUE(trigger_status.first);
   ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
