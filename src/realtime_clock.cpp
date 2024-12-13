@@ -35,7 +35,7 @@
  * Author: Wim Meeussen
  */
 
-#include "realtime_tools/realtime_clock.h"
+#include "realtime_tools/realtime_clock.hpp"
 
 #include <chrono>
 
