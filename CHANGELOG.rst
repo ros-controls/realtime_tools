@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.10.0 (2024-12-14)
+-------------------
 * sleep after starting thread to fix flaky tests (backport `#235 <https://github.com/ros-controls/realtime_tools/issues/235>`_) (`#237 <https://github.com/ros-controls/realtime_tools/issues/237>`_)
 * Fix the badges in the readme (backport `#234 <https://github.com/ros-controls/realtime_tools/issues/234>`_) (`#236 <https://github.com/ros-controls/realtime_tools/issues/236>`_)
 * Remove duplicate wf (backport `#230 <https://github.com/ros-controls/realtime_tools/issues/230>`_) (`#231 <https://github.com/ros-controls/realtime_tools/issues/231>`_)
