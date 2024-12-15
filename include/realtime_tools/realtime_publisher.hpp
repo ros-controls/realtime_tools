@@ -49,27 +49,39 @@
 
 namespace realtime_tools
 {
-template <class Msg>
+template <class MessageT>
 class RealtimePublisher
 {
-private:
-  using PublisherSharedPtr = typename rclcpp::Publisher<Msg>::SharedPtr;
-
 public:
+  /// Provide various typedefs to resemble the rclcpp::Publisher type
+  using PublisherType = rclcpp::Publisher<MessageT>;
+  using PublisherSharedPtr = typename rclcpp::Publisher<MessageT>::SharedPtr;
+
+  using PublishedType = typename rclcpp::TypeAdapter<MessageT>::custom_type;
+  using ROSMessageType = typename rclcpp::TypeAdapter<MessageT>::ros_message_type;
+
+  RCLCPP_SMART_PTR_DEFINITIONS(RealtimePublisher<MessageT>)
+
   /// The msg_ variable contains the data that will get published on the ROS topic.
-  Msg msg_;
+  MessageT msg_;
 
   /**  \brief Constructor for the realtime publisher
    *
    * \param publisher the publisher to wrap
    */
   explicit RealtimePublisher(PublisherSharedPtr publisher)
-  : publisher_(publisher), is_running_(false), keep_running_(true), turn_(LOOP_NOT_STARTED)
+  : publisher_(publisher), is_running_(false), keep_running_(true), turn_(State::LOOP_NOT_STARTED)
   {
     thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
   }
 
-  RealtimePublisher() : is_running_(false), keep_running_(false), turn_(LOOP_NOT_STARTED) {}
+  [[deprecated(
+    "Use constructor with rclcpp::Publisher<T>::SharedPtr instead - this class does not make sense "
+    "without a real publisher")]]
+  RealtimePublisher()
+  : is_running_(false), keep_running_(false), turn_(State::LOOP_NOT_STARTED)
+  {
+  }
 
   /// Destructor
   ~RealtimePublisher()
@@ -101,7 +113,7 @@ public:
   bool trylock()
   {
     if (msg_mutex_.try_lock()) {
-      if (turn_ == REALTIME) {
+      if (turn_ == State::REALTIME) {
         return true;
       } else {
         msg_mutex_.unlock();
@@ -112,6 +124,23 @@ public:
     }
   }
 
+  /**  \brief Try to get the data lock from realtime and publish the given message
+   *
+   * Tries to gain unique access to msg_ variable. If this succeeds
+   * update the msg_ variable and call unlockAndPublish
+   * @return false in case no lock for the realtime variable could be acquired
+   */
+  bool tryPublish(const MessageT & msg)
+  {
+    if (!trylock()) {
+      return false;
+    }
+
+    msg_ = msg;
+    unlockAndPublish();
+    return true;
+  }
+
   /**  \brief Unlock the msg_ variable
    *
    * After a successful trylock and after the data is written to the mgs_
@@ -120,7 +149,7 @@ public:
    */
   void unlockAndPublish()
   {
-    turn_ = NON_REALTIME;
+    turn_ = State::NON_REALTIME;
     unlock();
   }
 
@@ -163,10 +192,10 @@ private:
   void publishingLoop()
   {
     is_running_ = true;
-    turn_ = REALTIME;
+    turn_ = State::REALTIME;
 
     while (keep_running_) {
-      Msg outgoing;
+      MessageT outgoing;
 
       // Locks msg_ and copies it
 
@@ -176,7 +205,7 @@ private:
       lock();
 #endif
 
-      while (turn_ != NON_REALTIME && keep_running_) {
+      while (turn_ != State::NON_REALTIME && keep_running_) {
 #ifdef NON_POLLING
         updated_cond_.wait(lock_);
 #else
@@ -186,7 +215,7 @@ private:
 #endif
       }
       outgoing = msg_;
-      turn_ = REALTIME;
+      turn_ = State::REALTIME;
 
       unlock();
 
@@ -210,12 +239,12 @@ private:
   std::condition_variable updated_cond_;
 #endif
 
-  enum { REALTIME, NON_REALTIME, LOOP_NOT_STARTED };
-  std::atomic<int> turn_;  // Who's turn is it to use msg_?
+  enum class State : int { REALTIME, NON_REALTIME, LOOP_NOT_STARTED };
+  std::atomic<State> turn_;  // Who's turn is it to use msg_?
 };
 
-template <class Msg>
-using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<Msg>>;
+template <class MessageT>
+using RealtimePublisherSharedPtr = std::shared_ptr<RealtimePublisher<MessageT>>;
 
 }  // namespace realtime_tools
 #endif  // REALTIME_TOOLS__REALTIME_PUBLISHER_HPP_
