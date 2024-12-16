@@ -28,8 +28,8 @@
 
 // Author: Lennart Nachtigall
 
-#ifndef REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_H_
-#define REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_H_
+#ifndef REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_HPP_
+#define REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_HPP_
 
 #include <functional>
 #include <initializer_list>
@@ -230,4 +230,4 @@ private:
 };
 }  // namespace realtime_tools
 
-#endif  // REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_H_
+#endif  // REALTIME_TOOLS__REALTIME_BOX_BEST_EFFORT_HPP_
