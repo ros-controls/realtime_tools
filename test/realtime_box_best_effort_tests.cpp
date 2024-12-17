@@ -29,7 +29,7 @@
 // Author: Lennart Nachtigall
 
 #include <gmock/gmock.h>
-#include <realtime_tools/realtime_box_best_effort.h>
+#include <realtime_tools/realtime_box_best_effort.hpp>
 
 struct DefaultConstructable
 {
