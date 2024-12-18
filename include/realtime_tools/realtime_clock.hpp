@@ -27,11 +27,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 /*
- * Publishing ROS messages is difficult, as the publish function is
- * not realtime safe.  This class provides the proper locking so that
- * you can call publish in realtime and a separate (non-realtime)
- * thread will ensure that the message gets published over ROS.
- *
  * Author: Wim Meeussen
  */
 
