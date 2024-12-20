@@ -34,6 +34,10 @@
 #include "rclcpp/utilities.hpp"
 #include "realtime_tools/realtime_clock.hpp"
 
+// Disable deprecated warnings
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 using realtime_tools::RealtimeClock;
 
 TEST(RealtimeClock, get_system_time)
@@ -59,3 +63,5 @@ TEST(RealtimeClock, get_system_time)
   }
   rclcpp::shutdown();
 }
+
+#pragma GCC diagnostic pop
