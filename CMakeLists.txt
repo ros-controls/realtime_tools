@@ -101,6 +101,11 @@ if(BUILD_TESTING)
   ament_add_gmock(test_async_function_handler test/test_async_function_handler.cpp)
   target_link_libraries(test_async_function_handler realtime_tools thread_priority)
   ament_target_dependencies(test_async_function_handler lifecycle_msgs rclcpp_lifecycle)
+
+  if(NOT WIN32)
+    ament_add_gmock(realtime_mutex_tests test/realtime_mutex_tests.cpp)
+    target_link_libraries(realtime_mutex_tests realtime_tools)
+  endif()
 endif()
 
 # Install
