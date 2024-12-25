@@ -35,7 +35,7 @@ jobs:
     with:
       ros_distro: humble
       ros_repo: testing
-      ref_for_scheduled_build: humlbe
+      ref_for_scheduled_build: humble
       additional_debs: clang
       c_compiler: clang
       cxx_compiler: clang++
