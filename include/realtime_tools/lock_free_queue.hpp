@@ -19,26 +19,78 @@
 
 #include <chrono>
 #include <mutex>
+#include <type_traits>
+#include <utility>
+
 #include <boost/lockfree/queue.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/lockfree/stack.hpp>
-#include <type_traits>
 
 namespace
 {
-  // Trait to check if the capacity is set
+// Trait to check if the capacity is set
 template <typename T>
-struct has_capacity : std::false_type {};
+struct has_capacity : std::false_type
+{
+};
 
 template <typename T, std::size_t Capacity>
-struct has_capacity<boost::lockfree::spsc_queue<T, boost::lockfree::capacity<Capacity>>> : std::true_type {};
+struct has_capacity<boost::lockfree::spsc_queue<T, boost::lockfree::capacity<Capacity>>>
+: std::true_type
+{
+};
 
 template <typename T, std::size_t Capacity>
-struct has_capacity<boost::lockfree::queue<T, boost::lockfree::capacity<Capacity>>> : std::true_type {};
+struct has_capacity<boost::lockfree::queue<T, boost::lockfree::capacity<Capacity>>> : std::true_type
+{
+};
 
 template <typename T, std::size_t Capacity, bool FixedSize>
-struct has_capacity<boost::lockfree::queue<T, boost::lockfree::capacity<Capacity>, boost::lockfree::fixed_sized<FixedSize>>> : std::true_type {};
-}
+struct has_capacity<boost::lockfree::queue<
+  T, boost::lockfree::capacity<Capacity>, boost::lockfree::fixed_sized<FixedSize>>> : std::true_type
+{
+};
+
+template <typename T>
+struct is_spsc_queue : std::false_type
+{
+};
+
+template <typename T>
+struct is_spsc_queue<boost::lockfree::spsc_queue<T>> : std::true_type
+{
+};
+
+template <typename T, std::size_t Capacity>
+struct is_spsc_queue<boost::lockfree::spsc_queue<T, boost::lockfree::capacity<Capacity>>>
+: std::true_type
+{
+};
+
+// Default case: no capacity
+template <typename T>
+struct get_boost_lockfree_queue_capacity
+{
+  static constexpr std::size_t value = 0;  // Default to 0 if capacity is not defined
+};
+
+// Specialization for queues with capacity
+template <typename T, std::size_t Capacity>
+struct get_boost_lockfree_queue_capacity<
+  boost::lockfree::spsc_queue<T, boost::lockfree::capacity<Capacity>>>
+{
+  static constexpr std::size_t value = Capacity;
+};
+
+// Specialization for queues with capacity
+template <typename T, std::size_t Capacity>
+struct get_boost_lockfree_queue_capacity<
+  boost::lockfree::queue<T, boost::lockfree::capacity<Capacity>>>
+{
+  static constexpr std::size_t value = Capacity;
+};
+
+}  // namespace
 
 namespace realtime_tools
 {
@@ -49,60 +101,64 @@ public:
   using T = DataType;
 
   // enable this constructor only if the queue has capacity set
-  template <bool HasCapacity = has_capacity<LockFreeSPSCContainer>::value, typename std::enable_if_t<HasCapacity, int> = 0>
+  template <
+    bool HasCapacity = has_capacity<LockFreeSPSCContainer>::value,
+    typename std::enable_if_t<HasCapacity, int> = 0>
   LockFreeSPSCQueueBase()
+  : capacity_(get_boost_lockfree_queue_capacity<LockFreeSPSCContainer>::value)
   {
   }
 
   // enable this constructor only if the queue has no capacity set
-  template <bool HasCapacity = has_capacity<LockFreeSPSCContainer>::value, typename std::enable_if_t<HasCapacity, int> = 1>
-  LockFreeSPSCQueueBase(std::size_t capacity)
-  : data_queue_(capacity)
-  {
-  }
-
-  /**
-   * @brief Constructor for objects that don't have
-   * a default constructor
-   * @param data The object to use as default value
-   */
-  explicit LockFreeSPSCQueueBase(const T & data)
+  template <
+    bool HasCapacity = has_capacity<LockFreeSPSCContainer>::value,
+    typename std::enable_if_t<!HasCapacity, int> = 1>
+  explicit LockFreeSPSCQueueBase(std::size_t capacity) : data_queue_(capacity), capacity_(capacity)
   {
   }
 
   virtual ~LockFreeSPSCQueueBase() = default;
 
-  [[nodiscard]] bool pop(T & data)
-  {
-    return data_queue_.pop(data);
-  }
+  [[nodiscard]] bool pop(T & data) { return data_queue_.pop(data); }
 
-  [[nodiscard]] bool push(const T & data)
+  template <typename U>
+  std::enable_if_t<std::is_convertible_v<T, U>, bool> push(const U & data)
   {
     return data_queue_.push(data);
   }
 
-  bool empty() const
+  template <typename U>
+  std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
-    return data_queue_.empty();
+    if (!data_queue_.push(data)) {
+      data_queue_.pop();
+      return data_queue_.push(data);
+    }
+    return true;
   }
 
-  const LockFreeSPSCContainer& get_lockfree_container() const
-  {
-    return data_queue_;
-  }
+  [[nodiscard]] bool push(const T & data) { return data_queue_.push(data); }
 
- LockFreeSPSCContainer& get_lockfree_container()
-  {
-    return data_queue_;
-  }
+  bool empty() const { return data_queue_.read_available() == 0u; }
+
+  size_t capacity() const { return capacity_; }
+
+  std::size_t size() const { return data_queue_.read_available(); }
+
+  const LockFreeSPSCContainer & get_lockfree_container() const { return data_queue_; }
+
+  LockFreeSPSCContainer & get_lockfree_container() { return data_queue_; }
 
 private:
-LockFreeSPSCContainer data_queue_;
+  LockFreeSPSCContainer data_queue_;
+  std::size_t capacity_;
 };  // class
 
-template <class DataType, std::size_t Capacity>
-using LockFreeBuffer = LockFreeSPSCQueueBase<DataType, boost::lockfree::spsc_queue<DataType, boost::lockfree::capacity<Capacity>>>;
+template <class DataType, std::size_t Capacity = 0>
+using LockFreeQueue = std::conditional_t<
+  Capacity == 0, LockFreeSPSCQueueBase<DataType, boost::lockfree::spsc_queue<DataType>>,
+  LockFreeSPSCQueueBase<
+    DataType, boost::lockfree::spsc_queue<DataType, boost::lockfree::capacity<Capacity>>>>;
 
 }  // namespace realtime_tools
 #endif  // REALTIME_TOOLS__LOCK_FREE_QUEUE_HPP_
