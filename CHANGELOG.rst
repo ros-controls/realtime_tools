@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.1.0 (2024-12-29)
+------------------
 * Fix ref for scheduled build (`#248 <https://github.com/ros-controls/realtime_tools/issues/248>`_)
 * Add realtime priority inheritance mutexes (`#197 <https://github.com/ros-controls/realtime_tools/issues/197>`_)
 * Deprecate RealtimeClock class (`#244 <https://github.com/ros-controls/realtime_tools/issues/244>`_)
