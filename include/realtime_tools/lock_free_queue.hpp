@@ -90,6 +90,14 @@ struct get_boost_lockfree_queue_capacity<
   static constexpr std::size_t value = Capacity;
 };
 
+// Specialization for queues with capacity
+template <typename T, std::size_t Capacity, bool FixedSize>
+struct get_boost_lockfree_queue_capacity<
+  boost::lockfree::queue<T, boost::lockfree::capacity<Capacity>, boost::lockfree::fixed_sized<FixedSize>>>
+{
+  static constexpr std::size_t value = Capacity;
+};
+
 }  // namespace
 
 namespace realtime_tools
@@ -131,19 +139,27 @@ public:
   std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
     if (!data_queue_.push(data)) {
-      data_queue_.pop();
-      return data_queue_.push(data);
+      // data_queue_.pop();
+      // return data_queue_.push(data);
+      T dummy;
+      if (!data_queue_.pop(dummy)) {
+        std::cerr << "LockFreeSPSCQueueBase::bounded_push: queue is full and pop succeeded\n";
+        return data_queue_.push(data);
+      } else {
+        // std::cerr << "LockFreeSPSCQueueBase::bounded_push: queue is full and pop failed\n";
+        return data_queue_.push(data);
+      }
     }
     return true;
   }
 
   [[nodiscard]] bool push(const T & data) { return data_queue_.push(data); }
 
-  bool empty() const { return data_queue_.read_available() == 0u; }
+  bool empty() const { return data_queue_.empty(); }
 
   size_t capacity() const { return capacity_; }
 
-  std::size_t size() const { return data_queue_.read_available(); }
+  std::size_t size() const { return 10; }
 
   const LockFreeSPSCContainer & get_lockfree_container() const { return data_queue_; }
 
@@ -156,9 +172,9 @@ private:
 
 template <class DataType, std::size_t Capacity = 0>
 using LockFreeQueue = std::conditional_t<
-  Capacity == 0, LockFreeSPSCQueueBase<DataType, boost::lockfree::spsc_queue<DataType>>,
+  Capacity == 0, LockFreeSPSCQueueBase<DataType, boost::lockfree::queue<DataType>>,
   LockFreeSPSCQueueBase<
-    DataType, boost::lockfree::spsc_queue<DataType, boost::lockfree::capacity<Capacity>>>>;
+    DataType, boost::lockfree::queue<DataType, boost::lockfree::capacity<Capacity>, boost::lockfree::fixed_sized<true>>>>;
 
 }  // namespace realtime_tools
 #endif  // REALTIME_TOOLS__LOCK_FREE_QUEUE_HPP_
