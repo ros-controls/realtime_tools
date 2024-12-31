@@ -42,19 +42,19 @@ public:
 
 TEST(LockFreeQueue, default_construct)
 {
-  // {
-  //   LockFreeQueue<DefaultConstructable> buffer(10);
-  //   DefaultConstructable obj1;
-  //   ASSERT_EQ(10, buffer.capacity());
-  //   ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
-  //   ASSERT_FALSE(buffer.pop(obj1)) << "Buffer should be empty";
-  //   ASSERT_TRUE(buffer.push(DefaultConstructable())) << "Buffer should have space for one element";
-  //   ASSERT_EQ(10, buffer.capacity());
-  //   ASSERT_EQ(1, buffer.size()) << "Buffer should have one element";
-  //   ASSERT_TRUE(buffer.pop(obj1));
-  //   ASSERT_EQ(10, buffer.capacity());
-  //   ASSERT_EQ(42, obj1.number_);
-  // }
+  {
+    LockFreeQueue<DefaultConstructable> buffer(10);
+    DefaultConstructable obj1;
+    ASSERT_EQ(10, buffer.capacity());
+    ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
+    ASSERT_FALSE(buffer.pop(obj1)) << "Buffer should be empty";
+    ASSERT_TRUE(buffer.push(DefaultConstructable())) << "Buffer should have space for one element";
+    ASSERT_EQ(10, buffer.capacity());
+    // ASSERT_EQ(1, buffer.size()) << "Buffer should have one element";
+    ASSERT_TRUE(buffer.pop(obj1));
+    ASSERT_EQ(10, buffer.capacity());
+    ASSERT_EQ(42, obj1.number_);
+  }
   {
     LockFreeQueue<DefaultConstructable, 10> buffer;
     DefaultConstructable obj1;
