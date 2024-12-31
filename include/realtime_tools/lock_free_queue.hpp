@@ -142,24 +142,30 @@ public:
       // data_queue_.pop();
       // return data_queue_.push(data);
       T dummy;
-      if (!data_queue_.pop(dummy)) {
-        std::cerr << "LockFreeSPSCQueueBase::bounded_push: queue is full and pop succeeded\n";
-        return data_queue_.push(data);
-      } else {
-        // std::cerr << "LockFreeSPSCQueueBase::bounded_push: queue is full and pop failed\n";
-        return data_queue_.push(data);
-      }
+      data_queue_.pop(dummy);
+      return data_queue_.push(data);
     }
     return true;
   }
 
   [[nodiscard]] bool push(const T & data) { return data_queue_.push(data); }
 
+  template <
+    bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
+    typename std::enable_if_t<IsSPSCQueue, int> = 0>
+  bool empty() const { return data_queue_.read_available() == 0; }
+
+  template <
+    bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
+    typename std::enable_if_t<!IsSPSCQueue, int> = 1>
   bool empty() const { return data_queue_.empty(); }
 
   size_t capacity() const { return capacity_; }
 
-  std::size_t size() const { return 10; }
+  template <
+    bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
+    typename std::enable_if_t<IsSPSCQueue, int> = 0>
+  std::size_t size() const { return data_queue_.read_available(); }
 
   const LockFreeSPSCContainer & get_lockfree_container() const { return data_queue_; }
 
