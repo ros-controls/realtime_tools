@@ -51,6 +51,7 @@ struct has_capacity<boost::lockfree::queue<
 {
 };
 
+// Traits to check if the queue is spsc_queue
 template <typename T>
 struct is_spsc_queue : std::false_type
 {
@@ -67,6 +68,7 @@ struct is_spsc_queue<boost::lockfree::spsc_queue<T, boost::lockfree::capacity<Ca
 {
 };
 
+// Traits to get the capacity of the queue
 // Default case: no capacity
 template <typename T>
 struct get_boost_lockfree_queue_capacity
@@ -102,13 +104,21 @@ struct get_boost_lockfree_queue_capacity<boost::lockfree::queue<
 
 namespace realtime_tools
 {
+/**
+ * @brief Base class for lock-free queues
+ * @tparam DataType Type of the data to be stored in the queue
+ * @tparam LockFreeSPSCContainer Type of the lock-free container - Typically boost::lockfree::spsc_queue or boost::lockfree::queue with their own template parameters
+ */
 template <typename DataType, typename LockFreeSPSCContainer>
 class LockFreeQueueBase
 {
 public:
   using T = DataType;
 
-  // enable this constructor only if the queue has capacity set
+  /**
+   * @brief Construct a new LockFreeQueueBase object
+   * @note This constructor is enabled only if the LockFreeSPSCContainer has a capacity set
+   */
   template <
     bool HasCapacity = has_capacity<LockFreeSPSCContainer>::value,
     typename std::enable_if_t<HasCapacity, int> = 0>
@@ -116,7 +126,11 @@ public:
   {
   }
 
-  // enable this constructor only if the queue has no capacity set
+  /**
+   * @brief Construct a new LockFreeQueueBase object
+   * @param capacity Capacity of the queue
+   * @note This constructor is enabled only if the LockFreeSPSCContainer has no capacity set
+   */
   template <
     bool HasCapacity = has_capacity<LockFreeSPSCContainer>::value,
     typename std::enable_if_t<!HasCapacity, int> = 1>
@@ -126,18 +140,62 @@ public:
 
   virtual ~LockFreeQueueBase() = default;
 
+  /**
+   * @brief Pop the data from the queue
+   * @param data Data to be popped
+   * @return true If the data is popped successfully
+   * @return false If the queue is empty or the data could not be popped
+   */
   [[nodiscard]] bool pop(T & data) { return data_queue_.pop(data); }
 
+  /**
+   * @brief Pop the data from the queue
+   * @param data Data to be popped
+   * @return true If the data is popped successfully
+   * @return false If the queue is empty or the data could not be popped
+   * @note This function is enabled only if the data type is convertible to the template type of the queue
+   */
   template <typename U>
-  std::enable_if_t<std::is_convertible_v<T, U>, bool> push(const U & data)
+  [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> pop(U & data)
+  {
+    return data_queue_.pop(data);
+  }
+
+  /**
+   * @brief Push the data into the queue
+   * @param data Data to be pushed
+   * @return true If the data is pushed successfully
+   * @return false If the queue is full or the data could not be pushed
+   */
+
+  [[nodiscard]] bool push(const T & data) { return data_queue_.push(data); }
+
+  /**
+   * @brief Push the data into the queue
+   * @param data Data to be pushed
+   * @return true If the data is pushed successfully
+   * @return false If the queue is full or the data could not be pushed
+   * @note This function is enabled only if the data type is convertible to the template type of the queue
+   */
+  template <typename U>
+  [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> push(const U & data)
   {
     return data_queue_.push(data);
   }
 
+  /**
+   * @brief The bounded_push function pushes the data into the queue and pops the oldest data if the queue is full
+   * @param data Data to be pushed
+   * @return true If the data is pushed successfully
+   * @return false If the data could not be pushed
+   * @note This function is enabled only if the queue is a spsc_queue and only if the data type is convertible to the template type of the queue
+   * @note To be used in a single threaded applications
+   * @warning This method might not work as expected if it is used with 2 different threads one doing bounded_push and the other doing pop. In this case, the queue is no more a single producer single consumer queue. So, the behaviour might not be as expected.
+   */
   template <
     typename U, bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
     typename std::enable_if_t<IsSPSCQueue, int> = 0>
-  std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
+  [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
     if (!data_queue_.push(data)) {
       // data_queue_.pop();
@@ -149,10 +207,18 @@ public:
     return true;
   }
 
+  /**
+   * @brief The bounded_push function pushes the data into the queue and pops the oldest data if the queue is full
+   * @param data Data to be pushed
+   * @return true If the data is pushed successfully
+   * @return false If the data could not be pushed
+   * @note This function is enabled only if the queue is of multiple producer and multiple consumer type and only if the data type is convertible to the template type of the queue
+   * @note Can be used in a multi threaded applications
+   */
   template <
     typename U, bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
     typename std::enable_if_t<!IsSPSCQueue, int> = 1>
-  std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
+  [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
     if (!data_queue_.bounded_push(data)) {
       // data_queue_.pop();
@@ -164,8 +230,12 @@ public:
     return true;
   }
 
-  [[nodiscard]] bool push(const T & data) { return data_queue_.push(data); }
-
+  /**
+   * @brief Check if the queue is empty
+   * @return true If the queue is empty
+   * @return false If the queue is not empty
+   * @note This function is enabled only if the queue is a spsc_queue
+   */
   template <
     bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
     typename std::enable_if_t<IsSPSCQueue, int> = 0>
@@ -174,6 +244,12 @@ public:
     return data_queue_.read_available() == 0;
   }
 
+  /**
+   * @brief Check if the queue is empty
+   * @return true If the queue is empty
+   * @return false If the queue is not empty
+   * @note This function is enabled only if the queue is of multiple producer and multiple consumer type
+   */
   template <
     bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
     typename std::enable_if_t<!IsSPSCQueue, int> = 1>
@@ -182,8 +258,17 @@ public:
     return data_queue_.empty();
   }
 
+  /**
+   * @brief Get the capacity of the queue
+   * @return std::size_t Capacity of the queue
+   */
   size_t capacity() const { return capacity_; }
 
+  /**
+   * @brief Get the size of the queue
+   * @return std::size_t Size of the queue
+   * @note This function is enabled only if the queue is a spsc_queue
+   */
   template <
     bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
     typename std::enable_if_t<IsSPSCQueue, int> = 0>
@@ -192,13 +277,16 @@ public:
     return data_queue_.read_available();
   }
 
-  // template <
-  //   bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
-  //   typename std::enable_if_t<!IsSPSCQueue, int> = 1>
-  // std::size_t size() const { return 10; }
-
+  /**
+   * @brief Get the lockfree container
+   * @return const LockFreeSPSCContainer& Reference to the lockfree container
+   */
   const LockFreeSPSCContainer & get_lockfree_container() const { return data_queue_; }
 
+  /**
+   * @brief Get the lockfree container
+   * @return LockFreeSPSCContainer& Reference to the lockfree container
+   */
   LockFreeSPSCContainer & get_lockfree_container() { return data_queue_; }
 
 private:
@@ -206,19 +294,30 @@ private:
   std::size_t capacity_;
 };  // class
 
+/**
+ * @brief Lock-free Single Producer Single Consumer Queue
+ * @tparam DataType Type of the data to be stored in the queue
+ * @tparam Capacity Capacity of the queue
+ */
 template <class DataType, std::size_t Capacity = 0>
 using LockFreeSPSCQueue = std::conditional_t<
   Capacity == 0, LockFreeQueueBase<DataType, boost::lockfree::spsc_queue<DataType>>,
   LockFreeQueueBase<
     DataType, boost::lockfree::spsc_queue<DataType, boost::lockfree::capacity<Capacity>>>>;
 
-template <class DataType, std::size_t Capacity = 0>
+/**
+ * @brief Lock-free Multiple Producer Multiple Consumer Queue
+ * @tparam DataType Type of the data to be stored in the queue
+ * @tparam Capacity Capacity of the queue
+ * @tparam FixedSize Fixed size of the queue
+ */
+template <class DataType, std::size_t Capacity = 0, bool FixedSize = true>
 using LockFreeMPMCQueue = std::conditional_t<
   Capacity == 0, LockFreeQueueBase<DataType, boost::lockfree::queue<DataType>>,
   LockFreeQueueBase<
     DataType,
     boost::lockfree::queue<
-      DataType, boost::lockfree::capacity<Capacity>, boost::lockfree::fixed_sized<true>>>>;
+      DataType, boost::lockfree::capacity<Capacity>, boost::lockfree::fixed_sized<FixedSize>>>>;
 
 }  // namespace realtime_tools
 #endif  // REALTIME_TOOLS__LOCK_FREE_QUEUE_HPP_

@@ -68,6 +68,16 @@ TEST(LockFreeSPSCQueue, initialize_value)
   ASSERT_DOUBLE_EQ(3.14, obj1);
   ASSERT_EQ(0, buffer.size()) << "Buffer should be empty";
   ASSERT_TRUE(buffer.empty());
+  ASSERT_TRUE(buffer.push(2.71)) << "Buffer should have space for one element";
+  ASSERT_EQ(1, buffer.size()) << "Buffer should have one element";
+  int obj2;
+  ASSERT_TRUE(buffer.pop(obj2));
+  ASSERT_EQ(2, obj2);
+  ASSERT_EQ(0, buffer.size()) << "Buffer should be empty";
+  ASSERT_TRUE(buffer.empty());
+  ASSERT_TRUE(buffer.push(6));
+  ASSERT_TRUE(buffer.pop(obj1));
+  ASSERT_EQ(6, obj1);
 }
 
 TEST(LockFreeSPSCQueue, test_push)
@@ -273,6 +283,14 @@ TEST(LockFreeMPMCQueue, initialize_value)
   ASSERT_TRUE(buffer.pop(obj1));
   ASSERT_DOUBLE_EQ(3.14, obj1);
   ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
+  ASSERT_TRUE(buffer.push(2.71)) << "Buffer should have space for one element";
+  int obj2;
+  ASSERT_TRUE(buffer.pop(obj2));
+  ASSERT_EQ(2, obj2);
+  ASSERT_TRUE(buffer.empty());
+  ASSERT_TRUE(buffer.push(6));
+  ASSERT_TRUE(buffer.pop(obj1));
+  ASSERT_EQ(6, obj1);
 }
 
 TEST(LockFreeMPMCQueue, test_push)
