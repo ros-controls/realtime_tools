@@ -39,6 +39,7 @@ TEST(LockFreeSPSCQueue, default_construct)
     ASSERT_EQ(10, buffer.capacity());
     ASSERT_EQ(1, buffer.size()) << "Buffer should have one element";
     ASSERT_TRUE(buffer.pop(obj1));
+    ASSERT_TRUE(buffer.is_lock_free());
     ASSERT_EQ(10, buffer.capacity());
     ASSERT_EQ(42, obj1.number_);
   }
@@ -52,6 +53,7 @@ TEST(LockFreeSPSCQueue, default_construct)
     ASSERT_EQ(10, buffer.capacity());
     ASSERT_EQ(1, buffer.size()) << "Buffer should have one element";
     ASSERT_TRUE(buffer.pop(obj1));
+    ASSERT_TRUE(buffer.is_lock_free());
     ASSERT_EQ(10, buffer.capacity());
     ASSERT_EQ(42, obj1.number_);
   }
@@ -63,6 +65,7 @@ TEST(LockFreeSPSCQueue, initialize_value)
   ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
   ASSERT_TRUE(buffer.push(3.14)) << "Buffer should have space for one element";
   ASSERT_EQ(1, buffer.size()) << "Buffer should have one element";
+  ASSERT_TRUE(buffer.is_lock_free());
   double obj1;
   ASSERT_TRUE(buffer.pop(obj1));
   ASSERT_DOUBLE_EQ(3.14, obj1);
@@ -256,6 +259,7 @@ TEST(LockFreeMPMCQueue, default_construct)
     ASSERT_FALSE(buffer.pop(obj1)) << "Buffer should be empty";
     ASSERT_TRUE(buffer.push(DefaultConstructable())) << "Buffer should have space for one element";
     ASSERT_EQ(10, buffer.capacity());
+    ASSERT_TRUE(buffer.is_lock_free());
     ASSERT_TRUE(buffer.pop(obj1));
     ASSERT_EQ(10, buffer.capacity());
     ASSERT_EQ(42, obj1.number_);
@@ -269,6 +273,7 @@ TEST(LockFreeMPMCQueue, default_construct)
     ASSERT_TRUE(buffer.push(DefaultConstructable())) << "Buffer should have space for one element";
     ASSERT_EQ(10, buffer.capacity());
     ASSERT_TRUE(buffer.pop(obj1));
+    ASSERT_TRUE(buffer.is_lock_free());
     ASSERT_EQ(10, buffer.capacity());
     ASSERT_EQ(42, obj1.number_);
   }
@@ -279,6 +284,7 @@ TEST(LockFreeMPMCQueue, initialize_value)
   LockFreeMPMCQueue<double, 10> buffer;
   ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
   ASSERT_TRUE(buffer.push(3.14)) << "Buffer should have space for one element";
+  ASSERT_TRUE(buffer.is_lock_free());
   double obj1;
   ASSERT_TRUE(buffer.pop(obj1));
   ASSERT_DOUBLE_EQ(3.14, obj1);

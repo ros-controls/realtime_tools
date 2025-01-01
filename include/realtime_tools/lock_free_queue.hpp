@@ -278,6 +278,26 @@ public:
   }
 
   /**
+   * @brief The method to check if the queue is lock free
+   * @return true If the queue is lock free, false otherwise
+   * @warning It only checks, if the queue head and tail nodes and the freelist can
+   * be modified in a lock-free manner. On most platforms, the whole implementation
+   * is lock-free, if this is true. Using c++0x-style atomics, there is no possibility
+   * to provide a completely accurate implementation, because one would need to test
+   * every internal node, which is impossible if further nodes will be allocated from
+   * the operating system.
+   * @link https://www.boost.org/doc/libs/1_74_0/doc/html/boost/lockfree/queue.html
+   */
+  bool is_lock_free() const
+  {
+    if constexpr (is_spsc_queue<LockFreeSPSCContainer>::value) {
+      return true;
+    } else {
+      return data_queue_.is_lock_free();
+    }
+  }
+
+  /**
    * @brief Get the lockfree container
    * @return const LockFreeSPSCContainer& Reference to the lockfree container
    */
