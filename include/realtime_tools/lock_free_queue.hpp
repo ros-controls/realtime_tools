@@ -211,6 +211,18 @@ public:
   }
 
   /**
+   * @brief Get the latest data from the queue
+   * @param data Data to be filled with the latest data
+   * @return true If the data is filled with the latest data, false otherwise
+   * @return false If the queue is empty
+   * @note This function consumes all the data in the queue until the last data and returns the last element of the queue
+   */
+  [[nodiscard]] bool get_latest(T & data)
+  {
+    return data_queue_.consume_all([&data](const T & d) { data = d; }) > 0;
+  }
+
+  /**
    * @brief The bounded_push function pushes the data into the queue and pops the oldest data if the queue is full
    * @param data Data to be pushed
    * @return true If the data is pushed successfully

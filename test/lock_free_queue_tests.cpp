@@ -116,6 +116,22 @@ TEST(LockFreeSPSCQueue, test_pop)
   ASSERT_FALSE(buffer.pop(obj1)) << "Buffer should be empty";
 }
 
+TEST(LockFreeSPSCQueue, test_get_latest)
+{
+  LockFreeSPSCQueue<double, 10> buffer;
+  ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
+  for (auto i = 1; i <= 10; i++) {
+    ASSERT_TRUE(buffer.push(i)) << "Buffer should have space for element as size is 10";
+    ASSERT_EQ(i, buffer.size());
+  }
+  double obj1;
+  ASSERT_TRUE(buffer.get_latest(obj1));
+  ASSERT_EQ(10, obj1);
+  ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
+  ASSERT_EQ(0, buffer.size());
+  ASSERT_FALSE(buffer.get_latest(obj1));
+}
+
 TEST(LockFreeSPSCQueue, test_bounded_push)
 {
   {
@@ -326,6 +342,21 @@ TEST(LockFreeMPMCQueue, test_pop)
   ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
   double obj1;
   ASSERT_FALSE(buffer.pop(obj1)) << "Buffer should be empty";
+}
+
+TEST(LockFreeMPMCQueue, test_get_latest)
+{
+  LockFreeMPMCQueue<double, 10> buffer;
+  ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
+  for (auto i = 1; i <= 10; i++) {
+    ASSERT_TRUE(buffer.push(i)) << "Buffer should have space for element as size is 10";
+  }
+  ASSERT_FALSE(buffer.empty()) << "Buffer should not be empty";
+  double obj1;
+  ASSERT_TRUE(buffer.get_latest(obj1));
+  ASSERT_EQ(10, obj1);
+  ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
+  ASSERT_FALSE(buffer.get_latest(obj1));
 }
 
 TEST(LockFreeMPMCQueue, test_bounded_push)
