@@ -188,9 +188,12 @@ public:
    * @param data Data to be pushed
    * @return true If the data is pushed successfully
    * @return false If the data could not be pushed
-   * @note This function is enabled only if the queue is a spsc_queue and only if the data type is convertible to the template type of the queue
+   * @note This function is enabled only if the queue is a spsc_queue and only if the data type
+   * is convertible to the template type of the queue
    * @note To be used in a single threaded applications
-   * @warning This method might not work as expected if it is used with 2 different threads one doing bounded_push and the other doing pop. In this case, the queue is no more a single producer single consumer queue. So, the behaviour might not be as expected.
+   * @warning This method might not work as expected if it is used with 2 different threads one
+   * doing bounded_push and the other doing pop. In this case, the queue is no more a single producer
+   * single consumer queue. So, the behaviour might not be as expected.
    */
   template <
     typename U, bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
@@ -212,7 +215,8 @@ public:
    * @param data Data to be pushed
    * @return true If the data is pushed successfully
    * @return false If the data could not be pushed
-   * @note This function is enabled only if the queue is of multiple producer and multiple consumer type and only if the data type is convertible to the template type of the queue
+   * @note This function is enabled only if the queue is of multiple producer and multiple consumer
+   * type and only if the data type is convertible to the template type of the queue
    * @note Can be used in a multi threaded applications
    */
   template <
@@ -235,6 +239,7 @@ public:
    * @return true If the queue is empty
    * @return false If the queue is not empty
    * @note This function is enabled only if the queue is a spsc_queue
+   * @note Should only be called from the consumer thread where pop is called
    */
   template <
     bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
@@ -248,6 +253,8 @@ public:
    * @brief Check if the queue is empty
    * @return true If the queue is empty
    * @return false If the queue is not empty
+   * @note The result is only accurate, if no other thread modifies the queue.
+   * Therefore it is rarely practical to use this value in program logic.
    * @note This function is enabled only if the queue is of multiple producer and multiple consumer type
    */
   template <
