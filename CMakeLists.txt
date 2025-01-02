@@ -29,6 +29,7 @@ find_package(ament_cmake REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
+find_package(Boost REQUIRED)
 
 add_library(realtime_tools SHARED
   src/realtime_clock.cpp
@@ -75,7 +76,7 @@ if(BUILD_TESTING)
   target_link_libraries(realtime_buffer_tests realtime_tools)
 
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
-  target_link_libraries(lock_free_queue_tests realtime_tools)
+  target_link_libraries(lock_free_queue_tests realtime_tools atomic)
 
   ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
   target_link_libraries(realtime_clock_tests realtime_tools)
