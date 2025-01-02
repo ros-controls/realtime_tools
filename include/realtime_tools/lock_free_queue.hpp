@@ -107,9 +107,9 @@ namespace realtime_tools
 /**
  * @brief Base class for lock-free queues
  * @tparam DataType Type of the data to be stored in the queue
- * @tparam LockFreeSPSCContainer Type of the lock-free container - Typically boost::lockfree::spsc_queue or boost::lockfree::queue with their own template parameters
+ * @tparam LockFreeContainer Type of the lock-free container - Typically boost::lockfree::spsc_queue or boost::lockfree::queue with their own template parameters
  */
-template <typename DataType, typename LockFreeSPSCContainer>
+template <typename DataType, typename LockFreeContainer>
 class LockFreeQueueBase
 {
 public:
@@ -117,22 +117,22 @@ public:
 
   /**
    * @brief Construct a new LockFreeQueueBase object
-   * @note This constructor is enabled only if the LockFreeSPSCContainer has a capacity set
+   * @note This constructor is enabled only if the LockFreeContainer has a capacity set
    */
   template <
-    bool HasCapacity = has_capacity<LockFreeSPSCContainer>::value,
+    bool HasCapacity = has_capacity<LockFreeContainer>::value,
     typename std::enable_if_t<HasCapacity, int> = 0>
-  LockFreeQueueBase() : capacity_(get_boost_lockfree_queue_capacity<LockFreeSPSCContainer>::value)
+  LockFreeQueueBase() : capacity_(get_boost_lockfree_queue_capacity<LockFreeContainer>::value)
   {
   }
 
   /**
    * @brief Construct a new LockFreeQueueBase object
    * @param capacity Capacity of the queue
-   * @note This constructor is enabled only if the LockFreeSPSCContainer has no capacity set
+   * @note This constructor is enabled only if the LockFreeContainer has no capacity set
    */
   template <
-    bool HasCapacity = has_capacity<LockFreeSPSCContainer>::value,
+    bool HasCapacity = has_capacity<LockFreeContainer>::value,
     typename std::enable_if_t<!HasCapacity, int> = 1>
   explicit LockFreeQueueBase(std::size_t capacity) : data_queue_(capacity), capacity_(capacity)
   {
@@ -196,7 +196,7 @@ public:
    * single consumer queue. So, the behaviour might not be as expected.
    */
   template <
-    typename U, bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
+    typename U, bool IsSPSCQueue = is_spsc_queue<LockFreeContainer>::value,
     typename std::enable_if_t<IsSPSCQueue, int> = 0>
   [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
@@ -230,7 +230,7 @@ public:
    * @note Can be used in a multi threaded applications
    */
   template <
-    typename U, bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
+    typename U, bool IsSPSCQueue = is_spsc_queue<LockFreeContainer>::value,
     typename std::enable_if_t<!IsSPSCQueue, int> = 1>
   [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
@@ -250,7 +250,7 @@ public:
    * @note Should only be called from the consumer thread where pop is called
    */
   template <
-    bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
+    bool IsSPSCQueue = is_spsc_queue<LockFreeContainer>::value,
     typename std::enable_if_t<IsSPSCQueue, int> = 0>
   bool empty() const
   {
@@ -266,7 +266,7 @@ public:
    * @note This function is enabled only if the queue is of multiple producer and multiple consumer type
    */
   template <
-    bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
+    bool IsSPSCQueue = is_spsc_queue<LockFreeContainer>::value,
     typename std::enable_if_t<!IsSPSCQueue, int> = 1>
   bool empty() const
   {
@@ -285,7 +285,7 @@ public:
    * @note This function is enabled only if the queue is a spsc_queue
    */
   template <
-    bool IsSPSCQueue = is_spsc_queue<LockFreeSPSCContainer>::value,
+    bool IsSPSCQueue = is_spsc_queue<LockFreeContainer>::value,
     typename std::enable_if_t<IsSPSCQueue, int> = 0>
   std::size_t size() const
   {
@@ -305,7 +305,7 @@ public:
    */
   bool is_lock_free() const
   {
-    if constexpr (is_spsc_queue<LockFreeSPSCContainer>::value) {
+    if constexpr (is_spsc_queue<LockFreeContainer>::value) {
       return true;
     } else {
       return data_queue_.is_lock_free();
@@ -314,18 +314,18 @@ public:
 
   /**
    * @brief Get the lockfree container
-   * @return const LockFreeSPSCContainer& Reference to the lockfree container
+   * @return const LockFreeContainer& Reference to the lockfree container
    */
-  const LockFreeSPSCContainer & get_lockfree_container() const { return data_queue_; }
+  const LockFreeContainer & get_lockfree_container() const { return data_queue_; }
 
   /**
    * @brief Get the lockfree container
-   * @return LockFreeSPSCContainer& Reference to the lockfree container
+   * @return LockFreeContainer& Reference to the lockfree container
    */
-  LockFreeSPSCContainer & get_lockfree_container() { return data_queue_; }
+  LockFreeContainer & get_lockfree_container() { return data_queue_; }
 
 private:
-  LockFreeSPSCContainer data_queue_;
+  LockFreeContainer data_queue_;
   std::size_t capacity_;
 };  // class
 
