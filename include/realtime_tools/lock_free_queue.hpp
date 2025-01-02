@@ -201,8 +201,6 @@ public:
   [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
     if (!data_queue_.push(data)) {
-      // data_queue_.pop();
-      // return data_queue_.push(data);
       T dummy;
       data_queue_.pop(dummy);
       return data_queue_.push(data);
@@ -237,8 +235,6 @@ public:
   [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
     if (!data_queue_.bounded_push(data)) {
-      // data_queue_.pop();
-      // return data_queue_.push(data);
       T dummy;
       data_queue_.pop(dummy);
       return data_queue_.bounded_push(data);
