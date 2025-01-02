@@ -219,52 +219,6 @@ TEST(LockFreeSPSCQueue, test_lockfree_queue_push)
   ASSERT_EQ(consumer_count, iterations);
 }
 
-// TEST(LockFreeSPSCQueue, test_lockfree_queue_bounded_push)
-// {
-//   LockFreeSPSCQueue<int, 100> queue;
-//   std::atomic_int producer_count = 0;
-//   std::atomic_int consumer_count(0);
-//   std::atomic_bool done(false);
-
-//   const int iterations = 1000000;
-
-//   std::thread producer([&]() {
-//     for (auto j = 0; j < iterations; ++j) {
-//       ASSERT_TRUE(queue.bounded_push(j));
-//       ASSERT_EQ(100, queue.capacity());
-//       ++producer_count;
-//     }
-//   });
-
-//   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-//   std::cerr << "producer_count: " << producer_count << std::endl;
-
-//   std::thread consumer([&]() {
-//     int value;
-//     while (!done) {
-//       while (queue.pop(value)) {
-//         ++consumer_count;
-//         std::this_thread::yield();
-//       }
-//     }
-//     while (queue.pop(value)) {
-//       ++consumer_count;
-//     }
-//   });
-
-//   producer.join();
-//   done = true;
-//   consumer.join();
-
-//   std::cerr << "producer_count: " << producer_count << std::endl;
-//   std::cerr << "consumer_count: " << consumer_count << std::endl;
-//   std::cerr << "iterations: " << iterations << std::endl;
-//   ASSERT_GT(producer_count, consumer_count);
-//   ASSERT_EQ(producer_count, iterations);
-//   ASSERT_GT(iterations, consumer_count);
-// }
-
 TEST(LockFreeMPMCQueue, default_construct)
 {
   {
