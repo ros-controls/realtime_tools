@@ -29,7 +29,14 @@ find_package(ament_cmake REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
-find_package(Boost REQUIRED)
+
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+find_package(Boost QUIET COMPONENTS headers)
+if(NOT Boost_headers_FOUND)
+  find_package(Boost REQUIRED)
+endif()
 
 add_library(realtime_tools SHARED
   src/realtime_clock.cpp
