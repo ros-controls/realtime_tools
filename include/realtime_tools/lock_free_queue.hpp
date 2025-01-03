@@ -305,11 +305,7 @@ public:
    */
   bool is_lock_free() const
   {
-    if constexpr (is_spsc_queue<LockFreeContainer>::value) {
-      return true;
-    } else {
-      return data_queue_.is_lock_free();
-    }
+    return (is_spsc_queue<LockFreeContainer>::value) || data_queue_.is_lock_free();
   }
 
   /**
