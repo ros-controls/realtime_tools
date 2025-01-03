@@ -82,13 +82,14 @@ if(BUILD_TESTING)
   ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests realtime_tools)
 
-  if(WIN32)
-    set(HAVE_CXX_ATOMICS64_WITHOUT_LIB True)
-    set(HAVE_CXX_ATOMICS_WITHOUT_LIB True)
-    set(FOUND_LIBATOMIC TRUE)
-  endif()
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
-  target_link_libraries(lock_free_queue_tests realtime_tools atomic Boost::boost)
+  if(WIN32)
+    # atomic is not found on Windows, but also not needed
+    target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
+  else()
+    # without adding atomic, clang throws a linker error
+    target_link_libraries(lock_free_queue_tests realtime_tools atomic Boost::boost)
+  endif()
 
   ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
   target_link_libraries(realtime_clock_tests realtime_tools)
