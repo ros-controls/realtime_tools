@@ -234,31 +234,16 @@ public:
    * @brief Check if the queue is empty
    * @return true If the queue is empty
    * @return false If the queue is not empty
-   * @note This function is enabled only if the queue is a spsc_queue
-   * @note Should only be called from the consumer thread where pop is called
+   * @note The result is only accurate, if no other thread modifies the queue. Therefore, it is rarely practical to use this value in program logic.
+   * @note For a SPSC Queue, it should only be called from the consumer thread where pop is called. If need to be called from producer thread, use write_available() instead.
    */
-  template <
-    bool IsSPSCQueue = is_spsc_queue<LockFreeContainer>::value,
-    typename std::enable_if_t<IsSPSCQueue, int> = 0>
   bool empty() const
   {
-    return data_queue_.read_available() == 0;
-  }
-
-  /**
-   * @brief Check if the queue is empty
-   * @return true If the queue is empty
-   * @return false If the queue is not empty
-   * @note The result is only accurate, if no other thread modifies the queue.
-   * Therefore it is rarely practical to use this value in program logic.
-   * @note This function is enabled only if the queue is of multiple producer and multiple consumer type
-   */
-  template <
-    bool IsSPSCQueue = is_spsc_queue<LockFreeContainer>::value,
-    typename std::enable_if_t<!IsSPSCQueue, int> = 1>
-  bool empty() const
-  {
-    return data_queue_.empty();
+    if constexpr (is_spsc_queue<LockFreeContainer>::value) {
+      return data_queue_.read_available() == 0;
+    } else {
+      return data_queue_.empty();
+    }
   }
 
   /**
