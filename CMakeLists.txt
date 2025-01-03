@@ -16,6 +16,8 @@ if(WIN32)
   )
   # set the same behavior for windows as it is on linux
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+  set(FOUND_LIBATOMIC TRUE)
 endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -83,7 +85,7 @@ if(BUILD_TESTING)
   target_link_libraries(realtime_buffer_tests realtime_tools)
 
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
-  target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
+  target_link_libraries(lock_free_queue_tests realtime_tools atomic Boost::boost)
 
   ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
   target_link_libraries(realtime_clock_tests realtime_tools)
