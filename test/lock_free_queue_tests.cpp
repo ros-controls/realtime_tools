@@ -417,11 +417,9 @@ TEST(LockFreeMPMCQueue, test_lockfree_queue_bounded_push)
 
   std::thread consumer([&]() {
     int value;
-    while (!done) {
-      while (queue.pop(value)) {
-        ++consumer_count;
-        std::this_thread::yield();
-      }
+    while (!done && queue.pop(value)) {
+      ++consumer_count;
+      std::this_thread::yield();
     }
     while (queue.pop(value)) {
       ++consumer_count;
