@@ -271,14 +271,27 @@ TEST(LockFreeMPMCQueue, initialize_value)
 
 TEST(LockFreeMPMCQueue, test_push)
 {
-  LockFreeMPMCQueue<double, 10> buffer;
-  ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
-  for (auto i = 1; i <= 10; i++) {
-    ASSERT_TRUE(buffer.push(i)) << "Buffer should have space for element as size is 10";
-    ASSERT_EQ(10, buffer.capacity());
+  {
+    LockFreeMPMCQueue<double, 10> buffer;
+    ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
+    for (auto i = 1; i <= 10; i++) {
+      ASSERT_TRUE(buffer.push(i)) << "Buffer should have space for element as size is 10";
+      ASSERT_EQ(10, buffer.capacity());
+    }
+    ASSERT_FALSE(buffer.push(11)) << "Buffer should not have space for element as size is 10";
+    ASSERT_FALSE(buffer.empty());
   }
-  ASSERT_FALSE(buffer.push(11)) << "Buffer should not have space for element as size is 10";
-  ASSERT_FALSE(buffer.empty());
+  {
+    LockFreeMPMCQueue<double> buffer(10);
+    ASSERT_TRUE(buffer.empty()) << "Buffer should be empty";
+    for (auto i = 1; i <= 10; i++) {
+      ASSERT_TRUE(buffer.push(i)) << "Buffer should have space for element as size is 10";
+      ASSERT_EQ(10, buffer.capacity());
+    }
+    ASSERT_FALSE(buffer.push(11)) << "Buffer should not have space for element as size is 10";
+    ASSERT_FALSE(buffer.push(12)) << "Buffer should not have space for element as size is 10";
+    ASSERT_FALSE(buffer.empty());
+  }
 }
 
 TEST(LockFreeMPMCQueue, test_pop)

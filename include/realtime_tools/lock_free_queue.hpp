@@ -173,7 +173,14 @@ public:
    * @return false If the queue is full or the data could not be pushed
    */
 
-  [[nodiscard]] bool push(const T & data) { return data_queue_.push(data); }
+  [[nodiscard]] bool push(const T & data)
+  {
+    if constexpr (is_spsc_queue<LockFreeContainer>::value) {
+      return data_queue_.push(data);
+    } else {
+      return data_queue_.bounded_push(data);
+    }
+  }
 
   /**
    * @brief Push the data into the queue
@@ -185,7 +192,11 @@ public:
   template <typename U>
   [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> push(const U & data)
   {
-    return data_queue_.push(data);
+    if constexpr (is_spsc_queue<LockFreeContainer>::value) {
+      return data_queue_.push(data);
+    } else {
+      return data_queue_.bounded_push(data);
+    }
   }
 
   /**
@@ -203,17 +214,10 @@ public:
   template <typename U>
   [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
   {
-    const auto bounded_push = [this](const U & info) -> bool {
-      if constexpr (is_spsc_queue<LockFreeContainer>::value) {
-        return data_queue_.push(info);
-      } else {
-        return data_queue_.bounded_push(info);
-      }
-    };
-    if (!bounded_push(data)) {
+    if (!push(data)) {
       T dummy;
       data_queue_.pop(dummy);
-      return bounded_push(data);
+      return push(data);
     }
     return true;
   }
@@ -317,7 +321,9 @@ using LockFreeSPSCQueue = std::conditional_t<
  */
 template <class DataType, std::size_t Capacity = 0, bool FixedSize = true>
 using LockFreeMPMCQueue = std::conditional_t<
-  Capacity == 0, LockFreeQueueBase<DataType, boost::lockfree::queue<DataType>>,
+  Capacity == 0,
+  LockFreeQueueBase<
+    DataType, boost::lockfree::queue<DataType, boost::lockfree::fixed_sized<FixedSize>>>,
   LockFreeQueueBase<
     DataType,
     boost::lockfree::queue<
