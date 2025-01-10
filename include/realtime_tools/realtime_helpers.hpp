@@ -35,8 +35,11 @@
 #include <vector>
 
 #ifdef _WIN32
-#include <windows.h>
-using NATIVE_THREAD_HANDLE = HANDLE;
+// Here we directly use void* instead of including windows.h
+// and using HANDLE macro to avoid polluting all the downstream
+// compilation units that include the public header realtime_helpers.hpp
+// with problematic macros like MIN, MAX or ERROR
+using NATIVE_THREAD_HANDLE = void *;
 #else
 using NATIVE_THREAD_HANDLE = pthread_t;
 #endif
