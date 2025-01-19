@@ -34,12 +34,15 @@
 #include <sched.h>
 #include <sys/capability.h>
 #include <sys/mman.h>
+#include <sys/utsname.h>
 
 #include <unistd.h>
 #endif
 
 #include <cstring>
 #include <fstream>
+#include <iostream>
+#include <regex>
 
 namespace realtime_tools
 {
@@ -50,6 +53,19 @@ bool has_realtime_kernel()
   if (realtime_file.is_open()) {
     realtime_file >> has_realtime;
   }
+#if !defined(_WIN32)
+  if (!has_realtime) {
+    struct utsname kernel_info;
+    if (uname(&kernel_info) == -1) {
+      std::cerr << "Error: Could not get kernel information : " << std::strerror(errno)
+                << std::endl;
+      return false;
+    }
+    const std::string kernel_version(kernel_info.release);
+    const std::regex pattern("(RT|Preempt)", std::regex_constants::icase);
+    return std::regex_search(kernel_version, pattern);
+  }
+#endif
   return has_realtime;
 }
 
