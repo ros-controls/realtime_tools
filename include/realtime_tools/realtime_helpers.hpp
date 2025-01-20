@@ -66,19 +66,6 @@ bool configure_sched_fifo(int priority);
  * will not swap out the pages to disk i.e., the pages are guaranteed to stay in
  * RAM until later unlocked - which is important for realtime applications.
  * \param[out] message a message describing the result of the operation
- * \returns true if memory locking succeeded, false otherwise.
-*/
-
-[[deprecated("Use std::pair<bool, std::string> lock_memory() instead.")]]
-bool lock_memory(std::string & message);
-
-/**
- * Locks the memory pages of the calling thread to prevent page faults.
- * By calling this method, the programs locks all pages mapped into the address
- * space of the calling process and future mappings. This means that the kernel
- * will not swap out the pages to disk i.e., the pages are guaranteed to stay in
- * RAM until later unlocked - which is important for realtime applications.
- * \param[out] message a message describing the result of the operation
  * \returns  a pair of a boolean indicating whether the operation succeeded or not
  * and a message describing the result of the operation
 */
