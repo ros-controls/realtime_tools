@@ -42,7 +42,6 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <regex>
 
 namespace realtime_tools
 {
@@ -61,9 +60,8 @@ bool has_realtime_kernel()
                 << std::endl;
       return false;
     }
-    const std::string kernel_version(kernel_info.release);
-    const std::regex pattern("(RT|Preempt)", std::regex_constants::icase);
-    return std::regex_search(kernel_version, pattern);
+    const std::string kernel_version(kernel_info.version);
+    return kernel_version.find("PREEMPT_RT") != std::string::npos;
   }
 #endif
   return has_realtime;
