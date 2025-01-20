@@ -31,7 +31,6 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
 endforeach()
 
 add_library(realtime_tools SHARED
-  src/realtime_clock.cpp
   src/realtime_helpers.cpp
 )
 target_compile_features(realtime_tools PUBLIC cxx_std_17)
@@ -73,9 +72,6 @@ if(BUILD_TESTING)
 
   ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests realtime_tools)
-
-  ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
-  target_link_libraries(realtime_clock_tests realtime_tools)
 
   ament_add_gmock(realtime_publisher_tests_non_polling
                   test/realtime_publisher_non_polling.test
