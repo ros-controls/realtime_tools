@@ -47,12 +47,15 @@ namespace realtime_tools
 {
 bool has_realtime_kernel()
 {
+#ifdef _WIN32
+  std::cerr << "Realtime kernel detection is not supported on Windows." << std::endl;
+  return false;
+#else
   std::ifstream realtime_file("/sys/kernel/realtime", std::ios::in);
   bool has_realtime = false;
   if (realtime_file.is_open()) {
     realtime_file >> has_realtime;
   }
-#if !defined(_WIN32)
   if (!has_realtime) {
     struct utsname kernel_info;
     if (uname(&kernel_info) == -1) {
@@ -63,8 +66,8 @@ bool has_realtime_kernel()
     const std::string kernel_version(kernel_info.version);
     return kernel_version.find("PREEMPT_RT") != std::string::npos;
   }
-#endif
   return has_realtime;
+#endif
 }
 
 bool configure_sched_fifo(int priority)
