@@ -1,15 +1,15 @@
-name: Rolling Debian Build
+name: Jazzy Debian Build
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - jazzy
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '33 2 * * *'
 
 concurrency:
-  # cancel previous runs of the same workflow, except for pushes on master branch
+  # cancel previous runs of the same workflow, except for pushes on jazzy branch
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ !startsWith(github.ref, '/refs/heads') }}
 
@@ -17,5 +17,5 @@ jobs:
   debian_source_build:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-debian-build.yml@master
     with:
-      ros_distro: rolling
-      ref_for_scheduled_build: master
+      ros_distro: jazzy
+      ref_for_scheduled_build: jazzy

@@ -1,12 +1,12 @@
-name: Rolling ABI Compatibility Check
+name: Jazzy ABI Compatibility Check
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - jazzy
 
 concurrency:
-  # cancel previous runs of the same workflow, except for pushes on master branch
+  # cancel previous runs of the same workflow, except for pushes on jazzy branch
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ !startsWith(github.ref, '/refs/heads') }}
 
@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ros-industrial/industrial_ci@master
         env:
-          ROS_DISTRO: rolling
+          ROS_DISTRO: jazzy
           ROS_REPO: main
           ABICHECK_URL: github:${{ github.repository }}#${{ github.base_ref }}
           NOT_TEST_BUILD: true
