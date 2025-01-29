@@ -29,7 +29,7 @@ jobs:
     #   (github.event_name == 'workflow_dispatch')
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@master
     with:
-      ros_distro: jazzy
+      ros_distro: jazzy # no pre-compiled rolling version is available
       ref_for_scheduled_build: master
       os_name: windows-2019
       install_boost: true
