@@ -1,9 +1,9 @@
-name: Rolling Source Build
+name: Jazzy Source Build
 on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - jazzy
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * *'
@@ -12,8 +12,8 @@ jobs:
   source:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
     with:
-      ros_distro: rolling
-      ref: master
-      ros2_repo_branch: rolling
+      ros_distro: jazzy
+      ref: jazzy
+      ros2_repo_branch: jazzy
       os_name: ubuntu-latest
       container: ubuntu:24.04
