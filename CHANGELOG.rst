@@ -2,6 +2,14 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.0 (2025-01-29)
+------------------
+* Add Lock-free Queue (`#253 <https://github.com/ros-controls/realtime_tools/issues/253>`_)
+* Use humble branch of control_toolbox repo (`#258 <https://github.com/ros-controls/realtime_tools/issues/258>`_)
+* Avoid to include windows.h in realtime_helpers.hpp (`#255 <https://github.com/ros-controls/realtime_tools/issues/255>`_)
+* Bump version of pre-commit hooks (`#251 <https://github.com/ros-controls/realtime_tools/issues/251>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota, Silvio Traversaro, github-actions[bot]
+
 3.1.0 (2024-12-29)
 ------------------
 * Fix ref for scheduled build (`#248 <https://github.com/ros-controls/realtime_tools/issues/248>`_)
