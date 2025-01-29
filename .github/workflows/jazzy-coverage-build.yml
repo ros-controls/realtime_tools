@@ -1,0 +1,22 @@
+name: Jazzy Coverage Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - jazzy
+  pull_request:
+    branches:
+      - jazzy
+
+concurrency:
+  # cancel previous runs of the same workflow, except for pushes on jazzy branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, '/refs/heads') }}
+
+jobs:
+  coverage:
+    name: coverage build
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
+    secrets: inherit
+    with:
+      ros_distro: jazzy

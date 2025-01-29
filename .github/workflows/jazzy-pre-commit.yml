@@ -1,10 +1,10 @@
-name: Rolling Pre-Commit
+name: Jazzy Pre-Commit
 
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - jazzy
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,4 +14,4 @@ jobs:
   pre-commit:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-pre-commit.yml@master
     with:
-      ros_distro: rolling
+      ros_distro: jazzy
