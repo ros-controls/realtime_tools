@@ -2,6 +2,18 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use humble branch of control_toolbox repo (backport `#258 <https://github.com/ros-controls/realtime_tools/issues/258>`_) (`#259 <https://github.com/ros-controls/realtime_tools/issues/259>`_)
+* Avoid to include windows.h in realtime_helpers.hpp (backport `#255 <https://github.com/ros-controls/realtime_tools/issues/255>`_) (`#256 <https://github.com/ros-controls/realtime_tools/issues/256>`_)
+* Bump version of pre-commit hooks (backport `#251 <https://github.com/ros-controls/realtime_tools/issues/251>`_) (`#252 <https://github.com/ros-controls/realtime_tools/issues/252>`_)
+* Fix ref for scheduled build (backport `#248 <https://github.com/ros-controls/realtime_tools/issues/248>`_) (`#249 <https://github.com/ros-controls/realtime_tools/issues/249>`_)
+* Add realtime priority inheritance mutexes (backport `#197 <https://github.com/ros-controls/realtime_tools/issues/197>`_) (`#246 <https://github.com/ros-controls/realtime_tools/issues/246>`_)
+* First step towards modernizing the rt publisher (backport `#210 <https://github.com/ros-controls/realtime_tools/issues/210>`_) (`#233 <https://github.com/ros-controls/realtime_tools/issues/233>`_)
+* Remove wrong comments (backport `#240 <https://github.com/ros-controls/realtime_tools/issues/240>`_) (`#242 <https://github.com/ros-controls/realtime_tools/issues/242>`_)
+* Update filenames also for best_effort (`#238 <https://github.com/ros-controls/realtime_tools/issues/238>`_)
+* Contributors: Christoph Fröhlich, mergify[bot]
+
 2.10.0 (2024-12-14)
 -------------------
 * sleep after starting thread to fix flaky tests (backport `#235 <https://github.com/ros-controls/realtime_tools/issues/235>`_) (`#237 <https://github.com/ros-controls/realtime_tools/issues/237>`_)
