@@ -15,7 +15,7 @@ pull_request_rules:
     actions:
       backport:
         branches:
-          - humble
+          - jazzy
 
   - name: Ask to resolve conflict
     conditions:
