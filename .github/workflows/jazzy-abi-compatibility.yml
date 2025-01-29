@@ -1,12 +1,12 @@
-name: Humble ABI Compatibility Check
+name: Jazzy ABI Compatibility Check
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - humble
+      - jazzy
 
 concurrency:
-  # cancel previous runs of the same workflow, except for pushes on humble branch
+  # cancel previous runs of the same workflow, except for pushes on jazzy branch
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ !startsWith(github.ref, '/refs/heads') }}
 
@@ -14,4 +14,4 @@ jobs:
   abi_check:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@master
     with:
-      ros_distro: humble
+      ros_distro: jazzy

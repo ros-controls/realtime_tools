@@ -30,6 +30,14 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
 
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+find_package(Boost COMPONENTS headers)
+if(NOT Boost_headers_FOUND)
+  find_package(Boost REQUIRED)
+endif()
+
 add_library(realtime_tools SHARED
   src/realtime_helpers.cpp
 )
@@ -72,6 +80,15 @@ if(BUILD_TESTING)
 
   ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests realtime_tools)
+
+  ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
+  if(WIN32)
+    # atomic is not found on Windows, but also not needed
+    target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
+  else()
+    # without adding atomic, clang throws a linker error
+    target_link_libraries(lock_free_queue_tests realtime_tools atomic Boost::boost)
+  endif()
 
   ament_add_gmock(realtime_publisher_tests_non_polling
                   test/realtime_publisher_non_polling.test

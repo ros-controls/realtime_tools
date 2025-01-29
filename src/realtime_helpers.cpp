@@ -34,23 +34,40 @@
 #include <sched.h>
 #include <sys/capability.h>
 #include <sys/mman.h>
+#include <sys/utsname.h>
 
 #include <unistd.h>
 #endif
 
 #include <cstring>
 #include <fstream>
+#include <iostream>
 
 namespace realtime_tools
 {
 bool has_realtime_kernel()
 {
+#ifdef _WIN32
+  std::cerr << "Realtime kernel detection is not supported on Windows." << std::endl;
+  return false;
+#else
   std::ifstream realtime_file("/sys/kernel/realtime", std::ios::in);
   bool has_realtime = false;
   if (realtime_file.is_open()) {
     realtime_file >> has_realtime;
   }
+  if (!has_realtime) {
+    struct utsname kernel_info;
+    if (uname(&kernel_info) == -1) {
+      std::cerr << "Error: Could not get kernel information : " << std::strerror(errno)
+                << std::endl;
+      return false;
+    }
+    const std::string kernel_version(kernel_info.version);
+    return kernel_version.find("PREEMPT_RT") != std::string::npos;
+  }
   return has_realtime;
+#endif
 }
 
 bool configure_sched_fifo(int priority)
