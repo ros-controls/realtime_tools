@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.11.0 (2025-01-29)
+-------------------
 * Use humble branch of control_toolbox repo (backport `#258 <https://github.com/ros-controls/realtime_tools/issues/258>`_) (`#259 <https://github.com/ros-controls/realtime_tools/issues/259>`_)
 * Avoid to include windows.h in realtime_helpers.hpp (backport `#255 <https://github.com/ros-controls/realtime_tools/issues/255>`_) (`#256 <https://github.com/ros-controls/realtime_tools/issues/256>`_)
 * Bump version of pre-commit hooks (backport `#251 <https://github.com/ros-controls/realtime_tools/issues/251>`_) (`#252 <https://github.com/ros-controls/realtime_tools/issues/252>`_)
