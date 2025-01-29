@@ -1,7 +1,7 @@
 realtime_tools
 ===========
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![codecov](https://codecov.io/gh/ros-controls/realtime_tools/branch/master/graph/badge.svg?token=Osge1FOaAh)](https://app.codecov.io/gh/ros-controls/realtime_tools/tree/master)
+[![codecov](https://codecov.io/gh/ros-controls/realtime_tools/branch/jazzy/graph/badge.svg?token=Osge1FOaAh)](https://app.codecov.io/gh/ros-controls/realtime_tools/tree/jazzy)
 
 Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
 
@@ -9,7 +9,7 @@ Contains a set of tools that can be used from a hard realtime thread, without br
 ROS2 Distro | Branch | Build status | Documentation | Released packages
 :---------: | :----: | :----------: | :-----------: | :---------------:
 **Rolling** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build.yml?branch=master) <br /> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-source-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-source-build.yml?branch=master) | [API](http://docs.ros.org/en/rolling/p/realtime_tools/)  | [realtime_tools](https://index.ros.org/p/realtime_tools/#rolling)
-**Jazzy** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | see above | [API](http://docs.ros.org/en/jazzy/p/realtime_tools/) | [realtime_tools](https://index.ros.org/p/realtime_tools/#jazzy)
+**Jazzy** | [`jazzy`](https://github.com/ros-controls/realtime_tools/tree/jazzy) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-binary-build.yml/badge.svg?branch=jazzy)](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-binary-build.yml?branch=jazzy) <br /> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-source-build.yml/badge.svg?branch=jazzy)](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-source-build.yml?branch=jazzy) | [API](http://docs.ros.org/en/jazzy/p/realtime_tools/)  | [realtime_tools](https://index.ros.org/p/realtime_tools/#jazzy)
 **Humble** | [`humble`](https://github.com/ros-controls/realtime_tools/tree/humble) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build.yml?branch=master) <br /> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-source-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-source-build.yml?branch=master) | [API](http://docs.ros.org/en/humble/p/realtime_tools/) | [realtime_tools](https://index.ros.org/p/realtime_tools/#humble)
 
 
