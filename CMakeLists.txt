@@ -91,6 +91,9 @@ if(BUILD_TESTING)
     target_link_libraries(lock_free_queue_tests realtime_tools atomic Boost::boost)
   endif()
 
+  ament_add_gmock(realtime_barrier_tests test/realtime_barrier_tests.cpp)
+  target_link_libraries(realtime_barrier_tests ${PROJECT_NAME} ${GMOCK_MAIN_LIBRARIES})
+
   ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
   target_link_libraries(realtime_clock_tests realtime_tools)
 
