@@ -2,6 +2,13 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use ABI workflow from ros2_control_ci (backport `#264 <https://github.com/ros-controls/realtime_tools/issues/264>`_) (`#272 <https://github.com/ros-controls/realtime_tools/issues/272>`_)
+* Improve has_realtime_kernel method (backport `#260 <https://github.com/ros-controls/realtime_tools/issues/260>`_) (`#268 <https://github.com/ros-controls/realtime_tools/issues/268>`_)
+* Branch for jazzy (backport `#263 <https://github.com/ros-controls/realtime_tools/issues/263>`_) (`#266 <https://github.com/ros-controls/realtime_tools/issues/266>`_)
+* Contributors: mergify[bot]
+
 3.2.0 (2025-01-29)
 ------------------
 * Add Lock-free Queue (`#253 <https://github.com/ros-controls/realtime_tools/issues/253>`_)
