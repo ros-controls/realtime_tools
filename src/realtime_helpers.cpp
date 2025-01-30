@@ -83,13 +83,6 @@ bool configure_sched_fifo(int priority)
 #endif
 }
 
-bool lock_memory(std::string & message)
-{
-  const auto lock_result = lock_memory();
-  message = lock_result.second;
-  return lock_result.first;
-}
-
 std::pair<bool, std::string> lock_memory()
 {
 #ifdef _WIN32
