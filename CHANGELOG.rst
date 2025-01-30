@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.0.0 (2025-01-30)
+------------------
 * Remove deprecated code (`#262 <https://github.com/ros-controls/realtime_tools/issues/262>`_)
 * Remove RealtimeClock (`#261 <https://github.com/ros-controls/realtime_tools/issues/261>`_)
 * Install boost on jazzy as well (`#273 <https://github.com/ros-controls/realtime_tools/issues/273>`_)
