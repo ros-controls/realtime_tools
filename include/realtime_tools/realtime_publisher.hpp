@@ -111,12 +111,7 @@ public:
   bool trylock()
   {
     if (msg_mutex_.try_lock()) {
-      if (turn_ == State::REALTIME) {
-        return true;
-      } else {
-        msg_mutex_.unlock();
-        return false;
-      }
+      return (turn_ == State::REALTIME);
     } else {
       return false;
     }
