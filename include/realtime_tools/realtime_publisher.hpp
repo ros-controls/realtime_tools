@@ -99,9 +99,7 @@ public:
   void stop()
   {
     keep_running_ = false;
-#ifdef NON_POLLING
     updated_cond_.notify_one();  // So the publishing loop can exit
-#endif
   }
 
   /**  \brief Try to get the data lock from realtime
@@ -159,17 +157,7 @@ public:
    * attempt to get unique access to the msg_ variable. Trylock returns
    * true if the lock was acquired, and false if it failed to get the lock.
    */
-  void lock()
-  {
-#ifdef NON_POLLING
-    msg_mutex_.lock();
-#else
-    // never actually block on the lock
-    while (!msg_mutex_.try_lock()) {
-      std::this_thread::sleep_for(std::chrono::microseconds(200));
-    }
-#endif
-  }
+  void lock() { msg_mutex_.lock(); }
 
   /**  \brief Unlocks the data without publishing anything
    *
@@ -177,9 +165,7 @@ public:
   void unlock()
   {
     msg_mutex_.unlock();
-#ifdef NON_POLLING
     updated_cond_.notify_one();
-#endif
   }
 
   std::thread & get_thread() { return thread_; }
@@ -203,20 +189,9 @@ private:
 
       // Locks msg_ and copies it
 
-#ifdef NON_POLLING
       std::unique_lock<std::mutex> lock_(msg_mutex_);
-#else
-      lock();
-#endif
-
       while (turn_ != State::NON_REALTIME && keep_running_) {
-#ifdef NON_POLLING
         updated_cond_.wait(lock_);
-#else
-        unlock();
-        std::this_thread::sleep_for(std::chrono::microseconds(500));
-        lock();
-#endif
       }
       outgoing = msg_;
       turn_ = State::REALTIME;
@@ -238,10 +213,7 @@ private:
   std::thread thread_;
 
   std::mutex msg_mutex_;  // Protects msg_
-
-#ifdef NON_POLLING
   std::condition_variable updated_cond_;
-#endif
 
   enum class State : int { REALTIME, NON_REALTIME, LOOP_NOT_STARTED };
   std::atomic<State> turn_;  // Who's turn is it to use msg_?
