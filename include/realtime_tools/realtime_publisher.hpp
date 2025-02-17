@@ -187,14 +187,13 @@ private:
     while (keep_running_) {
       MessageT outgoing;
 
-      // Locks msg_ and copies it
-
-      std::unique_lock<std::mutex> lock_(msg_mutex_);
-      updated_cond_.wait(lock_, [&] { return turn_ == State::NON_REALTIME || !keep_running_; });
-      outgoing = msg_;
-      turn_ = State::REALTIME;
-
-      unlock();
+      {
+        // Locks msg_ and copies it to outgoing
+        std::unique_lock<std::mutex> lock_(msg_mutex_);
+        updated_cond_.wait(lock_, [&] { return turn_ == State::NON_REALTIME || !keep_running_; });
+        outgoing = msg_;
+        turn_ = State::REALTIME;
+      }
 
       // Sends the outgoing message
       if (keep_running_) {
