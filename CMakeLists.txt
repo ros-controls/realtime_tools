@@ -90,12 +90,6 @@ if(BUILD_TESTING)
     target_link_libraries(lock_free_queue_tests realtime_tools atomic Boost::boost)
   endif()
 
-  ament_add_gmock(realtime_publisher_tests_non_polling
-                  test/realtime_publisher_non_polling.test
-                  test/realtime_publisher_tests_non_polling.cpp)
-  target_link_libraries(realtime_publisher_tests_non_polling realtime_tools)
-  ament_target_dependencies(realtime_publisher_tests_non_polling test_msgs)
-
   ament_add_gmock(realtime_publisher_tests
                   test/realtime_publisher.test
                   test/realtime_publisher_tests.cpp)
