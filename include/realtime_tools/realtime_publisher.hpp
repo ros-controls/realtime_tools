@@ -110,7 +110,7 @@ public:
    */
   bool trylock()
   {
-    if (turn_ == State::REALTIME && msg_mutex_.try_lock()) {
+    if (turn_.load(std::memory_order_acquire) == State::REALTIME && msg_mutex_.try_lock()) {
       return true;
     } else {
       return false;
@@ -142,7 +142,7 @@ public:
    */
   void unlockAndPublish()
   {
-    turn_ = State::NON_REALTIME;
+    turn_.store(State::NON_REALTIME, std::memory_order_release);
     unlock();
   }
 
@@ -177,7 +177,7 @@ private:
   void publishingLoop()
   {
     is_running_ = true;
-    turn_ = State::REALTIME;
+    turn_.store(State::REALTIME, std::memory_order_release);
 
     while (keep_running_) {
       MessageT outgoing;
@@ -187,13 +187,13 @@ private:
         std::unique_lock<std::mutex> lock_(msg_mutex_);
         updated_cond_.wait(lock_, [&] { return turn_ == State::NON_REALTIME || !keep_running_; });
         outgoing = msg_;
-        turn_ = State::REALTIME;
       }
 
       // Sends the outgoing message
       if (keep_running_) {
         publisher_->publish(outgoing);
       }
+      turn_.store(State::REALTIME, std::memory_order_release);
     }
     is_running_ = false;
   }
