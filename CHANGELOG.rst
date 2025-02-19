@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.1.0 (2025-02-19)
+------------------
 * [RTPublisher] Use NON_POLLING as default for the realtime pubisher  (`#280 <https://github.com/ros-controls/realtime_tools/issues/280>`_)
 * Bump version of pre-commit hooks (`#276 <https://github.com/ros-controls/realtime_tools/issues/276>`_)
 * Contributors: Sai Kishor Kothakota, github-actions[bot]
