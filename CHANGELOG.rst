@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.0 (2025-02-19)
+------------------
 * [RTPublisher] use NON_POLLING as default for the realtime pubisher  (backport `#280 <https://github.com/ros-controls/realtime_tools/issues/280>`_) (`#282 <https://github.com/ros-controls/realtime_tools/issues/282>`_)
 * Bump version of pre-commit hooks (backport `#276 <https://github.com/ros-controls/realtime_tools/issues/276>`_) (`#278 <https://github.com/ros-controls/realtime_tools/issues/278>`_)
 * Install boost on jazzy as well (backport `#273 <https://github.com/ros-controls/realtime_tools/issues/273>`_) (`#275 <https://github.com/ros-controls/realtime_tools/issues/275>`_)
