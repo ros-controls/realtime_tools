@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.0 (2025-03-01)
+-------------------
 * CI downstream build (backport `#214 <https://github.com/ros-controls/realtime_tools/issues/214>`_) (`#283 <https://github.com/ros-controls/realtime_tools/issues/283>`_)
 * Bump version of pre-commit hooks (backport `#276 <https://github.com/ros-controls/realtime_tools/issues/276>`_) (`#277 <https://github.com/ros-controls/realtime_tools/issues/277>`_)
 * Install boost on jazzy as well (backport `#273 <https://github.com/ros-controls/realtime_tools/issues/273>`_) (`#274 <https://github.com/ros-controls/realtime_tools/issues/274>`_)
