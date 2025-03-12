@@ -65,9 +65,14 @@ public:
   /// The msg_ variable contains the data that will get published on the ROS topic.
   MessageT msg_;
 
-  /**  \brief Constructor for the realtime publisher
+  /**
+   * \brief Constructor for the realtime publisher
    *
-   * \param publisher the publisher to wrap
+   * Starts a dedicated thread for message publishing.
+   * The publishing thread runs the publishingLoop() function to handle message
+   * delivery in a non-realtime context.
+   *
+   * \param publisher the ROS publisher to wrap
    */
   explicit RealtimePublisher(PublisherSharedPtr publisher)
   : publisher_(publisher), is_running_(false), keep_running_(true), turn_(State::LOOP_NOT_STARTED)
@@ -95,19 +100,27 @@ public:
     }
   }
 
-  /// Stop the realtime publisher from sending out more ROS messages
+  /**
+   * \brief Stop the realtime publisher
+   *
+   * Signals the publishing thread to exit by setting keep_running_ to false
+   * and notifying the condition variable. This allows the publishing loop
+   * to break out of its wait state and exit cleanly.
+   */
   void stop()
   {
     keep_running_ = false;
     updated_cond_.notify_one();  // So the publishing loop can exit
   }
 
-  /**  \brief Try to get the data lock from realtime
-   *
-   * To publish data from the realtime loop, you need to run trylock to
-   * attempt to get unique access to the msg_ variable. Trylock returns
-   * true if the lock was acquired, and false if it failed to get the lock.
-   */
+  /**
+  * \brief Try to acquire the data lock for non-realtime message publishing
+  *
+  * It first checks if the current state allows non-realtime message publishing (turn_ == NON_REALTIME)
+  * and then attempts to lock
+  *
+  * \return true if the lock was successfully acquired, false otherwise
+  */
   bool trylock()
   {
     if (turn_.load(std::memory_order_acquire) == State::NON_REALTIME && msg_mutex_.try_lock()) {
@@ -117,11 +130,14 @@ public:
     }
   }
 
-  /**  \brief Try to get the data lock from realtime and publish the given message
+  /**
+   * \brief Try to get the data lock from realtime and publish the given message
    *
    * Tries to gain unique access to msg_ variable. If this succeeds
    * update the msg_ variable and call unlockAndPublish
-   * @return false in case no lock for the realtime variable could be acquired
+   *
+   * \param [in] msg The message to publish
+   * \return false in case no lock for the realtime variable could be acquired
    */
   bool tryPublish(const MessageT & msg)
   {
@@ -134,7 +150,8 @@ public:
     return true;
   }
 
-  /**  \brief Unlock the msg_ variable
+  /**
+   * \brief Unlock the msg_ variable
    *
    * After a successful trylock and after the data is written to the mgs_
    * variable, the lock has to be released for the message to get
@@ -146,12 +163,12 @@ public:
     unlock();
   }
 
-  /**  \brief Get the data lock form non-realtime
-   *
-   * To publish data from the realtime loop, you need to run trylock to
-   * attempt to get unique access to the msg_ variable. Trylock returns
-   * true if the lock was acquired, and false if it failed to get the lock.
-   */
+  /**
+ * \brief Acquire the data lock
+ *
+ * This blocking call acquires exclusive access to the msg_ variable.
+ * Use trylock() for non-blocking attempts to acquire the lock.
+ */
   void lock() { msg_mutex_.lock(); }
 
   /**  \brief Unlocks the data without publishing anything
@@ -174,6 +191,17 @@ private:
 
   bool is_running() const { return is_running_; }
 
+  /**
+   * \brief Publishing loop (runs in separate thread)
+   *
+   * This is the main loop for the non-realtime publishing thread. It:
+   * 1. Waits for new messages (State::REALTIME)
+   * 2. Copies the message data
+   * 3. Publishes the message through the ROS publisher
+   * 4. Returns to State::NON_REALTIME to allow realtime updates
+   *
+   * The loop continues until keep_running_ is set to false.
+   */
   void publishingLoop()
   {
     is_running_ = true;
