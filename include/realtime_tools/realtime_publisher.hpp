@@ -137,7 +137,7 @@ public:
    * update the msg_ variable and call unlockAndPublish
    *
    * \param [in] msg The message to publish
-   * \return false in case no lock for the realtime variable could be acquired
+   * \return false in case no lock for the realtime variable is acquired. This implies the message will not be published.
    */
   bool tryPublish(const MessageT & msg)
   {
@@ -151,7 +151,7 @@ public:
   }
 
   /**
-   * \brief Unlock the msg_ variable
+   * \brief Unlock the msg_ variable for the non-realtime thread to start publishing
    *
    * After a successful trylock and after the data is written to the mgs_
    * variable, the lock has to be released for the message to get
@@ -164,14 +164,15 @@ public:
   }
 
   /**
- * \brief Acquire the data lock
- *
- * This blocking call acquires exclusive access to the msg_ variable.
- * Use trylock() for non-blocking attempts to acquire the lock.
- */
+   * \brief Acquire the data lock
+   *
+   * This blocking call acquires exclusive access to the msg_ variable.
+   * Use trylock() for non-blocking attempts to acquire the lock.
+   */
   void lock() { msg_mutex_.lock(); }
 
-  /**  \brief Unlocks the data without publishing anything
+  /**
+   * \brief Unlocks the data without publishing anything
    *
    */
   void unlock()
