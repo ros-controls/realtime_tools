@@ -18,4 +18,5 @@ jobs:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-debian-build.yml@master
     with:
       ros_distro: rolling
+      upstream_workspace: realtime_tools.rolling.repos
       ref_for_scheduled_build: master

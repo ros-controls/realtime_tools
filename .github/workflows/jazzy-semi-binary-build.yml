@@ -1,4 +1,4 @@
-name: Jazzy Binary Build
+name: Jazzy Semi-Binary Build
 # author: Denis Štogl <denis@stoglrobotics.de>
 # description: 'Build & test all dependencies from released (binary) packages.'
 
@@ -22,12 +22,19 @@ concurrency:
 jobs:
   binary:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
-    strategy:
-      fail-fast: false
-      matrix:
-        ROS_DISTRO: [jazzy]
-        ROS_REPO: [main, testing]
     with:
-      ros_distro: ${{ matrix.ROS_DISTRO }}
-      ros_repo: ${{ matrix.ROS_REPO }}
+      ros_distro: jazzy
+      ros_repo: testing
       ref_for_scheduled_build: jazzy
+      upstream_workspace: realtime_tools.jazzy.repos
+  binary_clang:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+    with:
+      ros_distro: jazzy
+      ros_repo: testing
+      ref_for_scheduled_build: jazzy
+      upstream_workspace: realtime_tools.jazzy.repos
+      additional_debs: clang
+      c_compiler: clang
+      cxx_compiler: clang++
+      not_test_build: true

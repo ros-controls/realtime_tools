@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(realtime_tools LANGUAGES CXX)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-  add_compile_options(-Wall -Wextra -Wpedantic -Werror=conversion -Werror=unused-but-set-variable
-  -Werror=return-type -Werror=shadow -Werror=format)
-endif()
+find_package(ros2_control_cmake REQUIRED)
+set_compiler_options()
 
 if(WIN32)
   add_compile_definitions(
@@ -15,7 +13,7 @@ if(WIN32)
     WIN32_LEAN_AND_MEAN
   )
   # set the same behavior for windows as it is on linux
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  export_windows_symbols()
 endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
