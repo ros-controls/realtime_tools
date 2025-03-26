@@ -19,6 +19,8 @@
 
   <buildtool_export_depend>ament_cmake</buildtool_export_depend>
 
+  <build_depend>ros2_control_cmake</build_depend>
+
   <depend>libboost-dev</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
