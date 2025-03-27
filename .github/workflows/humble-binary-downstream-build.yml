@@ -22,7 +22,7 @@ jobs:
     with:
       ros_distro: humble
       ros_repo: testing
-      ref_for_scheduled_build: master
+      ref_for_scheduled_build: humble
       not_test_build: true
       downstream_workspace: ros_controls.humble.repos
       not_test_downstream: true
