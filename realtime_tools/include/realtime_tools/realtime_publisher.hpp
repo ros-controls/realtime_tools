@@ -83,7 +83,7 @@ public:
     // This is important to ensure that the thread is properly initialized and ready to handle
     // messages before any other operations are performed on the RealtimePublisher instance.
     while (!thread_.joinable() ||
-           turn_.load(std::memory_order_acquire) != State::LOOP_NOT_STARTED) {
+           turn_.load(std::memory_order_acquire) == State::LOOP_NOT_STARTED) {
       std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
   }
