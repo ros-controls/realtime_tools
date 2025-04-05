@@ -78,6 +78,14 @@ public:
   : publisher_(publisher), is_running_(false), keep_running_(true), turn_(State::LOOP_NOT_STARTED)
   {
     thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
+
+    // Wait for the thread to be ready before proceeding
+    // This is important to ensure that the thread is properly initialized and ready to handle
+    // messages before any other operations are performed on the RealtimePublisher instance.
+    while (!thread_.joinable() ||
+           turn_.load(std::memory_order_acquire) != State::LOOP_NOT_STARTED) {
+      std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
   }
 
   [[deprecated(
@@ -206,12 +214,12 @@ private:
   void publishingLoop()
   {
     is_running_ = true;
-    turn_.store(State::REALTIME, std::memory_order_release);
 
     while (keep_running_) {
       MessageT outgoing;
 
       {
+        turn_.store(State::REALTIME, std::memory_order_release);
         // Locks msg_ and copies it to outgoing
         std::unique_lock<std::mutex> lock_(msg_mutex_);
         updated_cond_.wait(lock_, [&] { return turn_ == State::NON_REALTIME || !keep_running_; });
