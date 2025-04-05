@@ -116,14 +116,14 @@ public:
   /**
   * \brief Try to acquire the data lock for non-realtime message publishing
   *
-  * It first checks if the current state allows non-realtime message publishing (turn_ == NON_REALTIME)
+  * It first checks if the current state allows non-realtime message publishing (turn_ == REALTIME)
   * and then attempts to lock
   *
   * \return true if the lock was successfully acquired, false otherwise
   */
   bool trylock()
   {
-    if (turn_.load(std::memory_order_acquire) == State::NON_REALTIME && msg_mutex_.try_lock()) {
+    if (turn_.load(std::memory_order_acquire) == State::REALTIME && msg_mutex_.try_lock()) {
       return true;
     } else {
       return false;
@@ -159,7 +159,7 @@ public:
    */
   void unlockAndPublish()
   {
-    turn_.store(State::REALTIME, std::memory_order_release);
+    turn_.store(State::NON_REALTIME, std::memory_order_release);
     unlock();
   }
 
@@ -196,17 +196,17 @@ private:
    * \brief Publishing loop (runs in separate thread)
    *
    * This is the main loop for the non-realtime publishing thread. It:
-   * 1. Waits for new messages (State::REALTIME)
+   * 1. Waits for new messages (State::NON_REALTIME)
    * 2. Copies the message data
    * 3. Publishes the message through the ROS publisher
-   * 4. Returns to State::NON_REALTIME to allow realtime updates
+   * 4. Returns to State::REALTIME to allow realtime updates
    *
    * The loop continues until keep_running_ is set to false.
    */
   void publishingLoop()
   {
     is_running_ = true;
-    turn_.store(State::NON_REALTIME, std::memory_order_release);
+    turn_.store(State::REALTIME, std::memory_order_release);
 
     while (keep_running_) {
       MessageT outgoing;
@@ -214,7 +214,7 @@ private:
       {
         // Locks msg_ and copies it to outgoing
         std::unique_lock<std::mutex> lock_(msg_mutex_);
-        updated_cond_.wait(lock_, [&] { return turn_ == State::REALTIME || !keep_running_; });
+        updated_cond_.wait(lock_, [&] { return turn_ == State::NON_REALTIME || !keep_running_; });
         outgoing = msg_;
       }
 
@@ -222,7 +222,6 @@ private:
       if (keep_running_) {
         publisher_->publish(outgoing);
       }
-      turn_.store(State::NON_REALTIME, std::memory_order_release);
     }
     is_running_ = false;
   }
