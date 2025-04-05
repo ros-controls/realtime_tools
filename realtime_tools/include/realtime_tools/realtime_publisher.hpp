@@ -185,12 +185,12 @@ public:
 
   const std::thread & get_thread() const { return thread_; }
 
+  bool is_running() const { return is_running_; }
+
 private:
   // non-copyable
   RealtimePublisher(const RealtimePublisher &) = delete;
   RealtimePublisher & operator=(const RealtimePublisher &) = delete;
-
-  bool is_running() const { return is_running_; }
 
   /**
    * \brief Publishing loop (runs in separate thread)
@@ -205,8 +205,8 @@ private:
    */
   void publishingLoop()
   {
-    is_running_ = true;
     turn_.store(State::NON_REALTIME, std::memory_order_release);
+    is_running_ = true;
 
     while (keep_running_) {
       MessageT outgoing;
