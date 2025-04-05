@@ -205,8 +205,8 @@ private:
    */
   void publishingLoop()
   {
-    is_running_ = true;
     turn_.store(State::NON_REALTIME, std::memory_order_release);
+    is_running_ = true;
 
     while (keep_running_) {
       MessageT outgoing;
