@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.0 (2025-04-06)
+------------------
 * Fix realtime publisher race condition upon initialization (backport `#309 <https://github.com/ros-controls/realtime_tools/issues/309>`_) (`#311 <https://github.com/ros-controls/realtime_tools/issues/311>`_)
 * Move the package to a subfolder (backport `#295 <https://github.com/ros-controls/realtime_tools/issues/295>`_) (`#306 <https://github.com/ros-controls/realtime_tools/issues/306>`_)
 * Use ros2_control_cmake (backport `#293 <https://github.com/ros-controls/realtime_tools/issues/293>`_) (`#293 <https://github.com/ros-controls/realtime_tools/issues/293>`_)
