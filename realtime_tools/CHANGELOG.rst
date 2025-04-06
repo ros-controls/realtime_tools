@@ -2,6 +2,13 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix realtime publisher race condition upon initialization (backport `#309 <https://github.com/ros-controls/realtime_tools/issues/309>`_) (`#311 <https://github.com/ros-controls/realtime_tools/issues/311>`_)
+* Move the package to a subfolder (backport `#295 <https://github.com/ros-controls/realtime_tools/issues/295>`_) (`#306 <https://github.com/ros-controls/realtime_tools/issues/306>`_)
+* Use ros2_control_cmake (backport `#293 <https://github.com/ros-controls/realtime_tools/issues/293>`_) (`#293 <https://github.com/ros-controls/realtime_tools/issues/293>`_)
+* Contributors: mergify[bot]
+
 3.4.0 (2025-02-19)
 ------------------
 * [RTPublisher] use NON_POLLING as default for the realtime pubisher  (backport `#280 <https://github.com/ros-controls/realtime_tools/issues/280>`_) (`#282 <https://github.com/ros-controls/realtime_tools/issues/282>`_)
