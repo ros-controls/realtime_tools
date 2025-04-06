@@ -2,6 +2,13 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix realtime publisher race condition upon initialization (backport `#309 <https://github.com/ros-controls/realtime_tools/issues/309>`_) (`#310 <https://github.com/ros-controls/realtime_tools/issues/310>`_)
+* [RTPublisher] use NON_POLLING as default for the realtime pubisher  (backport `#280 <https://github.com/ros-controls/realtime_tools/issues/280>`_) (`#281 <https://github.com/ros-controls/realtime_tools/issues/281>`_)
+* Update the docstring for realtime_publisher.hpp (backport `#287 <https://github.com/ros-controls/realtime_tools/issues/287>`_) (`#288 <https://github.com/ros-controls/realtime_tools/issues/288>`_)
+* Contributors: mergify[bot], Julia Jia
+
 2.12.0 (2025-03-01)
 -------------------
 * CI downstream build (backport `#214 <https://github.com/ros-controls/realtime_tools/issues/214>`_) (`#283 <https://github.com/ros-controls/realtime_tools/issues/283>`_)
