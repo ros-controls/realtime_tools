@@ -5,35 +5,18 @@ realtime_tools
 
 Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
 
+Some documentation can be found at [docs.ros.org](http://docs.ros.org/en/rolling/p/realtime_tools/doc/index.html).
+
+## Contributing
+As an open-source project, we welcome each contributor, regardless of their background and experience. Pick a [PR](https://github.com/ros-controls/realtime_tools/pulls) and review it, or [create your own](https://github.com/ros-controls/realtime_tools/contribute)!
+If you are new to the project, please read the [contributing guide](https://control.ros.org/rolling/doc/contributing/contributing.html) for more information on how to get started. We are happy to help you with your first contribution.
+
 ## Build status
-ROS2 Distro | Branch | Build status | Documentation | Released packages
+ROS2 Distro | Branch | Build status | Documentation | Package Build
 :---------: | :----: | :----------: | :-----------: | :---------------:
-**Rolling** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build.yml?branch=master) <br /> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-source-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-source-build.yml?branch=master) | [API](http://docs.ros.org/en/rolling/p/realtime_tools/)  | [realtime_tools](https://index.ros.org/p/realtime_tools/#rolling)
-**Jazzy** | [`jazzy`](https://github.com/ros-controls/realtime_tools/tree/jazzy) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-binary-build.yml/badge.svg?branch=jazzy)](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-binary-build.yml?branch=jazzy) <br /> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-source-build.yml/badge.svg?branch=jazzy)](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-source-build.yml?branch=jazzy) | [API](http://docs.ros.org/en/jazzy/p/realtime_tools/)  | [realtime_tools](https://index.ros.org/p/realtime_tools/#jazzy)
-**Humble** | [`humble`](https://github.com/ros-controls/realtime_tools/tree/humble) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build.yml?branch=master) <br /> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-source-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-source-build.yml?branch=master) | [API](http://docs.ros.org/en/humble/p/realtime_tools/) | [realtime_tools](https://index.ros.org/p/realtime_tools/#humble)
+**Rolling** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build.yml?branch=master) <br> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-source-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-source-build.yml?branch=master) <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Rdev__realtime_tools__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Rdev__realtime_tools__ubuntu_noble_amd64/) | [API](http://docs.ros.org/en/rolling/p/realtime_tools/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__realtime_tools__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Rbin_uN64__realtime_tools__ubuntu_noble_amd64__binary/)
+**Jazzy** | [`jazzy`](https://github.com/ros-controls/realtime_tools/tree/jazzy) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-binary-build.yml/badge.svg?branch=jazzy)](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-binary-build.yml?branch=jazzy) <br> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-source-build.yml/badge.svg?branch=jazzy)](https://github.com/ros-controls/realtime_tools/actions/workflows/jazzy-source-build.yml?branch=jazzy) <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Jdev__realtime_tools__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Jdev__realtime_tools__ubuntu_noble_amd64/) | [API](http://docs.ros.org/en/jazzy/p/realtime_tools/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Jbin_uN64__realtime_tools__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Jbin_uN64__realtime_tools__ubuntu_noble_amd64__binary/)
+**Humble** | [`humble`](https://github.com/ros-controls/realtime_tools/tree/humble) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-binary-build.yml?branch=master) <br> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-source-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/humble-source-build.yml?branch=master) <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Hdev__realtime_tools__ubuntu_jammy_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Hdev__realtime_tools__ubuntu_jammy_amd64/) | [API](http://docs.ros.org/en/humble/p/realtime_tools/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__realtime_tools__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Hbin_uJ64__realtime_tools__ubuntu_jammy_amd64__binary/)
 
-
-### Explanation of different build types
-
-**NOTE**: There are different build stages checking current and future compatibility of the package.
-
-[Detailed build status](.github/workflows/README.md)
-
-## Publication
-
-If you find this work useful please give credits to the authors by citing:
-
-* S. Chitta, E. Marder-Eppstein, W. Meeussen, V. Pradeep, A. Rodríguez Tsouroukdissian, J. Bohren, D. Coleman, B. Magyar, G. Raiola, M. Lüdtke and E. Fernandez Perdomo
-**"ros_control: A generic and simple control framework for ROS"**,
-The Journal of Open Source Software, 2017. ([PDF](http://www.theoj.org/joss-papers/joss.00456/10.21105.joss.00456.pdf))
-
-```
-@article{ros_control,
-author = {Chitta, Sachin and Marder-Eppstein, Eitan and Meeussen, Wim and Pradeep, Vijay and Rodr{\'i}guez Tsouroukdissian, Adolfo  and Bohren, Jonathan and Coleman, David and Magyar, Bence and Raiola, Gennaro and L{\"u}dtke, Mathias and Fern{\'a}ndez Perdomo, Enrique},
-title = {ros\_control: A generic and simple control framework for ROS},
-journal = {The Journal of Open Source Software},
-year = {2017},
-doi = {10.21105/joss.00456},
-URL = {http://www.theoj.org/joss-papers/joss.00456/10.21105.joss.00456.pdf}
-}
-```
+## Acknowledgements
+The project has received major contributions from companies and institutions [listed on control.ros.org](https://control.ros.org/rolling/doc/acknowledgements/acknowledgements.html)
