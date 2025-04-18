@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling]
+        ROS_DISTRO: [kilted, rolling]
         ROS_REPO: [testing]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
@@ -34,11 +34,15 @@ jobs:
       upstream_workspace: realtime_tools.${{ matrix.ROS_DISTRO }}.repos
   binary_clang:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [kilted, rolling]
     with:
-      ros_distro: rolling
+      ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: testing
       ref_for_scheduled_build: master
-      upstream_workspace: realtime_tools.rolling.repos
+      upstream_workspace: realtime_tools.${{ matrix.ROS_DISTRO }}.repos
       additional_debs: clang
       c_compiler: clang
       cxx_compiler: clang++
