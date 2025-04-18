@@ -26,10 +26,9 @@ jobs:
       fail-fast: false
       matrix:
         ROS_DISTRO: [kilted, rolling]
-        ROS_REPO: [testing]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
-      ros_repo: ${{ matrix.ROS_REPO }}
+      ros_repo: testing
       ref_for_scheduled_build: master
       upstream_workspace: realtime_tools.${{ matrix.ROS_DISTRO }}.repos
   binary_clang:

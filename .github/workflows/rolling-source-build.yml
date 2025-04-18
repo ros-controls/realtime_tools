@@ -15,10 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         ROS_DISTRO: [kilted, rolling]
-        ROS_REPO: [testing]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref: master
-      ros2_repo_branch: ${{ matrix.ROS_DISTRO }}
       os_name: ubuntu-latest
       container: ubuntu:24.04
