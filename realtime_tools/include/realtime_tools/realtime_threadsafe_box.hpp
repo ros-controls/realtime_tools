@@ -39,7 +39,8 @@
 #include <optional>
 #include <utility>
 
-#include <rcpputils/pointer_traits.hpp>
+#include "rcpputils/pointer_traits.hpp"
+#include "realtime_tools/mutex.hpp"
 
 namespace realtime_tools
 {
@@ -55,7 +56,7 @@ constexpr auto is_ptr_or_smart_ptr = rcpputils::is_pointer<T>::value;
     You can use pointers with this box but the access will be different.
     Only use the get/set methods that take function pointer for accessing the internal value.
 */
-template <class T, typename mutex_type = std::mutex>
+template <class T, typename mutex_type = realtime_tools::prio_inherit_mutex>
 class RealtimeThreadsafeBoxBase
 {
   static_assert(std::is_copy_constructible_v<T>, "Passed type must be copy constructible");
