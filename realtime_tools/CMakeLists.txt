@@ -73,8 +73,8 @@ if(BUILD_TESTING)
   ament_add_gmock(thread_priority_tests test/thread_priority_tests.cpp)
   target_link_libraries(thread_priority_tests thread_priority)
 
-  ament_add_gmock(realtime_box_tests test/realtime_box_tests.cpp)
-  target_link_libraries(realtime_box_tests realtime_tools)
+  ament_add_gmock(realtime_threadsafe_box_tests test/realtime_threadsafe_box_tests.cpp)
+  target_link_libraries(realtime_threadsafe_box_tests realtime_tools)
 
   ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests realtime_tools)
