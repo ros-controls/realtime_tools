@@ -171,9 +171,6 @@ public:
         }
         updated_cond_.notify_one();  // Notify the publishing thread
         return true;
-      } else {
-        // The lock was not acquired, so we cannot publish
-        return false;
       }
     }
     return false;
