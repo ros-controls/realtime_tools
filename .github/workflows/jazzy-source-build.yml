@@ -14,6 +14,5 @@ jobs:
     with:
       ros_distro: jazzy
       ref: jazzy
-      ros2_repo_branch: jazzy
       os_name: ubuntu-latest
       container: ubuntu:24.04
