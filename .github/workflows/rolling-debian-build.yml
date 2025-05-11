@@ -16,7 +16,11 @@ concurrency:
 jobs:
   debian_source_build:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-debian-build.yml@master
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [kilted, rolling]
     with:
-      ros_distro: rolling
-      upstream_workspace: realtime_tools.rolling.repos
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      upstream_workspace: realtime_tools.${{ matrix.ROS_DISTRO }}.repos
       ref_for_scheduled_build: master
