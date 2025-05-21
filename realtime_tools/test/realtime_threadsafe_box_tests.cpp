@@ -55,40 +55,40 @@ struct FromInitializerList
   std::array<int, 3> data;
 };
 
-using realtime_tools::RealtimeThreadsafeBox;
+using realtime_tools::RealtimeThreadSafeBox;
 
-TEST(RealtimeThreadsafeBox, empty_construct)
+TEST(RealtimeThreadSafeBox, empty_construct)
 {
-  RealtimeThreadsafeBox<DefaultConstructable> box;
+  RealtimeThreadSafeBox<DefaultConstructable> box;
 
   auto value = box.get();
   EXPECT_EQ(value.a, 10);
   EXPECT_EQ(value.str, "hallo");
 }
 
-TEST(RealtimeThreadsafeBox, default_construct)
+TEST(RealtimeThreadSafeBox, default_construct)
 {
   DefaultConstructable data;
   data.a = 100;
 
-  RealtimeThreadsafeBox<DefaultConstructable> box(data);
+  RealtimeThreadSafeBox<DefaultConstructable> box(data);
 
   auto value = box.get();
   EXPECT_EQ(value.a, 100);
   EXPECT_EQ(value.str, "hallo");
 }
 
-TEST(RealtimeThreadsafeBox, non_default_constructable)
+TEST(RealtimeThreadSafeBox, non_default_constructable)
 {
-  RealtimeThreadsafeBox<NonDefaultConstructable> box(NonDefaultConstructable(-10, "hello"));
+  RealtimeThreadSafeBox<NonDefaultConstructable> box(NonDefaultConstructable(-10, "hello"));
 
   auto value = box.get();
   EXPECT_EQ(value.a, -10);
   EXPECT_EQ(value.str, "hello");
 }
-TEST(RealtimeThreadsafeBox, standard_get)
+TEST(RealtimeThreadSafeBox, standard_get)
 {
-  RealtimeThreadsafeBox<DefaultConstructable> box(DefaultConstructable{1000});
+  RealtimeThreadSafeBox<DefaultConstructable> box(DefaultConstructable{1000});
 
   DefaultConstructable data;
   box.get(data);
@@ -101,9 +101,9 @@ TEST(RealtimeThreadsafeBox, standard_get)
   EXPECT_EQ(value.a, 10000);
 }
 
-TEST(RealtimeThreadsafeBox, initializer_list)
+TEST(RealtimeThreadSafeBox, initializer_list)
 {
-  RealtimeThreadsafeBox<FromInitializerList> box({1, 2, 3});
+  RealtimeThreadSafeBox<FromInitializerList> box({1, 2, 3});
 
   auto value = box.get();
   EXPECT_EQ(value.data[0], 1);
@@ -111,20 +111,20 @@ TEST(RealtimeThreadsafeBox, initializer_list)
   EXPECT_EQ(value.data[2], 3);
 }
 
-TEST(RealtimeThreadsafeBox, assignment_operator)
+TEST(RealtimeThreadSafeBox, assignment_operator)
 {
   DefaultConstructable data;
   data.a = 1000;
-  RealtimeThreadsafeBox<DefaultConstructable> box;
+  RealtimeThreadSafeBox<DefaultConstructable> box;
   // Assignment operator is always non RT!
   box = data;
 
   auto value = box.get();
   EXPECT_EQ(value.a, 1000);
 }
-TEST(RealtimeThreadsafeBox, typecast_operator)
+TEST(RealtimeThreadSafeBox, typecast_operator)
 {
-  RealtimeThreadsafeBox<DefaultConstructable> box(DefaultConstructable{100, ""});
+  RealtimeThreadSafeBox<DefaultConstructable> box(DefaultConstructable{100, ""});
 
   // Use non RT access
   DefaultConstructable data = box;
@@ -139,12 +139,12 @@ TEST(RealtimeThreadsafeBox, typecast_operator)
   }
 }
 
-TEST(RealtimeThreadsafeBox, pointer_type)
+TEST(RealtimeThreadSafeBox, pointer_type)
 {
   int a = 100;
   int * ptr = &a;
 
-  RealtimeThreadsafeBox<int *> box(ptr);
+  RealtimeThreadSafeBox<int *> box(ptr);
   // This does not and should not compile!
   // auto value = box.get();
 
@@ -159,11 +159,11 @@ TEST(RealtimeThreadsafeBox, pointer_type)
   box.try_get([](const auto & i) { EXPECT_EQ(*i, 200); });
 }
 
-TEST(RealtimeThreadsafeBox, smart_ptr_type)
+TEST(RealtimeThreadSafeBox, smart_ptr_type)
 {
   std::shared_ptr<int> ptr = std::make_shared<int>(100);
 
-  RealtimeThreadsafeBox<std::shared_ptr<int>> box(ptr);
+  RealtimeThreadSafeBox<std::shared_ptr<int>> box(ptr);
 
   // Instead access it via a passed function.
   // This assures that we access the data within the scope of the lock
@@ -178,11 +178,11 @@ TEST(RealtimeThreadsafeBox, smart_ptr_type)
   box.try_get([](const auto & p) { EXPECT_EQ(*p, 10); });
 
   // Test that we are able to set the nullptr for pointer types
-  RealtimeThreadsafeBox<std::shared_ptr<int>> box2;
+  RealtimeThreadSafeBox<std::shared_ptr<int>> box2;
   box2.set(nullptr);
 }
 
-// These are the tests from the old RealtimeThreadsafeBox implementation
+// These are the tests from the old RealtimeThreadSafeBox implementation
 // They are therefore suffixed with _existing
 
 class DefaultConstructable_existing
@@ -193,28 +193,28 @@ public:
   int number_;
 };
 
-TEST(RealtimeThreadsafeBox, default_construct_existing)
+TEST(RealtimeThreadSafeBox, default_construct_existing)
 {
   DefaultConstructable_existing thing;
   thing.number_ = 5;
 
-  RealtimeThreadsafeBox<DefaultConstructable_existing> box;
+  RealtimeThreadSafeBox<DefaultConstructable_existing> box;
   box.get(thing);
 
   EXPECT_EQ(42, thing.number_);
 }
 
-TEST(RealtimeThreadsafeBox, initial_value_existing)
+TEST(RealtimeThreadSafeBox, initial_value_existing)
 {
-  RealtimeThreadsafeBox<double> box(3.14);
+  RealtimeThreadSafeBox<double> box(3.14);
   double num = 0.0;
   box.get(num);
   EXPECT_DOUBLE_EQ(3.14, num);
 }
 
-TEST(RealtimeThreadsafeBox, set_and_get_existing)
+TEST(RealtimeThreadSafeBox, set_and_get_existing)
 {
-  RealtimeThreadsafeBox<char> box('a');
+  RealtimeThreadSafeBox<char> box('a');
 
   {
     const char input = 'z';
@@ -226,38 +226,38 @@ TEST(RealtimeThreadsafeBox, set_and_get_existing)
   EXPECT_EQ('z', output);
 }
 
-TEST(RealtimeThreadsafeBox, copy_assign)
+TEST(RealtimeThreadSafeBox, copy_assign)
 {
-  RealtimeThreadsafeBox<char> box_a('a');
-  RealtimeThreadsafeBox<char> box_b('b');
+  RealtimeThreadSafeBox<char> box_a('a');
+  RealtimeThreadSafeBox<char> box_b('b');
 
   // Assign b to a -> a should now contain b
   box_a = box_b;
 
   EXPECT_EQ('b', box_a.try_get().value());
 }
-TEST(RealtimeThreadsafeBox, copy)
+TEST(RealtimeThreadSafeBox, copy)
 {
-  RealtimeThreadsafeBox<char> box_b('b');
-  RealtimeThreadsafeBox<char> box_a(box_b);
+  RealtimeThreadSafeBox<char> box_b('b');
+  RealtimeThreadSafeBox<char> box_a(box_b);
 
   EXPECT_EQ('b', box_a.try_get().value());
 }
 
-TEST(RealtimeThreadsafeBox, move_assign)
+TEST(RealtimeThreadSafeBox, move_assign)
 {
-  RealtimeThreadsafeBox<char> box_a('a');
-  RealtimeThreadsafeBox<char> box_b('b');
+  RealtimeThreadSafeBox<char> box_a('a');
+  RealtimeThreadSafeBox<char> box_b('b');
 
   // Move  b to a -> a should now contain b
   box_a = std::move(box_b);
 
   EXPECT_EQ('b', box_a.try_get().value());
 }
-TEST(RealtimeThreadsafeBox, move)
+TEST(RealtimeThreadSafeBox, move)
 {
-  RealtimeThreadsafeBox<char> box_b('b');
-  RealtimeThreadsafeBox<char> box_a(std::move(box_b));
+  RealtimeThreadSafeBox<char> box_b('b');
+  RealtimeThreadSafeBox<char> box_a(std::move(box_b));
 
   EXPECT_EQ('b', box_a.try_get().value());
 }
