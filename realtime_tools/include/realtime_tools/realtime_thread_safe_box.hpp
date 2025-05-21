@@ -30,8 +30,8 @@
 // Author: Stuart Glaser
 // Author: Lennart Nachtigall
 
-#ifndef REALTIME_TOOLS__REALTIME_THREADSAFE_BOX_HPP_
-#define REALTIME_TOOLS__REALTIME_THREADSAFE_BOX_HPP_
+#ifndef REALTIME_TOOLS__REALTIME_THREAD_SAFE_BOX_HPP_
+#define REALTIME_TOOLS__REALTIME_THREAD_SAFE_BOX_HPP_
 
 #include <functional>
 #include <initializer_list>
@@ -314,4 +314,4 @@ using RealtimeThreadSafeBox = RealtimeThreadSafeBoxStandard<T>;
 
 }  // namespace realtime_tools
 
-#endif  // REALTIME_TOOLS__REALTIME_THREADSAFE_BOX_HPP_
+#endif  // REALTIME_TOOLS__REALTIME_THREAD_SAFE_BOX_HPP_

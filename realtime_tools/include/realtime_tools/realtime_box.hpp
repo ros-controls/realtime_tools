@@ -33,11 +33,11 @@
 #ifndef REALTIME_TOOLS__REALTIME_BOX_HPP_
 #define REALTIME_TOOLS__REALTIME_BOX_HPP_
 
-#include "realtime_tools/realtime_threadsafe_box.hpp"
+#include "realtime_tools/realtime_thread_safe_box.hpp"
 
 // Deprecation notice
 #pragma message( \
-  "'RealtimeBox' is deprecated. Please update your code to use 'realtime_threadsafe_box.hpp' header, and class name 'RealtimeThreadSafeBox' instead.")  //NOLINT
+  "'RealtimeBox' is deprecated. Please update your code to use 'realtime_thread_safe_box.hpp' header, and class name 'RealtimeThreadSafeBox' instead.")  //NOLINT
 
 namespace realtime_tools
 {

@@ -31,7 +31,7 @@
 
 #include <array>
 
-#include "realtime_tools/realtime_threadsafe_box.hpp"
+#include "realtime_tools/realtime_thread_safe_box.hpp"
 
 struct DefaultConstructable
 {
