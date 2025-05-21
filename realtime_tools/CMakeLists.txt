@@ -96,7 +96,7 @@ if(BUILD_TESTING)
   target_link_libraries(realtime_server_goal_handle_tests realtime_tools ${test_msgs_TARGETS})
 
   ament_add_gmock(test_async_function_handler test/test_async_function_handler.cpp)
-  target_link_libraries(test_async_function_handler PUBLIC
+  target_link_libraries(test_async_function_handler
                         realtime_tools
                         thread_priority
                         ${lifecycle_msgs_TARGETS}
