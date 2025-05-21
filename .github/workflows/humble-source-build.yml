@@ -21,6 +21,5 @@ jobs:
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref: humble
-      ros2_repo_branch: ${{ matrix.ROS_DISTRO }}
       os_name: ${{ matrix.OS_NAME }}
       container: ${{ matrix.CONTAINER }}
