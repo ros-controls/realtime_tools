@@ -37,13 +37,13 @@
 
 // Deprecation notice
 #pragma message( \
-  "'RealtimeBox' is deprecated. Please update your code to use 'realtime_threadsafe_box.hpp' header, and class name 'RealtimeThreadsafeBox' instead.")  //NOLINT
+  "'RealtimeBox' is deprecated. Please update your code to use 'realtime_threadsafe_box.hpp' header, and class name 'RealtimeThreadSafeBox' instead.")  //NOLINT
 
 namespace realtime_tools
 {
 
 template <typename T>
-using RealtimeBox = RealtimeThreadsafeBox<T>;
+using RealtimeBox = RealtimeThreadSafeBox<T>;
 
 }  // namespace realtime_tools
 
