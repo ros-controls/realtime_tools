@@ -45,7 +45,7 @@ target_include_directories(realtime_tools PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
-ament_target_dependencies(realtime_tools PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(realtime_tools PUBLIC rclcpp::rclcpp rclcpp_action::rclcpp_action rcpputils::rcpputils Threads::Threads)
 if(UNIX)
   target_link_libraries(realtime_tools PUBLIC cap)
 endif()
@@ -59,7 +59,7 @@ target_include_directories(thread_priority PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
-ament_target_dependencies(thread_priority PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(thread_priority PUBLIC rclcpp::rclcpp rclcpp_action::rclcpp_action rcpputils::rcpputils Threads::Threads)
 if(UNIX)
   target_link_libraries(thread_priority PUBLIC cap)
 endif()
@@ -81,12 +81,9 @@ if(BUILD_TESTING)
   target_link_libraries(realtime_buffer_tests realtime_tools)
 
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
-  if(WIN32)
-    # atomic is not found on Windows, but also not needed
-    target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
-  else()
-    # without adding atomic, clang throws a linker error
-    target_link_libraries(lock_free_queue_tests realtime_tools atomic Boost::boost)
+  target_link_libraries(lock_free_queue_tests realtime_tools ${Boost_LIBRARIES})
+  if(UNIX)
+    target_link_libraries(lock_free_queue_tests atomic)
   endif()
 
   ament_add_gmock(realtime_clock_tests test/realtime_clock_tests.cpp)
@@ -95,18 +92,19 @@ if(BUILD_TESTING)
   ament_add_gmock(realtime_publisher_tests
                   test/realtime_publisher.test
                   test/realtime_publisher_tests.cpp)
-  target_link_libraries(realtime_publisher_tests realtime_tools)
-  ament_target_dependencies(realtime_publisher_tests test_msgs)
+  target_link_libraries(realtime_publisher_tests realtime_tools ${test_msgs_TARGETS})
 
   ament_add_gmock(realtime_server_goal_handle_tests
                   test/realtime_server_goal_handle.test
                   test/realtime_server_goal_handle_tests.cpp)
-  target_link_libraries(realtime_server_goal_handle_tests realtime_tools)
-  ament_target_dependencies(realtime_server_goal_handle_tests test_msgs)
+  target_link_libraries(realtime_server_goal_handle_tests realtime_tools ${test_msgs_TARGETS})
 
   ament_add_gmock(test_async_function_handler test/test_async_function_handler.cpp)
-  target_link_libraries(test_async_function_handler realtime_tools thread_priority)
-  ament_target_dependencies(test_async_function_handler lifecycle_msgs rclcpp_lifecycle)
+  target_link_libraries(test_async_function_handler
+                        realtime_tools
+                        thread_priority
+                        ${lifecycle_msgs_TARGETS}
+                        rclcpp_lifecycle::rclcpp_lifecycle)
 
   if(NOT WIN32)
     ament_add_gmock(realtime_mutex_tests test/realtime_mutex_tests.cpp)
