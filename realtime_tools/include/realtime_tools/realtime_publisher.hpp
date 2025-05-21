@@ -88,14 +88,6 @@ public:
     }
   }
 
-  [[deprecated(
-    "Use constructor with rclcpp::Publisher<T>::SharedPtr instead - this class does not make sense "
-    "without a real publisher")]]
-  RealtimePublisher()
-  : is_running_(false), keep_running_(false), turn_(State::LOOP_NOT_STARTED)
-  {
-  }
-
   /// Destructor
   ~RealtimePublisher()
   {
