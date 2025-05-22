@@ -80,7 +80,7 @@ if(BUILD_TESTING)
   target_link_libraries(realtime_buffer_tests realtime_tools)
 
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
-  target_link_libraries(lock_free_queue_tests realtime_tools ${Boost_LIBRARIES})
+  target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
   if(UNIX)
     target_link_libraries(lock_free_queue_tests atomic)
   endif()
