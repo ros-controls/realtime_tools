@@ -45,7 +45,7 @@ target_include_directories(realtime_tools PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
-target_link_libraries(realtime_tools PUBLIC rclcpp::rclcpp rclcpp_action::rclcpp_action rcpputils::rcpputils Threads::Threads)
+target_link_libraries(realtime_tools PUBLIC rclcpp::rclcpp rclcpp_action::rclcpp_action rcpputils::rcpputils Threads::Threads Boost::boost)
 if(UNIX)
   target_link_libraries(realtime_tools PUBLIC cap)
 endif()
@@ -81,7 +81,7 @@ if(BUILD_TESTING)
   target_link_libraries(realtime_buffer_tests realtime_tools)
 
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
-  target_link_libraries(lock_free_queue_tests realtime_tools ${Boost_LIBRARIES})
+  target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
   if(UNIX)
     target_link_libraries(lock_free_queue_tests atomic)
   endif()
@@ -125,5 +125,5 @@ install(TARGETS realtime_tools thread_priority
 )
 
 ament_export_targets(export_realtime_tools HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 ament_package()
