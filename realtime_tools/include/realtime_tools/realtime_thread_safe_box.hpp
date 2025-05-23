@@ -310,7 +310,7 @@ using RealtimeThreadSafeBoxRecursive = RealtimeThreadSafeBoxBase<T, std::recursi
 
 // This is the specialisation we recommend to use in the end
 template <typename T>
-using RealtimeThreadSafeBox = RealtimeThreadSafeBoxStandard<T>;
+using RealtimeThreadSafeBox = RealtimeThreadSafeBoxBase<T>;
 
 }  // namespace realtime_tools
 
