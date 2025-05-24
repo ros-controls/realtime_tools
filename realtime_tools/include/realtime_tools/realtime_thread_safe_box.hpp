@@ -62,7 +62,7 @@ constexpr auto is_ptr_or_smart_ptr = rcpputils::is_pointer<T>::value;
     Only use the get/set methods that take function pointer for accessing the internal value.
 */
 template <class T, typename mutex_type = DEFAULT_MUTEX>
-class RealtimeThreadSafeBoxBase
+class RealtimeThreadSafeBox
 {
   static_assert(std::is_copy_constructible_v<T>, "Passed type must be copy constructible");
 
@@ -70,11 +70,11 @@ public:
   using mutex_t = mutex_type;
   using type = T;
   // Provide various constructors
-  constexpr explicit RealtimeThreadSafeBoxBase(const T & init = T{}) : value_(init) {}
-  constexpr explicit RealtimeThreadSafeBoxBase(const T && init) : value_(std::move(init)) {}
+  constexpr explicit RealtimeThreadSafeBox(const T & init = T{}) : value_(init) {}
+  constexpr explicit RealtimeThreadSafeBox(const T && init) : value_(std::move(init)) {}
 
   // Copy constructor
-  constexpr RealtimeThreadSafeBoxBase(const RealtimeThreadSafeBoxBase & o)
+  constexpr RealtimeThreadSafeBox(const RealtimeThreadSafeBox & o)
   {
     // Lock the other box mutex
     std::unique_lock<mutex_t> lock(o.lock_);
@@ -83,7 +83,7 @@ public:
   }
 
   // Copy assignment constructor
-  constexpr RealtimeThreadSafeBoxBase & operator=(const RealtimeThreadSafeBoxBase & o)
+  constexpr RealtimeThreadSafeBox & operator=(const RealtimeThreadSafeBox & o)
   {
     // Check for self assignment (and a potential deadlock)
     if (&o != this) {
@@ -96,7 +96,7 @@ public:
     return *this;
   }
 
-  constexpr RealtimeThreadSafeBoxBase(RealtimeThreadSafeBoxBase && o)
+  constexpr RealtimeThreadSafeBox(RealtimeThreadSafeBox && o)
   {
     // Lock the other box mutex
     std::unique_lock<mutex_t> lock(o.lock_);
@@ -106,14 +106,14 @@ public:
 
   // Only enabled for types that can be constructed from an initializer list
   template <typename U = T>
-  constexpr RealtimeThreadSafeBoxBase(
+  constexpr RealtimeThreadSafeBox(
     const std::initializer_list<U> & init,
     std::enable_if_t<std::is_constructible_v<U, std::initializer_list<U>>>)
   : value_(init)
   {
   }
 
-  constexpr RealtimeThreadSafeBoxBase & operator=(RealtimeThreadSafeBoxBase && o)
+  constexpr RealtimeThreadSafeBox & operator=(RealtimeThreadSafeBox && o)
   {
     // Check for self assignment (and a potential deadlock)
     if (&o != this) {
@@ -303,14 +303,10 @@ private:
 
 // Provide specialisations for different mutex types
 template <typename T>
-using RealtimeThreadSafeBoxStandard = RealtimeThreadSafeBoxBase<T, std::mutex>;
+using RealtimeThreadSafeBoxStandard = RealtimeThreadSafeBox<T, std::mutex>;
 
 template <typename T>
-using RealtimeThreadSafeBoxRecursive = RealtimeThreadSafeBoxBase<T, std::recursive_mutex>;
-
-// This is the specialisation we recommend to use in the end
-template <typename T>
-using RealtimeThreadSafeBox = RealtimeThreadSafeBoxBase<T, DEFAULT_MUTEX>;
+using RealtimeThreadSafeBoxRecursive = RealtimeThreadSafeBox<T, std::recursive_mutex>;
 
 }  // namespace realtime_tools
 

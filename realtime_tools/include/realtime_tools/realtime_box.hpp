@@ -44,7 +44,7 @@ namespace realtime_tools
 
 // Provide backward-compatibility for the old RealtimeBox class
 template <class T, typename mutex_type = std::mutex>
-using RealtimeBoxBase = RealtimeThreadSafeBoxBase<T, mutex_type>;
+using RealtimeBoxBase = RealtimeThreadSafeBox<T, mutex_type>;
 
 template <typename T>
 using RealtimeBoxStandard = RealtimeBoxBase<T, std::mutex>;
