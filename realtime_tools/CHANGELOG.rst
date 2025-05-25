@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.6.0 (2025-05-25)
+------------------
 * Rename RealtimeBox to RealtimeThreadsafeBox and use `prio_inherit_mutex` (backport `#318 <https://github.com/ros-controls/realtime_tools/issues/318>`_) (`#341 <https://github.com/ros-controls/realtime_tools/issues/341>`_)
 * Use `Boost::boost` instead of ${Boost_LIBRARIES} and export it (backport `#333 <https://github.com/ros-controls/realtime_tools/issues/333>`_, `#336 <https://github.com/ros-controls/realtime_tools/issues/336>`_) (`#334 <https://github.com/ros-controls/realtime_tools/issues/334>`_)
 * Use target_link_libraries instead of ament_target_dependencies (backport `#331 <https://github.com/ros-controls/realtime_tools/issues/331>`_) (`#332 <https://github.com/ros-controls/realtime_tools/issues/332>`_)
