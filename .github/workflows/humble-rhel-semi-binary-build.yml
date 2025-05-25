@@ -6,7 +6,7 @@ on:
       - humble
   schedule:
     # Run every day to detect flakiness and broken dependencies
-    - cron: '03 3 * * *'
+    - cron: '03 3 * * MON-FRI'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on humble branch
