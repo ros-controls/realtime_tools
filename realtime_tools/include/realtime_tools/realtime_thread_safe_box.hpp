@@ -299,14 +299,11 @@ private:
   mutable mutex_t lock_;
 };
 
-// Introduce some easier to use names
-
-// Provide specialisations for different mutex types
-template <typename T>
-using RealtimeThreadSafeBoxStandard = RealtimeThreadSafeBox<T, std::mutex>;
+// Provide specialisations for other mutex types
 
 template <typename T>
-using RealtimeThreadSafeBoxRecursive = RealtimeThreadSafeBox<T, std::recursive_mutex>;
+using RealtimeThreadSafeBoxRecursive =
+  RealtimeThreadSafeBox<T, realtime_tools::prio_inherit_recursive_mutex>;
 
 }  // namespace realtime_tools
 
