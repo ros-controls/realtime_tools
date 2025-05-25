@@ -43,8 +43,10 @@
 #ifndef _WIN32
 #include "realtime_tools/mutex.hpp"
 #define DEFAULT_MUTEX realtime_tools::prio_inherit_mutex
+#define RECURSIVE_MUTEX realtime_tools::prio_inherit_recursive_mutex
 #else
 #define DEFAULT_MUTEX std::mutex
+#define DEFAULT_MUTEX std::recursive_mutex
 #endif
 
 namespace realtime_tools
@@ -394,8 +396,7 @@ private:
 // Provide specialisations for other mutex types
 
 template <typename T>
-using RealtimeThreadSafeBoxRecursive =
-  RealtimeThreadSafeBox<T, realtime_tools::prio_inherit_recursive_mutex>;
+using RealtimeThreadSafeBoxRecursive = RealtimeThreadSafeBox<T, RECURSIVE_MUTEX>;
 
 }  // namespace realtime_tools
 
