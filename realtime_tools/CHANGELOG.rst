@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.3.0 (2025-05-25)
+------------------
 * Change default mutex of `RealtimeThreadSafeBox` and add more aliases (`#342 <https://github.com/ros-controls/realtime_tools/issues/342>`_)
 * Rename RealtimeBox to RealtimeThreadsafeBox and use `prio_inherit_mutex` (`#318 <https://github.com/ros-controls/realtime_tools/issues/318>`_)
 * export Boost dependency (`#336 <https://github.com/ros-controls/realtime_tools/issues/336>`_)
