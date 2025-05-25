@@ -42,8 +42,6 @@
 using StringMsg = test_msgs::msg::Strings;
 using realtime_tools::RealtimePublisher;
 
-TEST(RealtimePublisher, construct_destruct) { RealtimePublisher<StringMsg> rt_pub; }
-
 struct StringCallback
 {
   StringMsg msg_;

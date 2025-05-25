@@ -2,6 +2,16 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.3.0 (2025-05-25)
+------------------
+* Change default mutex of `RealtimeThreadSafeBox` and add more aliases (`#342 <https://github.com/ros-controls/realtime_tools/issues/342>`_)
+* Rename RealtimeBox to RealtimeThreadsafeBox and use `prio_inherit_mutex` (`#318 <https://github.com/ros-controls/realtime_tools/issues/318>`_)
+* export Boost dependency (`#336 <https://github.com/ros-controls/realtime_tools/issues/336>`_)
+* Use `Boost::boost` instead of ${Boost_LIBRARIES} (`#333 <https://github.com/ros-controls/realtime_tools/issues/333>`_)
+* Use target_link_libraries instead of ament_target_dependencies (`#331 <https://github.com/ros-controls/realtime_tools/issues/331>`_)
+* Cleanup deprecated constructor of RTPublisher (`#330 <https://github.com/ros-controls/realtime_tools/issues/330>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota
+
 4.2.1 (2025-05-04)
 ------------------
 * Fix the deadlock in the destructor of RealtimePublisher (`#320 <https://github.com/ros-controls/realtime_tools/issues/320>`_)
