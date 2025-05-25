@@ -46,7 +46,7 @@
 #define RECURSIVE_MUTEX realtime_tools::prio_inherit_recursive_mutex
 #else
 #define DEFAULT_MUTEX std::mutex
-#define DEFAULT_MUTEX std::recursive_mutex
+#define RECURSIVE_MUTEX std::recursive_mutex
 #endif
 
 namespace realtime_tools
