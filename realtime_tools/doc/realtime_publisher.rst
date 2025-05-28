@@ -1,5 +1,5 @@
-Realtime Publisher
-------------------
+RealtimePublisher
+---------------------
 The ``realtime_tools::RealtimePublisher`` allows users that write C++ ros2_controllers to publish messages on a ROS topic from a hard realtime loop. The normal ROS publisher is not realtime safe, and should not be used from within the update loop of a realtime controller. The realtime publisher is a wrapper around the ROS publisher; the wrapper creates an extra non-realtime thread that publishes messages on a ROS topic. The example below shows a typical usage of the realtime publisher in the ``on_configure()`` (non-realtime method) and ``update()`` (realtime method) methods of a realtime controller:
 
 .. code-block:: cpp
