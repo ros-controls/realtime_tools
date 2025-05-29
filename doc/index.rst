@@ -9,8 +9,7 @@ Contains a set of tools that can be used from a hard realtime thread, without br
 ***************************************
 Exchange data between different threads
 ***************************************
-This package contains different concepts for exchanging data between different threads. In the following,
-a guideline for the usage for ros2_controllers is given.
+This package contains different concepts for exchanging data between different threads. In the following, a guideline for the usage for ros2_controllers is given.
 
 Provided concepts
 =================
@@ -21,10 +20,7 @@ A Box that ensures thread-safe access to the boxed contents. Access is best effo
 
 LockFreeQueue
 ---------------------
-This class provides a base implementation for lock-free queues on top of `Boost.Lockfree <https://www.boost.org/doc/libs/latest/doc/html/lockfree.html>`__ for lock-free queues with various functionalities
-
- * such as pushing, popping, and checking the state of the queue. It supports both single-producer
- * single-consumer (SPSC) and multiple-producer multiple-consumer (MPMC) queues.
+This class provides a base implementation for lock-free queues on top of `Boost.Lockfree <https://www.boost.org/doc/libs/latest/doc/html/lockfree.html>`__ for lock-free queues with various functionalities, such as pushing, popping, and checking the state of the queue. It supports both single-producer single-consumer (SPSC) and multiple-producer multiple-consumer (MPMC) queues.
 
 .. RealtimePublisher
 .. ---------------------
