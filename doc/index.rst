@@ -40,7 +40,7 @@ There exist the following typical use-cases for ros2_controllers:
 * Exchange data (two-way) between a non-realtime thread and a realtime-thread like state information, current goals etc.:
 
    * For primitive types like ``bool``, you can simply use ``std::atomic<bool>``, see `cppreference <https://en.cppreference.com/w/cpp/atomic/atomic/>`__.
-   * For all other types, use the ``realtime_tools::RealtimeThreadSafeBox``
+   * For all other types, when missing some data samples from RT loop is not of major importance, then use the ``realtime_tools::RealtimeThreadSafeBox`` with ``try_set`` method. In the contrary situation, it is recommended to use ``realtime_tools::LockFreeQueue`` to avoid missing any samples.
 
 ***************************************
 Other classes and helper methods
