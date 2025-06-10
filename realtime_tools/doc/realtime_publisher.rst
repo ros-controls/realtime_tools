@@ -12,6 +12,7 @@ The ``realtime_tools::RealtimePublisher`` allows users that write C++ ros2_contr
   private:
     std::shared_ptr<realtime_tools::RealtimePublisher<my_msgs::msg::MyMsg>> state_publisher_;
     std::shared_ptr<rclcpp::Publisher<my_msgs::msg::MyMsg>> s_publisher_;
+    my_msgs::msg::MyMsg some_msg_;
   }
 
   controller_interface::CallbackReturn MyController::on_configure(
@@ -21,7 +22,8 @@ The ``realtime_tools::RealtimePublisher`` allows users that write C++ ros2_contr
     s_publisher_ = get_node()->create_publisher<my_msgs::msg::MyMsg>(
       "~/status", rclcpp::SystemDefaultsQoS());
     state_publisher_ =
-      std::make_unique<realtime_tools::RealtimePublisher<ControllerStateMsg>>(s_publisher_);
+      std::make_unique<realtime_tools::RealtimePublisher<my_msgs::msg::MyMsg>>(s_publisher_);
+    some_msg_.header.frame_id = params_.frame_id;
     ...
   }
 
@@ -30,7 +32,8 @@ The ``realtime_tools::RealtimePublisher`` allows users that write C++ ros2_contr
   {
     ...
     // Publish controller state
-    state_publisher_->lock();
-    state_publisher_->msg_ = some_msg;
-    state_publisher_->unlockAndPublish();
+    some_msg_.header.stamp = get_node()->now();
+    // Fill in the rest of the message
+    ....
+    state_publisher_->try_publish(some_msg_);
   }
