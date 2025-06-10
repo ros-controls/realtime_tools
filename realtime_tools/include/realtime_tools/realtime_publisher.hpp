@@ -145,7 +145,7 @@ public:
   bool can_publish() const
   {
     std::unique_lock<std::mutex> lock(msg_mutex_, std::try_to_lock);
-    return turn_.load(std::memory_order_acquire) == State::REALTIME && lock.owns_lock();
+    return can_publish(lock);
   }
 
   /**
@@ -159,17 +159,15 @@ public:
    */
   bool try_publish(const MessageT & msg)
   {
-    if (can_publish()) {
-      std::unique_lock<std::mutex> lock(msg_mutex_, std::try_to_lock);
-      if (lock.owns_lock()) {
-        {
-          std::unique_lock<std::mutex> scoped_lock(std::move(lock));
-          msg_ = msg;
-          turn_.store(State::NON_REALTIME, std::memory_order_release);
-        }
-        updated_cond_.notify_one();  // Notify the publishing thread
-        return true;
+    std::unique_lock<std::mutex> lock(msg_mutex_, std::try_to_lock);
+    if (can_publish(lock)) {
+      {
+        std::unique_lock<std::mutex> scoped_lock(std::move(lock));
+        msg_ = msg;
+        turn_.store(State::NON_REALTIME, std::memory_order_release);
       }
+      updated_cond_.notify_one();  // Notify the publishing thread
+      return true;
     }
     return false;
   }
@@ -247,6 +245,17 @@ public:
   const std::mutex & get_mutex() const { return msg_mutex_; }
 
 private:
+  /**
+   * \brief Check if the realtime publisher is in a state to publish messages
+   * \param lock A unique_lock that is already acquired on the msg_mutex_
+   * \return true if the publisher is in a state to publish messages
+   * \note The msg_ variable can be safely accessed if this function returns true
+  */
+  bool can_publish(std::unique_lock<std::mutex> & lock) const
+  {
+    return turn_.load(std::memory_order_acquire) == State::REALTIME && lock.owns_lock();
+  }
+
   // non-copyable
   RealtimePublisher(const RealtimePublisher &) = delete;
   RealtimePublisher & operator=(const RealtimePublisher &) = delete;
