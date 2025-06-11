@@ -5,14 +5,14 @@ realtime_tools
 
 Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
 
-Some documentation can be found at [docs.ros.org](http://docs.ros.org/en/rolling/p/realtime_tools/doc/index.html).
+Further documentation can be found at [docs.ros.org](https://control.ros.org/rolling/doc/realtime_tools/doc/index.html).
 
 ## Contributing
 As an open-source project, we welcome each contributor, regardless of their background and experience. Pick a [PR](https://github.com/ros-controls/realtime_tools/pulls) and review it, or [create your own](https://github.com/ros-controls/realtime_tools/contribute)!
 If you are new to the project, please read the [contributing guide](https://control.ros.org/rolling/doc/contributing/contributing.html) for more information on how to get started. We are happy to help you with your first contribution.
 
 ## Build status
-ROS2 Distro | Branch | Build status | Documentation | Package Build
+ROS2 Distro | Branch | Build status | API Documentation | Package Build
 :---------: | :----: | :----------: | :-----------: | :---------------:
 **Rolling** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | [![Binary Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-binary-build.yml?branch=master) <br> [![Source Build](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-source-build.yml/badge.svg?branch=master)](https://github.com/ros-controls/realtime_tools/actions/workflows/rolling-source-build.yml?branch=master) <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Rdev__realtime_tools__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Rdev__realtime_tools__ubuntu_noble_amd64/) | [API](http://docs.ros.org/en/rolling/p/realtime_tools/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__realtime_tools__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Rbin_uN64__realtime_tools__ubuntu_noble_amd64__binary/)
 **Kilted** | [`master`](https://github.com/ros-controls/realtime_tools/tree/master) | see above <br> [![build.ros2.org](https://build.ros2.org/buildStatus/icon?job=Kdev__realtime_tools__ubuntu_noble_amd64&subject=build.ros2.org)](https://build.ros2.org/job/Kdev__realtime_tools__ubuntu_noble_amd64/) | [API](http://docs.ros.org/en/rolling/p/realtime_tools/) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Kbin_uN64__realtime_tools__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Kbin_uN64__realtime_tools__ubuntu_noble_amd64__binary/)
