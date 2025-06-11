@@ -63,8 +63,6 @@ public:
 
   RCLCPP_SMART_PTR_DEFINITIONS(RealtimePublisher<MessageT>)
 
-  [[deprecated(
-    "This variable is deprecated, it is recommended to use the try_publish() method instead.")]]
   MessageT msg_;
 
   /**
