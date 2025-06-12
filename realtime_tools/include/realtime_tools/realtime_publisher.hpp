@@ -204,7 +204,10 @@ public:
   void unlockAndPublish()
   {
     turn_.store(State::NON_REALTIME, std::memory_order_release);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     unlock();
+#pragma GCC diagnostic pop
   }
 
   /**
