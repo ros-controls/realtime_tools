@@ -31,4 +31,3 @@ jobs:
     with:
       ros_distro: rolling
       ref_for_scheduled_build: master
-      os_name: windows-2025
