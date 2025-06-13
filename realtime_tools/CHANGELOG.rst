@@ -2,6 +2,14 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Silence some warnings (backport `#355 <https://github.com/ros-controls/realtime_tools/issues/355>`_) (`#357 <https://github.com/ros-controls/realtime_tools/issues/357>`_)
+* Add new API for the RealtimePublisher (backport `#323 <https://github.com/ros-controls/realtime_tools/issues/323>`_) (`#352 <https://github.com/ros-controls/realtime_tools/issues/352>`_)
+* Add guidelines for realtimebox/queue (backport `#347 <https://github.com/ros-controls/realtime_tools/issues/347>`_) (`#354 <https://github.com/ros-controls/realtime_tools/issues/354>`_)
+* Add docs for control.ros.org (backport `#346 <https://github.com/ros-controls/realtime_tools/issues/346>`_) (`#353 <https://github.com/ros-controls/realtime_tools/issues/353>`_)
+* Contributors: Christoph Froehlich, Sai Kishor Kothakota, mergify[bot]
+
 3.6.0 (2025-05-25)
 ------------------
 * Rename RealtimeBox to RealtimeThreadsafeBox and use `prio_inherit_mutex` (backport `#318 <https://github.com/ros-controls/realtime_tools/issues/318>`_) (`#341 <https://github.com/ros-controls/realtime_tools/issues/341>`_)
