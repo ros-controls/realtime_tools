@@ -42,8 +42,6 @@
 using StringMsg = test_msgs::msg::Strings;
 using realtime_tools::RealtimePublisher;
 
-TEST(RealtimePublisher, construct_destruct) { RealtimePublisher<StringMsg> rt_pub; }
-
 struct StringCallback
 {
   StringMsg msg_;
@@ -56,7 +54,12 @@ struct StringCallback
   }
 };
 
-TEST(RealtimePublisher, rt_publish)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+TEST(RealtimePublisher, construct_destruct_legacy) { RealtimePublisher<StringMsg> rt_pub; }
+
+TEST(RealtimePublisher, rt_publish_legacy)
 {
   rclcpp::init(0, nullptr);
   const size_t ATTEMPTS = 10;
@@ -92,7 +95,7 @@ TEST(RealtimePublisher, rt_publish)
   rclcpp::shutdown();
 }
 
-TEST(RealtimePublisher, rt_try_publish)
+TEST(RealtimePublisher, rt_try_publish_legacy)
 {
   rclcpp::init(0, nullptr);
   const size_t ATTEMPTS = 10;
@@ -132,6 +135,7 @@ TEST(RealtimePublisher, rt_try_publish)
   EXPECT_STREQ(expected_msg, str_callback.msg_.string_value.c_str());
   rclcpp::shutdown();
 }
+#pragma GCC diagnostic pop
 
 TEST(RealtimePublisher, rt_can_try_publish)
 {
