@@ -44,6 +44,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <utility>
 
 #include "rclcpp/publisher.hpp"
 
@@ -62,7 +63,6 @@ public:
 
   RCLCPP_SMART_PTR_DEFINITIONS(RealtimePublisher<MessageT>)
 
-  /// The msg_ variable contains the data that will get published on the ROS topic.
   MessageT msg_;
 
   /**
@@ -137,31 +137,61 @@ public:
   */
   bool trylock()
   {
-    if (turn_.load(std::memory_order_acquire) == State::REALTIME && msg_mutex_.try_lock()) {
-      return true;
-    } else {
-      return false;
-    }
+    return turn_.load(std::memory_order_acquire) == State::REALTIME && msg_mutex_.try_lock();
   }
 
   /**
-   * \brief Try to get the data lock from realtime and publish the given message
+   * \brief Check if the realtime publisher is in a state to publish messages
+   * \return true if the publisher is in a state to publish messages
+   * \note The msg_ variable can be safely accessed if this function returns true
+  */
+  bool can_publish() const
+  {
+    std::unique_lock<std::mutex> lock(msg_mutex_, std::try_to_lock);
+    return can_publish(lock);
+  }
+
+  /**
+   * \brief Try to publish the given message
    *
-   * Tries to gain unique access to msg_ variable. If this succeeds
-   * update the msg_ variable and call unlockAndPublish
+   * This method attempts to publish the given message if the publisher is in a state to do so.
+   * It uses a try_lock to avoid blocking if the mutex is already held by another thread.
    *
    * \param [in] msg The message to publish
-   * \return false in case no lock for the realtime variable is acquired. This implies the message will not be published.
+   * \return true if the message was successfully published, false otherwise
    */
+  bool try_publish(const MessageT & msg)
+  {
+    std::unique_lock<std::mutex> lock(msg_mutex_, std::try_to_lock);
+    if (can_publish(lock)) {
+      {
+        std::unique_lock<std::mutex> scoped_lock(std::move(lock));
+        msg_ = msg;
+        turn_.store(State::NON_REALTIME, std::memory_order_release);
+      }
+      updated_cond_.notify_one();  // Notify the publishing thread
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * \brief Try to publish the given message (deprecated)
+   * \deprecated This method is deprecated and should be replaced with try_publish()
+   *
+   * This method is deprecated and should be replaced with try_publish().
+   * It attempts to publish the given message if the publisher is in a state to do so.
+   * It uses a try_lock to avoid blocking if the mutex is already held by another thread.
+   *
+   * \param [in] msg The message to publish
+   * \return true if the message was successfully published, false otherwise
+   */
+  [[deprecated(
+    "Use try_publish() method instead of this method. This method may be removed in future "
+    "versions.")]]
   bool tryPublish(const MessageT & msg)
   {
-    if (!trylock()) {
-      return false;
-    }
-
-    msg_ = msg;
-    unlockAndPublish();
-    return true;
+    return try_publish(msg);
   }
 
   /**
@@ -199,7 +229,24 @@ public:
 
   const std::thread & get_thread() const { return thread_; }
 
+  const MessageT & get_msg() const { return msg_; }
+
+  std::mutex & get_mutex() { return msg_mutex_; }
+
+  const std::mutex & get_mutex() const { return msg_mutex_; }
+
 private:
+  /**
+   * \brief Check if the realtime publisher is in a state to publish messages
+   * \param lock A unique_lock that is already acquired on the msg_mutex_
+   * \return true if the publisher is in a state to publish messages
+   * \note The msg_ variable can be safely accessed if this function returns true
+  */
+  bool can_publish(std::unique_lock<std::mutex> & lock) const
+  {
+    return turn_.load(std::memory_order_acquire) == State::REALTIME && lock.owns_lock();
+  }
+
   // non-copyable
   RealtimePublisher(const RealtimePublisher &) = delete;
   RealtimePublisher & operator=(const RealtimePublisher &) = delete;
@@ -246,7 +293,7 @@ private:
 
   std::thread thread_;
 
-  std::mutex msg_mutex_;  // Protects msg_
+  mutable std::mutex msg_mutex_;  // Protects msg_
   std::condition_variable updated_cond_;
 
   enum class State : int { REALTIME, NON_REALTIME, LOOP_NOT_STARTED };
