@@ -2,6 +2,11 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix the deadlock in the destructor of RealtimePublisher (backport `#320 <https://github.com/ros-controls/realtime_tools/issues/320>`_) (`#324 <https://github.com/ros-controls/realtime_tools/issues/324>`_)
+* Contributors: mergify[bot]
+
 2.13.0 (2025-04-06)
 -------------------
 * Fix realtime publisher race condition upon initialization (backport `#309 <https://github.com/ros-controls/realtime_tools/issues/309>`_) (`#310 <https://github.com/ros-controls/realtime_tools/issues/310>`_)
