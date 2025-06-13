@@ -42,8 +42,6 @@
 using StringMsg = test_msgs::msg::Strings;
 using realtime_tools::RealtimePublisher;
 
-TEST(RealtimePublisher, construct_destruct) { RealtimePublisher<StringMsg> rt_pub; }
-
 struct StringCallback
 {
   StringMsg msg_;
@@ -58,6 +56,9 @@ struct StringCallback
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+TEST(RealtimePublisher, construct_destruct_legacy) { RealtimePublisher<StringMsg> rt_pub; }
+
 TEST(RealtimePublisher, rt_publish_legacy)
 {
   rclcpp::init(0, nullptr);
