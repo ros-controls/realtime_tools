@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.4.0 (2025-06-13)
+------------------
 * Silence some deprecation warnings (`#355 <https://github.com/ros-controls/realtime_tools/issues/355>`_)
 * Add new API for the RealtimePublisher (`#323 <https://github.com/ros-controls/realtime_tools/issues/323>`_)
 * Add guidelines for realtimebox/queue (`#347 <https://github.com/ros-controls/realtime_tools/issues/347>`_)
