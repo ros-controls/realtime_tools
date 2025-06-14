@@ -2,6 +2,14 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.4.0 (2025-06-13)
+------------------
+* Silence some deprecation warnings (`#355 <https://github.com/ros-controls/realtime_tools/issues/355>`_)
+* Add new API for the RealtimePublisher (`#323 <https://github.com/ros-controls/realtime_tools/issues/323>`_)
+* Add guidelines for realtimebox/queue (`#347 <https://github.com/ros-controls/realtime_tools/issues/347>`_)
+* Add docs for control.ros.org (`#346 <https://github.com/ros-controls/realtime_tools/issues/346>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota
+
 4.3.0 (2025-05-25)
 ------------------
 * Change default mutex of `RealtimeThreadSafeBox` and add more aliases (`#342 <https://github.com/ros-controls/realtime_tools/issues/342>`_)

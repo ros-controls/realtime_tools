@@ -63,8 +63,6 @@ public:
 
   RCLCPP_SMART_PTR_DEFINITIONS(RealtimePublisher<MessageT>)
 
-  [[deprecated(
-    "This variable is deprecated, it is recommended to use the try_publish() method instead.")]]
   MessageT msg_;
 
   /**
@@ -204,7 +202,10 @@ public:
   void unlockAndPublish()
   {
     turn_.store(State::NON_REALTIME, std::memory_order_release);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     unlock();
+#pragma GCC diagnostic pop
   }
 
   /**
