@@ -82,14 +82,7 @@ if(BUILD_TESTING)
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
 
   target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
-  if(WIN32)
-    # atomic is not found on Windows, but also not needed
-    target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
-  elseif(APPLE)
-    # On macOS, atomic lib is generally not needed
-    target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
-  else()
-    # without adding atomic, clang throws a linker error
+  if(UNIX AND NOT APPLE)
     target_link_libraries(lock_free_queue_tests realtime_tools atomic)
   endif()
 
