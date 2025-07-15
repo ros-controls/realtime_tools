@@ -101,7 +101,7 @@ bool configure_sched_fifo(int priority)
 std::pair<bool, std::string> lock_memory()
 {
 #if defined(_WIN32) || defined(__APPLE__)
-  return {false, "Memory locking is not supported on Windows or MacOs."};
+  return {false, "Memory locking is not supported on Windows or macOS."};
 #else
   auto is_capable = [](cap_value_t v) -> bool {
     bool rc = false;
