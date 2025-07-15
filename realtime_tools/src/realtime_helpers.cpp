@@ -100,7 +100,7 @@ bool configure_sched_fifo(int priority)
 
 std::pair<bool, std::string> lock_memory()
 {
-#ifdef defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__)
   return {false, "Memory locking is not supported on Windows or MacOs."};
 #else
   auto is_capable = [](cap_value_t v) -> bool {
@@ -151,7 +151,7 @@ std::pair<bool, std::string> set_thread_affinity(
   NATIVE_THREAD_HANDLE thread, const std::vector<int> & cores)
 {
   std::string message;
-#ifdef defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__)
   message = "Thread affinity is not supported on Windows or MacOS.";
   return std::make_pair(false, message);
 #else
