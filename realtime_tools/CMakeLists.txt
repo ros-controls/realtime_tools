@@ -83,7 +83,7 @@ if(BUILD_TESTING)
 
   target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
   if(UNIX AND NOT APPLE)
-    target_link_libraries(lock_free_queue_tests realtime_tools atomic)
+    target_link_libraries(lock_free_queue_tests atomic)
   endif()
 
   ament_add_gmock(realtime_publisher_tests
