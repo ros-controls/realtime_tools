@@ -156,11 +156,8 @@ std::pair<bool, std::string> set_thread_affinity(
   NATIVE_THREAD_HANDLE thread, const std::vector<int> & cores)
 {
   std::string message;
-#ifdef _WIN32
-  message = "Thread affinity is not supported on Windows.";
-  return std::make_pair(false, message);
-#elif defined(__APPLE__)
-  message = "Memory locking is not supported on MacOS.";
+#ifdef defined(_WIN32) || defined(__APPLE__)
+  message = "Thread affinity is not supported on Windows or MacOS.";
   return std::make_pair(false, message);
 #else
   auto set_affinity_result_message = [](int result, std::string & msg) -> bool {
