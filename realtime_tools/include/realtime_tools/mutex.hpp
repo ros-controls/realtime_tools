@@ -117,14 +117,13 @@ public:
     }
 
     // Set the mutex attribute robustness to MutexRobustness
+      // On platforms like macOS, pthread_mutexattr_setrobust is not available,
+      // so skip this step
     #if defined(__linux__)
       const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness::value);
       if (res_robust != 0) {
         throw std::system_error(res_robust, std::system_category(), "Failed to set mutex robustness");
       }
-    #else
-      // On platforms like macOS, pthread_mutexattr_setrobust is not available,
-      // so skip this step
     #endif
 
     // Initialize the mutex with the attributes
