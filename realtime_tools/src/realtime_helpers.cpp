@@ -32,6 +32,9 @@
 #include <windows.h>
 #else
 #include <sched.h>
+#if defined(__unix__)
+#include <sys/capability.h>
+#endif
 #include <sys/mman.h>
 #include <sys/utsname.h>
 #include <unistd.h>
