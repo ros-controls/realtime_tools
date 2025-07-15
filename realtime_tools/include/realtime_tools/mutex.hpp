@@ -162,6 +162,7 @@ public:
       }
       std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
                 << std::endl;
+      return;  // Mutex is now consistent, we can continue using it
 #else
       // On platforms without pthread_mutex_consistent support, just log a warning
       std::cerr
