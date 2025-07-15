@@ -31,8 +31,6 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
-
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <sched.h>
 #include <sys/mman.h>
 #include <sys/utsname.h>
