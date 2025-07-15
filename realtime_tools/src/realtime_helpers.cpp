@@ -152,7 +152,7 @@ std::pair<bool, std::string> set_thread_affinity(
 {
   std::string message;
 #if defined(_WIN32) || defined(__APPLE__)
-  message = "Thread affinity is not supported on Windows or MacOS.";
+  message = "Thread affinity is not supported on Windows or macOS.";
   return std::make_pair(false, message);
 #else
   auto set_affinity_result_message = [](int result, std::string & msg) -> bool {
