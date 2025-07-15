@@ -40,12 +40,6 @@
 #include <unistd.h>
 #endif
 
-#if defined(__unix__)
-#include <sys/capability.h>
-#endif
-
-#endif  // end of _WIN32 check
-
 #include <cstring>
 #include <fstream>
 #include <iostream>
