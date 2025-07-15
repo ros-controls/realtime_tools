@@ -61,8 +61,8 @@ struct stalled_robustness_t
 
 struct robust_robustness_t
 {
-#ifdef PTHREAD_MUTEX_STALLED
-  static constexpr int value = PTHREAD_MUTEX_STALLED;
+#ifdef PTHREAD_MUTEX_ROBUST
+  static constexpr int value = PTHREAD_MUTEX_ROBUST;
 #else
   static constexpr int value = 0;
 #endif
