@@ -52,20 +52,20 @@ struct recursive_mutex_type_t
 
 struct stalled_robustness_t
 {
-  #ifdef PTHREAD_MUTEX_STALLED
-    static constexpr int value = PTHREAD_MUTEX_STALLED;
-  #else
-    static constexpr int value = 0;
-  #endif
+#ifdef PTHREAD_MUTEX_STALLED
+  static constexpr int value = PTHREAD_MUTEX_STALLED;
+#else
+  static constexpr int value = 0;
+#endif
 };
 
 struct robust_robustness_t
 {
-  #ifdef PTHREAD_MUTEX_STALLED
-    static constexpr int value = PTHREAD_MUTEX_STALLED;
-  #else
-    static constexpr int value = 0;
-  #endif
+#ifdef PTHREAD_MUTEX_STALLED
+  static constexpr int value = PTHREAD_MUTEX_STALLED;
+#else
+  static constexpr int value = 0;
+#endif
 };
 /**
  * @brief A class template that provides a pthread mutex with the priority inheritance protocol
@@ -117,14 +117,14 @@ public:
     }
 
     // Set the mutex attribute robustness to MutexRobustness
-      // On platforms like macOS, pthread_mutexattr_setrobust is not available,
-      // so skip this step
-    #if defined(__linux__)
-      const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness::value);
-      if (res_robust != 0) {
-        throw std::system_error(res_robust, std::system_category(), "Failed to set mutex robustness");
-      }
-    #endif
+    // On platforms like macOS, pthread_mutexattr_setrobust is not available,
+    // so skip this step
+#if defined(__linux__)
+    const auto res_robust = pthread_mutexattr_setrobust(&attr, MutexRobustness::value);
+    if (res_robust != 0) {
+      throw std::system_error(res_robust, std::system_category(), "Failed to set mutex robustness");
+    }
+#endif
 
     // Initialize the mutex with the attributes
     const auto res_init = pthread_mutex_init(&mutex_, &attr);
@@ -154,19 +154,20 @@ public:
       return;
     }
     if (res == EOWNERDEAD) {
-      #if defined(__linux__)
-        const auto res_consistent = pthread_mutex_consistent(&mutex_);
-        if (res_consistent != 0) {
-          throw std::runtime_error(
-            std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
-        }
-        std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
-                  << std::endl;
-      #else
-        // On platforms without pthread_mutex_consistent support, just log a warning
-        std::cerr << "Mutex owner died, but pthread_mutex_consistent is not supported on this platform."
-                  << std::endl;
-      #endif
+#if defined(__linux__)
+      const auto res_consistent = pthread_mutex_consistent(&mutex_);
+      if (res_consistent != 0) {
+        throw std::runtime_error(
+          std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
+      }
+      std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
+                << std::endl;
+#else
+      // On platforms without pthread_mutex_consistent support, just log a warning
+      std::cerr
+        << "Mutex owner died, but pthread_mutex_consistent is not supported on this platform."
+        << std::endl;
+#endif
     } else if (res == EDEADLK) {
       throw std::system_error(res, std::system_category(), "Deadlock detected");
     } else {
@@ -192,18 +193,19 @@ public:
     if (res == EBUSY) {
       return false;
     } else if (res == EOWNERDEAD) {
-        #if defined(__linux__)
-          const auto res_consistent = pthread_mutex_consistent(&mutex_);
-          if (res_consistent != 0) {
-            throw std::runtime_error(
-              std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
-          }
-          std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
-                    << std::endl;
-        #else
-          std::cerr << "Mutex owner died, but pthread_mutex_consistent is not supported on this platform."
-                    << std::endl;
-        #endif
+#if defined(__linux__)
+      const auto res_consistent = pthread_mutex_consistent(&mutex_);
+      if (res_consistent != 0) {
+        throw std::runtime_error(
+          std::string("Failed to make mutex consistent : ") + std::strerror(res_consistent));
+      }
+      std::cerr << "Mutex owner died, but the mutex is consistent now. This shouldn't happen!"
+                << std::endl;
+#else
+      std::cerr
+        << "Mutex owner died, but pthread_mutex_consistent is not supported on this platform."
+        << std::endl;
+#endif
     } else if (res == EDEADLK) {
       throw std::system_error(res, std::system_category(), "Deadlock detected");
     } else {

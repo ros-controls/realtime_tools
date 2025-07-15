@@ -74,22 +74,22 @@ bool has_realtime_kernel()
 bool configure_sched_fifo(int priority)
 {
 #ifdef _WIN32
-   HANDLE thread = GetCurrentThread();
-   return SetThreadPriority(thread, priority);
+  HANDLE thread = GetCurrentThread();
+  return SetThreadPriority(thread, priority);
 #elif defined(__APPLE__)
   // macOS implementation using pthread_setschedparam with SCHED_FIFO
-    pthread_t thread = pthread_self();
-    struct sched_param schedp;
-    memset(&schedp, 0, sizeof(schedp));
-    schedp.sched_priority = priority;
+  pthread_t thread = pthread_self();
+  struct sched_param schedp;
+  memset(&schedp, 0, sizeof(schedp));
+  schedp.sched_priority = priority;
 
-    int policy = SCHED_FIFO;
-    if (pthread_setschedparam(thread, policy, &schedp) == 0) {
-        return true;
-    } else {
-        // Optionally log strerror(errno) for debugging
-        return false;
-    }
+  int policy = SCHED_FIFO;
+  if (pthread_setschedparam(thread, policy, &schedp) == 0) {
+    return true;
+  } else {
+    // Optionally log strerror(errno) for debugging
+    return false;
+  }
 #else
   struct sched_param schedp;
   memset(&schedp, 0, sizeof(schedp));
