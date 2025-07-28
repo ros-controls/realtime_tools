@@ -205,17 +205,26 @@ public:
 
   /**
    * @brief wait until the mutex could be locked and access the content (rw)
+   * @note Only accepts callables that take T& as argument (not by value).
    */
-  void set(const std::function<void(T &)> & func)
+  template <
+    typename F,
+    typename = std::enable_if_t<std::is_invocable_v<F, T &> && !std::is_invocable_v<F, T>>>
+  void set(F && func)
   {
     std::lock_guard<mutex_t> guard(lock_);
-    if (!func) {
-      if constexpr (is_ptr_or_smart_ptr<T>) {
-        value_ = nullptr;
-        return;
-      }
-    }
-    func(value_);
+    std::forward<F>(func)(value_);
+  }
+
+  /**
+   * @brief wait until the mutex could be locked and access the content (rw)
+   * @note Overload to allow setting pointer types to nullptr directly.
+   */
+  template <typename U = T>
+  typename std::enable_if_t<is_ptr_or_smart_ptr<U>, void> set(std::nullptr_t)
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    value_ = nullptr;
   }
 
   /**
