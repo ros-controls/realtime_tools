@@ -10,7 +10,7 @@ The ``realtime_tools::RealtimePublisher`` allows users that write C++ ros2_contr
   {
   ...
   private:
-    std::shared_ptr<realtime_tools::RealtimePublisher<my_msgs::msg::MyMsg>> state_publisher_;
+    std::unique_ptr<realtime_tools::RealtimePublisher<my_msgs::msg::MyMsg>> state_publisher_;
     std::shared_ptr<rclcpp::Publisher<my_msgs::msg::MyMsg>> s_publisher_;
     my_msgs::msg::MyMsg some_msg_;
   }
