@@ -195,6 +195,12 @@ public:
         rclcpp::get_logger("AsyncFunctionHandler"),
         "AsyncFunctionHandler is configured with DETACHED scheduling policy. "
         "This means that the async callback will not be synchronized with the main thread. ");
+      if (pause_thread.load(std::memory_order_relaxed)) {
+        pause_thread = false;
+        RCLCPP_INFO(params_.logger, "AsyncFunctionHandler: Resuming the async callback thread.");
+        async_callback_return_ = T();
+        async_callback_condition_.notify_one();
+      }
       return std::make_pair(true, async_callback_return_.load(std::memory_order_relaxed));
     }
     if (!is_running()) {
@@ -259,12 +265,37 @@ public:
   /**
    * If the async method is running, it will wait for the current async method call to finish.
    */
-  void wait_for_trigger_cycle_to_finish()
+  bool wait_for_trigger_cycle_to_finish()
   {
     if (is_running()) {
       std::unique_lock<std::mutex> lock(async_mtx_);
       cycle_end_condition_.wait(lock, [this] { return !trigger_in_progress_; });
+      return true;
     }
+    return false;
+  }
+
+  /// Pauses the execution of the async callback thread
+  /**
+   * If the async method is running, it will pause the async thread until the next trigger cycle.
+   * If the async method is not running, it will return immediately.
+   *
+   * \returns True if the async callback thread was paused, false otherwise.
+   */
+  bool pause_execution()
+  {
+    if (
+      params_.scheduling_policy ==
+      AsyncFunctionHandlerParams::AsyncSchedulingPolicy::SYNCHRONIZED) {
+      return wait_for_trigger_cycle_to_finish();
+    } else {
+      if (is_running()) {
+        std::unique_lock<std::mutex> lock(async_mtx_);
+        pause_thread = true;
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Check if the AsyncFunctionHandler is initialized
@@ -295,7 +326,13 @@ public:
   /**
    * @return True if the async callback is requested to be stopped, false otherwise
    */
-  bool is_stopped() const { return stop_async_callback_; }
+  bool is_stopped() const { return stop_async_callback_.load(std::memory_order_relaxed); }
+
+  /// Check if the async callback thread is paused
+  /**
+   * @return True if the async callback thread is paused, false otherwise
+   */
+  bool is_paused() const { return pause_thread.load(std::memory_order_relaxed); }
 
   /// Get the async worker thread
   /**
@@ -491,6 +528,7 @@ private:
   std::condition_variable cycle_end_condition_;
   std::mutex async_mtx_;
   std::atomic<std::chrono::nanoseconds> last_execution_time_;
+  std::atomic<double> periodicity_;
   std::exception_ptr async_exception_ptr_;
 };
 }  // namespace realtime_tools
