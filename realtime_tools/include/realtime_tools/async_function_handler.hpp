@@ -199,6 +199,8 @@ public:
         pause_thread = false;
         RCLCPP_INFO(params_.logger, "AsyncFunctionHandler: Resuming the async callback thread.");
         async_callback_return_ = T();
+        auto const sync_period = std::chrono::nanoseconds(1'000'000'000 / params_.exec_rate);
+        previous_time_ = params_.clock->now() - rclcpp::Duration(sync_period);
         async_callback_condition_.notify_one();
       }
       return std::make_pair(true, async_callback_return_.load(std::memory_order_relaxed));
@@ -463,7 +465,7 @@ private:
     auto const period = std::chrono::nanoseconds(1'000'000'000 / params_.exec_rate);
 
     // for calculating the measured period of the loop
-    rclcpp::Time previous_time = params_.clock->now();
+    previous_time_ = params_.clock->now();
     std::this_thread::sleep_for(period);
     std::chrono::steady_clock::time_point next_iteration_time{std::chrono::steady_clock::now()};
     while (!stop_async_callback_.load(std::memory_order_relaxed)) {
@@ -474,8 +476,8 @@ private:
         if (!stop_async_callback_) {
           // calculate measured period
           auto const current_time = params_.clock->now();
-          auto const measured_period = current_time - previous_time;
-          previous_time = current_time;
+          auto const measured_period = current_time - previous_time_;
+          previous_time_ = current_time;
           current_callback_time_ = current_time;
           current_callback_period_ = measured_period;
 
@@ -492,7 +494,7 @@ private:
           const auto time_now = std::chrono::steady_clock::now();
           if (next_iteration_time < time_now) {
             const double time_diff =
-              std::chrono::duration<double, std::micro>(time_now - next_iteration_time).count();
+              std::chrono::duration<double, std::milli>(time_now - next_iteration_time).count();
             const double cm_period = 1.e3 / static_cast<double>(params_.exec_rate);
             const int overrun_count = static_cast<int>(std::ceil(time_diff / cm_period));
             RCLCPP_WARN_THROTTLE(
@@ -519,6 +521,7 @@ private:
   // Async related variables
   std::thread thread_;
   AsyncFunctionHandlerParams params_;
+  rclcpp::Time previous_time_{0, 0, RCL_CLOCK_UNINITIALIZED};
   int thread_priority_ = std::numeric_limits<int>::quiet_NaN();
   std::atomic_bool stop_async_callback_{false};
   std::atomic_bool trigger_in_progress_{false};
