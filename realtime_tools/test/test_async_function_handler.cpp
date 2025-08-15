@@ -465,11 +465,17 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduli
 
   // Now, let's pause the thread and then check if it is updating or not
   ASSERT_TRUE(async_class.get_handler().pause_execution());
+  RCLCPP_INFO(
+    rclcpp::get_logger("test_async_function_handler"), "Async function handler paused, counter: %d",
+    async_class.get_counter());
   const auto counter_post_pause = async_class.get_counter();
   std::this_thread::sleep_for(std::chrono::seconds(2));
   ASSERT_EQ(counter_post_pause, async_class.get_counter());
 
   // Now, resume the callback and see if it is working
+  RCLCPP_INFO(
+    rclcpp::get_logger("test_async_function_handler"),
+    "Resuming async function handler, counter: %d", async_class.get_counter());
   auto trigger_status = async_class.trigger();
   ASSERT_TRUE(trigger_status.first);
   ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
