@@ -140,6 +140,8 @@ struct AsyncFunctionHandlerParams
   std::function<bool()> trigger_predicate = []() {
     return true;
   };  /// Predicate function to check if the async callback method should be triggered or not
+  bool wait_until_initial_trigger =
+    true;  /// Whether to wait until the initial trigger predicate is true
 };
 
 /**
@@ -210,6 +212,7 @@ public:
   {
     init(callback, params.trigger_predicate, params.thread_priority);
     params_ = params;
+    pause_thread_ = params.wait_until_initial_trigger;
   }
 
   /// Triggers the async callback method cycle
@@ -519,6 +522,11 @@ private:
 
     auto const period = std::chrono::nanoseconds(1'000'000'000 / params_.exec_rate);
 
+    if (pause_thread_) {
+      std::unique_lock<std::mutex> lock(async_mtx_);
+      async_callback_condition_.wait(
+        lock, [this] { return !pause_thread_ || stop_async_callback_; });
+    }
     // for calculating the measured period of the loop
     previous_time_ = params_.clock->now();
     std::this_thread::sleep_for(period);
@@ -527,7 +535,7 @@ private:
       {
         std::unique_lock<std::mutex> lock(async_mtx_);
         async_callback_condition_.wait(
-          lock, [this] { return !pause_thread || stop_async_callback_; });
+          lock, [this] { return !pause_thread_ || stop_async_callback_; });
         if (!stop_async_callback_) {
           // calculate measured period
           auto const current_time = params_.clock->now();

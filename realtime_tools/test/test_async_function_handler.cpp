@@ -436,7 +436,8 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduli
   realtime_tools::AsyncFunctionHandlerParams params;
   params.scheduling_policy = realtime_tools::AsyncSchedulingPolicy::DETACHED;
   params.clock = clock;
-  params.exec_rate = 500u;  // 1 kHz
+  params.exec_rate = 500u;  // 500 Hz
+  params.wait_until_initial_trigger = false;
   async_class.initialize(params);
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_FALSE(async_class.get_handler().is_running());
