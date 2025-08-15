@@ -434,8 +434,7 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduli
 
   rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
   realtime_tools::AsyncFunctionHandlerParams params;
-  params.scheduling_policy =
-    realtime_tools::AsyncFunctionHandlerParams::AsyncSchedulingPolicy::DETACHED;
+  params.scheduling_policy = realtime_tools::AsyncSchedulingPolicy::DETACHED;
   params.clock = clock;
   params.exec_rate = 500u;  // 1 kHz
   async_class.initialize(params);

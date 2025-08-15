@@ -39,6 +39,59 @@
 namespace realtime_tools
 {
 
+class AsyncSchedulingPolicy
+{
+public:
+  enum Value : int8_t {
+    UNKNOWN = -1,  /// Unknown scheduling policy
+    SYNCHRONIZED,  /// Synchronized scheduling policy
+    DETACHED,      /// Detached scheduling policy
+  };
+
+  AsyncSchedulingPolicy() = default;
+  constexpr AsyncSchedulingPolicy(Value value) : value_(value) {}  // NOLINT(runtime/explicit)
+  explicit AsyncSchedulingPolicy(const std::string & data_type)
+  {
+    if (data_type == "synchronized") {
+      value_ = SYNCHRONIZED;
+    } else if (data_type == "detached") {
+      value_ = DETACHED;
+    } else {
+      value_ = UNKNOWN;
+    }
+  }
+
+  operator Value() const { return value_; }
+
+  explicit operator bool() const = delete;
+
+  constexpr bool operator==(AsyncSchedulingPolicy other) const { return value_ == other.value_; }
+  constexpr bool operator!=(AsyncSchedulingPolicy other) const { return value_ != other.value_; }
+
+  constexpr bool operator==(Value other) const { return value_ == other; }
+  constexpr bool operator!=(Value other) const { return value_ != other; }
+
+  std::string to_string() const
+  {
+    switch (value_) {
+      case SYNCHRONIZED:
+        return "synchronized";
+      case DETACHED:
+        return "detached";
+      default:
+        return "unknown";
+    }
+  }
+
+  AsyncSchedulingPolicy from_string(const std::string & data_type)
+  {
+    return AsyncSchedulingPolicy(data_type);
+  }
+
+private:
+  Value value_ = UNKNOWN;
+};
+
 struct AsyncFunctionHandlerParams
 {
   bool validate()
@@ -70,10 +123,6 @@ struct AsyncFunctionHandlerParams
   /// thread, as the main thread will be triggering the async callback method.
   /// If the type is DETACHED, the async worker thread will be detached from the main thread and
   /// will have its own execution cycle.
-  enum class AsyncSchedulingPolicy {
-    SYNCHRONIZED,  /// Synchronized scheduling policy
-    DETACHED,      /// Detached scheduling policy
-  };
   int thread_priority = 50;  /// Thread priority for the async worker thread
   std::vector<int> cpu_affinity_cores =
     {};  /// CPU cores to which the async worker thread should be pinned
@@ -190,7 +239,7 @@ public:
         "AsyncFunctionHandler: Exception caught in the async callback thread!");
       std::rethrow_exception(async_exception_ptr_);
     }
-    if (params_.scheduling_policy == AsyncFunctionHandlerParams::AsyncSchedulingPolicy::DETACHED) {
+    if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
       RCLCPP_WARN_ONCE(
         rclcpp::get_logger("AsyncFunctionHandler"),
         "AsyncFunctionHandler is configured with DETACHED scheduling policy. "
@@ -291,9 +340,7 @@ public:
   bool pause_execution()
   {
     RCLCPP_INFO(params_.logger, "AsyncFunctionHandler: Pausing the async callback thread.");
-    if (
-      params_.scheduling_policy ==
-      AsyncFunctionHandlerParams::AsyncSchedulingPolicy::SYNCHRONIZED) {
+    if (params_.scheduling_policy == AsyncSchedulingPolicy::SYNCHRONIZED) {
       return wait_for_trigger_cycle_to_finish();
     } else {
       if (is_running()) {
@@ -419,9 +466,7 @@ public:
             params_.logger, affinity_result.first,
             "Async worker thread is successfully pinned to the requested CPU cores!");
         }
-        if (
-          params_.scheduling_policy ==
-          AsyncFunctionHandlerParams::AsyncSchedulingPolicy::SYNCHRONIZED) {
+        if (params_.scheduling_policy == AsyncSchedulingPolicy::SYNCHRONIZED) {
           execute_synchronized_callback();
         } else {
           execute_detached_callback();
