@@ -196,11 +196,14 @@ public:
         "AsyncFunctionHandler is configured with DETACHED scheduling policy. "
         "This means that the async callback will not be synchronized with the main thread. ");
       if (pause_thread.load(std::memory_order_relaxed)) {
-        pause_thread = false;
-        RCLCPP_INFO(params_.logger, "AsyncFunctionHandler: Resuming the async callback thread.");
-        async_callback_return_ = T();
-        auto const sync_period = std::chrono::nanoseconds(1'000'000'000 / params_.exec_rate);
-        previous_time_ = params_.clock->now() - rclcpp::Duration(sync_period);
+        {
+          std::unique_lock<std::mutex> lock(async_mtx_);
+          pause_thread = false;
+          RCLCPP_INFO(params_.logger, "AsyncFunctionHandler: Resuming the async callback thread.");
+          async_callback_return_ = T();
+          auto const sync_period = std::chrono::nanoseconds(1'000'000'000 / params_.exec_rate);
+          previous_time_ = params_.clock->now() - rclcpp::Duration(sync_period);
+        }
         async_callback_condition_.notify_one();
       }
       return std::make_pair(true, async_callback_return_.load(std::memory_order_relaxed));
@@ -281,11 +284,13 @@ public:
   /**
    * If the async method is running, it will pause the async thread until the next trigger cycle.
    * If the async method is not running, it will return immediately.
+   * \note This method is non real-time safe, as it uses a mutex to pause the thread.
    *
    * \returns True if the async callback thread was paused, false otherwise.
    */
   bool pause_execution()
   {
+    RCLCPP_INFO(params_.logger, "AsyncFunctionHandler: Pausing the async callback thread.");
     if (
       params_.scheduling_policy ==
       AsyncFunctionHandlerParams::AsyncSchedulingPolicy::SYNCHRONIZED) {
