@@ -454,7 +454,7 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduli
     ASSERT_TRUE(trigger_status.first)
       << "Trigger should be successful in DETACHED scheduling policy";
     ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
-    ASSERT_NEAR(async_class.get_counter(), i * params.exec_rate, 10)
+    ASSERT_NEAR(async_class.get_counter(), i * static_cast<int>(params.exec_rate), 10)
       << "Counter should be close to the number of cycles triggered in DETACHED scheduling policy";
   }
   // Make sure that the failed triggers are less than 0.5%
