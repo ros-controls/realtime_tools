@@ -252,10 +252,10 @@ public:
         rclcpp::get_logger("AsyncFunctionHandler"),
         "AsyncFunctionHandler is configured with DETACHED scheduling policy. "
         "This means that the async callback will not be synchronized with the main thread. ");
-      if (pause_thread.load(std::memory_order_relaxed)) {
+      if (pause_thread_.load(std::memory_order_relaxed)) {
         {
           std::unique_lock<std::mutex> lock(async_mtx_);
-          pause_thread = false;
+          pause_thread_ = false;
           RCLCPP_INFO(params_.logger, "AsyncFunctionHandler: Resuming the async callback thread.");
           async_callback_return_ = T();
           auto const sync_period = std::chrono::nanoseconds(1'000'000'000 / params_.exec_rate);
@@ -347,17 +347,19 @@ public:
    */
   bool pause_execution()
   {
-    RCLCPP_INFO(params_.logger, "AsyncFunctionHandler: Pausing the async callback thread.");
+    RCLCPP_INFO_EXPRESSION(
+      params_.logger, !pause_thread_, "AsyncFunctionHandler: Pausing the async callback thread.");
     if (params_.scheduling_policy == AsyncSchedulingPolicy::SYNCHRONIZED) {
+      pause_thread_ = true;
       return wait_for_trigger_cycle_to_finish();
     } else {
       if (is_running()) {
+        pause_thread_.store(true, std::memory_order_relaxed);
         std::unique_lock<std::mutex> lock(async_mtx_);
-        pause_thread = true;
         return true;
       }
     }
-    return false;
+    return pause_thread_.load(std::memory_order_relaxed);
   }
 
   /// Check if the AsyncFunctionHandler is initialized
@@ -394,7 +396,7 @@ public:
   /**
    * @return True if the async callback thread is paused, false otherwise
    */
-  bool is_paused() const { return pause_thread.load(std::memory_order_relaxed); }
+  bool is_paused() const { return pause_thread_.load(std::memory_order_relaxed); }
 
   /// Get the async worker thread
   /**
@@ -588,7 +590,7 @@ private:
   int thread_priority_ = std::numeric_limits<int>::quiet_NaN();
   std::atomic_bool stop_async_callback_{false};
   std::atomic_bool trigger_in_progress_{false};
-  std::atomic_bool pause_thread{false};
+  std::atomic_bool pause_thread_{false};
   std::atomic<T> async_callback_return_;
   std::condition_variable async_callback_condition_;
   std::condition_variable cycle_end_condition_;
