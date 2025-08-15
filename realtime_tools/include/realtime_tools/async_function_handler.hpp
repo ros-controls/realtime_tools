@@ -111,6 +111,11 @@ struct AsyncFunctionHandlerParams
         return false;
       }
     }
+    if (scheduling_policy == AsyncSchedulingPolicy::UNKNOWN) {
+      throw std::runtime_error(
+        "AsyncFunctionHandlerParams: scheduling policy is unknown. "
+        "Please set it to either 'synchronized' or 'detached'.");
+    }
     if (trigger_predicate == nullptr) {
       RCLCPP_ERROR(logger, "The parsed trigger predicate is not valid!");
       return false;
