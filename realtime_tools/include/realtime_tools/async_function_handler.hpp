@@ -425,8 +425,8 @@ public:
   {
     if (is_running()) {
       {
+        stop_async_callback_.store(true, std::memory_order_relaxed);
         std::unique_lock<std::mutex> lock(async_mtx_);
-        stop_async_callback_ = true;
       }
       async_callback_condition_.notify_one();
       thread_.join();
