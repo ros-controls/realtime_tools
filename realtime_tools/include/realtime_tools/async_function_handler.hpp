@@ -243,13 +243,12 @@ public:
     }
     if (async_exception_ptr_) {
       RCLCPP_ERROR(
-        rclcpp::get_logger("AsyncFunctionHandler"),
-        "AsyncFunctionHandler: Exception caught in the async callback thread!");
+        params_.logger, "AsyncFunctionHandler: Exception caught in the async callback thread!");
       std::rethrow_exception(async_exception_ptr_);
     }
     if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
       RCLCPP_WARN_ONCE(
-        rclcpp::get_logger("AsyncFunctionHandler"),
+        params_.logger,
         "AsyncFunctionHandler is configured with DETACHED scheduling policy. "
         "This means that the async callback will not be synchronized with the main thread. ");
       if (pause_thread_.load(std::memory_order_relaxed)) {
@@ -458,10 +457,9 @@ public:
       thread_ = std::thread([this]() -> void {
         if (!realtime_tools::configure_sched_fifo(thread_priority_)) {
           RCLCPP_WARN(
-            rclcpp::get_logger("AsyncFunctionHandler"),
+            params_.logger,
             "Could not enable FIFO RT scheduling policy. Consider setting up your user to do FIFO "
-            "RT "
-            "scheduling. See "
+            "RT scheduling. See "
             "[https://control.ros.org/master/doc/ros2_control/controller_manager/doc/userdoc.html] "
             "for details.");
         }
