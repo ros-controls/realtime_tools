@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <limits>
+#include <memory>
 
 #include "gmock/gmock.h"
 #include "rclcpp/rclcpp.hpp"
@@ -28,16 +29,17 @@ TestAsyncFunctionHandler::TestAsyncFunctionHandler()
   reset_counter(0);
 }
 
-void TestAsyncFunctionHandler::initialize()
+void TestAsyncFunctionHandler::initialize(realtime_tools::AsyncFunctionHandlerParams params)
 {
+  params.trigger_predicate = [this]() {
+    return (
+      state_.id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE &&
+      handler_.get_last_return_value() != realtime_tools::return_type::DEACTIVATE);
+  };
   handler_.init(
     std::bind(
       &TestAsyncFunctionHandler::update, this, std::placeholders::_1, std::placeholders::_2),
-    [this]() {
-      return (
-        state_.id() == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE &&
-        handler_.get_last_return_value() != realtime_tools::return_type::DEACTIVATE);
-    });
+    params);
 }
 
 std::pair<bool, return_type> TestAsyncFunctionHandler::trigger()
@@ -416,7 +418,7 @@ TEST_F(AsyncFunctionHandlerTest, check_exception_handling)
   ASSERT_FALSE(async_class.get_handler().is_stopped());
   ASSERT_TRUE(async_class.get_handler().get_thread().joinable());
   ASSERT_TRUE(async_class.get_handler().is_trigger_cycle_in_progress());
-  async_class.get_handler().wait_for_trigger_cycle_to_finish();
+  ASSERT_TRUE(async_class.get_handler().pause_execution());
   async_class.get_handler().get_last_execution_time();
   ASSERT_FALSE(async_class.get_handler().is_trigger_cycle_in_progress());
   ASSERT_EQ(async_class.get_counter(), 1);
@@ -424,4 +426,67 @@ TEST_F(AsyncFunctionHandlerTest, check_exception_handling)
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_TRUE(async_class.get_handler().is_stopped());
   async_class.get_handler().wait_for_trigger_cycle_to_finish();
+}
+
+TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduling_policy)
+{
+  realtime_tools::TestAsyncFunctionHandler async_class;
+
+  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
+  realtime_tools::AsyncFunctionHandlerParams params;
+  params.scheduling_policy = realtime_tools::AsyncSchedulingPolicy::DETACHED;
+  params.clock = clock;
+  params.exec_rate = 500u;  // 500 Hz
+  params.wait_until_initial_trigger = false;
+  async_class.initialize(params);
+  ASSERT_TRUE(async_class.get_handler().is_initialized());
+  ASSERT_FALSE(async_class.get_handler().is_running());
+  ASSERT_FALSE(async_class.get_handler().is_stopped());
+  async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+  EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
+
+  const int total_cycles = 3;
+  for (int i = 1; i <= total_cycles; i++) {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    const auto trigger_status = async_class.trigger();
+    ASSERT_TRUE(trigger_status.first)
+      << "Trigger should be successful in DETACHED scheduling policy";
+    ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
+    ASSERT_NEAR(async_class.get_counter(), i * static_cast<int>(params.exec_rate), 10)
+      << "Counter should be close to the number of cycles triggered in DETACHED scheduling policy";
+  }
+  // Make sure that the failed triggers are less than 0.5%
+  const auto missed_triggers = std::abs(
+    static_cast<int>(total_cycles * params.exec_rate) -
+    static_cast<int>(async_class.get_counter()));
+  ASSERT_LT(missed_triggers, static_cast<int>(0.005 * total_cycles * params.exec_rate))
+    << "The missed triggers cannot be more than 0.5%!";
+
+  // Now, let's pause the thread and then check if it is updating or not
+  ASSERT_TRUE(async_class.get_handler().pause_execution());
+  RCLCPP_INFO(
+    rclcpp::get_logger("test_async_function_handler"), "Async function handler paused, counter: %d",
+    async_class.get_counter());
+  const auto counter_post_pause = async_class.get_counter();
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+  ASSERT_EQ(counter_post_pause, async_class.get_counter());
+
+  // Now, resume the callback and see if it is working
+  RCLCPP_INFO(
+    rclcpp::get_logger("test_async_function_handler"),
+    "Resuming async function handler, counter: %d", async_class.get_counter());
+  auto trigger_status = async_class.trigger();
+  ASSERT_TRUE(trigger_status.first);
+  ASSERT_EQ(realtime_tools::return_type::OK, trigger_status.second);
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+  ASSERT_NEAR(async_class.get_counter() - counter_post_pause, 2.0 * params.exec_rate, 30)
+    << "The executions should be resumed now and the counter should be updated for 2 seconds!";
+
+  async_class.get_handler().stop_thread();
+
+  // now the async update should be preempted
+  ASSERT_FALSE(async_class.get_handler().is_running());
+  ASSERT_TRUE(async_class.get_handler().is_stopped());
 }
