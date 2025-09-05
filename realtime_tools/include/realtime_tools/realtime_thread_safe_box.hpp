@@ -291,8 +291,8 @@ public:
    * @brief wait until the mutex could be locked and access the content (rw)
    * @note Overload to allow setting pointer types to nullptr directly.
    */
-  template <typename U = T>
-  typename std::enable_if_t<is_ptr_or_smart_ptr<U>, void> set(std::nullptr_t)
+  template <typename U = T, typename = std::enable_if_t<is_ptr_or_smart_ptr<U>>>
+  void set(std::nullptr_t)
   {
     std::lock_guard<mutex_t> guard(lock_);
     value_ = nullptr;
