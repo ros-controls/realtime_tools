@@ -187,22 +187,34 @@ struct Dummy
   int value{0};
 };
 
+class BoxClass
+{
+public:
+  RealtimeThreadSafeBox<std::shared_ptr<Dummy>> box_;
+  std::shared_ptr<Dummy> dummy_;
+
+  BoxClass() : dummy_(std::make_shared<Dummy>()) {}
+
+  void assign()
+  {
+    // This lambda captures `this`
+    // GCC/Clang: OK
+    // MSVC: compile error without F& fix
+    box_.set([this](std::shared_ptr<Dummy> & handle) {
+      handle = dummy_;
+      if (handle) {
+        handle->value = 42;
+      }
+    });
+  }
+};
+
 TEST(RealtimeThreadSafeBox, smart_ptr_type_lambda)
 {
-  RealtimeThreadSafeBox<std::shared_ptr<Dummy>> box;
+  BoxClass cl;
+  cl.assign();
 
-  auto dummy = std::make_shared<Dummy>();
-
-  // This lambda takes T& = std::shared_ptr<Dummy>&
-  // On GCC/Clang it compiles fine, but on MSVC the current implementation fails.
-  box.set([&](std::shared_ptr<Dummy> & handle) {
-    handle = dummy;
-    if (handle) {
-      handle->value = 42;
-    }
-  });
-
-  box.get([](const auto & i) { EXPECT_EQ(i->value, 42); });
+  cl.box_.get([](const auto & i) { EXPECT_EQ(i->value, 42); });
 }
 
 // These are the tests from the old RealtimeThreadSafeBox implementation
