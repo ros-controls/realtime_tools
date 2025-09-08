@@ -209,7 +209,7 @@ public:
    */
   template <
     typename F,
-    typename = std::enable_if_t<std::is_invocable_v<F, T &> && !std::is_invocable_v<F, T>>>
+    typename = std::enable_if_t<std::is_invocable_v<F &, T &> && !std::is_invocable_v<F &, T>>>
   void set(F && func)
   {
     std::lock_guard<mutex_t> guard(lock_);
