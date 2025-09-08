@@ -182,6 +182,29 @@ TEST(RealtimeThreadSafeBox, smart_ptr_type)
   box2.set(nullptr);
 }
 
+struct Dummy
+{
+  int value{0};
+};
+
+TEST(RealtimeThreadSafeBox, smart_ptr_type_lambda)
+{
+  RealtimeThreadSafeBox<std::shared_ptr<Dummy>> box;
+
+  auto dummy = std::make_shared<Dummy>();
+
+  // This lambda takes T& = std::shared_ptr<Dummy>&
+  // On GCC/Clang it compiles fine, but on MSVC the current implementation fails.
+  box.set([&](std::shared_ptr<Dummy> & handle) {
+    handle = dummy;
+    if (handle) {
+      handle->value = 42;
+    }
+  });
+
+  box.get([](const auto & i) { EXPECT_EQ(i->value, 42); });
+}
+
 // These are the tests from the old RealtimeThreadSafeBox implementation
 // They are therefore suffixed with _existing
 
