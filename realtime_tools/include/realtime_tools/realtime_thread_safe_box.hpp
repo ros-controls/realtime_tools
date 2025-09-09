@@ -208,12 +208,15 @@ public:
    * @note Only accepts callables that take T& as argument (not by value).
    */
   template <typename F>
-  void set(
-    F && func, std::enable_if_t<std::is_invocable_v<F, T &> && !std::is_invocable_v<F, T>, int> = 0)
+  auto set(F && func) -> decltype(std::declval<F &>()(std::declval<T &>()), void())
   {
     std::lock_guard<mutex_t> guard(lock_);
     std::forward<F>(func)(value_);
   }
+
+  // If a callable would be invocable as void(T) (by value), make that a hard error:
+  template <typename F>
+  auto set(F &&) -> decltype(std::declval<F &>()(std::declval<T>()), void()) = delete;
 
   /**
    * @brief wait until the mutex could be locked and access the content (rw)
