@@ -2,6 +2,15 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix RealtimeThreadSafeBox for MSVC (backport `#400 <https://github.com/ros-controls/realtime_tools/issues/400>`_) (`#401 <https://github.com/ros-controls/realtime_tools/issues/401>`_)
+* Fix the failing ament_cppcheck in realtime_thread_safe_box (backport `#391 <https://github.com/ros-controls/realtime_tools/issues/391>`_) (`#396 <https://github.com/ros-controls/realtime_tools/issues/396>`_)
+* Fix macOS compatibility issues in realtime_tools package (backport `#370 <https://github.com/ros-controls/realtime_tools/issues/370>`_) (`#381 <https://github.com/ros-controls/realtime_tools/issues/381>`_)
+* Fix the realtime publisher doc (backport `#376 <https://github.com/ros-controls/realtime_tools/issues/376>`_) (`#377 <https://github.com/ros-controls/realtime_tools/issues/377>`_)
+* Only accept callable with T& (backport `#372 <https://github.com/ros-controls/realtime_tools/issues/372>`_) (`#373 <https://github.com/ros-controls/realtime_tools/issues/373>`_)
+* Contributors: mergify[bot]
+
 3.7.0 (2025-06-13)
 ------------------
 * Silence some warnings (backport `#355 <https://github.com/ros-controls/realtime_tools/issues/355>`_) (`#357 <https://github.com/ros-controls/realtime_tools/issues/357>`_)
