@@ -205,6 +205,7 @@ public:
     // cppcheck-suppress missingReturn
     value_ = value;
   }
+
   /**
    * @brief wait until the mutex could be locked and access the content (rw)
    * @note Only accepts callables that take T& as argument (not by value).
@@ -217,6 +218,7 @@ public:
     std::lock_guard<mutex_t> guard(lock_);
     std::forward<F>(func)(value_);
   }
+
   /**
    * @brief wait until the mutex could be locked and access the content (rw)
    * @note Overload to allow setting pointer types to nullptr directly.
