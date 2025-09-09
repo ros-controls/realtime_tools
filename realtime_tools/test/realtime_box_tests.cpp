@@ -171,6 +171,9 @@ TEST(RealtimeThreadSafeBox, smart_ptr_type)
 
   box.set([](auto & i) { *i = 200; });
 
+  // this must not be working because the lambda captures by value
+  // box.set([](auto i) { *i = 200; });
+
   box.get([](const auto & i) { EXPECT_EQ(*i, 200); });
 
   box.try_set([](const auto & p) { *p = 10; });
