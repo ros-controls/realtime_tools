@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.5.0 (2025-09-09)
+------------------
 * Fix RealtimeThreadSafeBox for MSVC (`#400 <https://github.com/ros-controls/realtime_tools/issues/400>`_)
 * Fix the failing ament_cppcheck in realtime_thread_safe_box (`#391 <https://github.com/ros-controls/realtime_tools/issues/391>`_)
 * Fix macOS compatibility issues in realtime_tools package (`#370 <https://github.com/ros-controls/realtime_tools/issues/370>`_)
