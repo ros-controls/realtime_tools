@@ -259,6 +259,9 @@ public:
     value_ = value;
   }
 
+#ifndef _WIN32
+  // TODO(anyone): Fix MSVC issues with SFINAE and enable the code below
+
   /**
    * @brief Wait until the mutex can be locked and set the content (RealtimeThreadSafeBox behavior)
    * @note same signature as in the existing RealtimeThreadSafeBox<T>
@@ -297,6 +300,24 @@ public:
     std::lock_guard<mutex_t> guard(lock_);
     value_ = nullptr;
   }
+
+#else
+  /**
+   * @brief wait until the mutex could be locked and access the content (rw)
+   * @note MSVC does not work with the code above.
+   */
+  void set(const std::function<void(T &)> & func)
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    if (!func) {
+      if constexpr (is_ptr_or_smart_ptr<T>) {
+        value_ = nullptr;
+        return;
+      }
+    }
+    func(value_);
+  }
+#endif
 
   /**
    * @brief Wait until the mutex could be locked and get the content (RealtimeThreadSafeBox behaviour)
