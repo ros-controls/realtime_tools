@@ -1,0 +1,48 @@
+name: Rolling Semi-Binary Build
+# author: Denis Štogl <denis@stoglrobotics.de>
+# description: 'Build & test all dependencies from released (binary) packages.'
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  schedule:
+    # Run every morning to detect flakiness and broken dependencies
+    - cron: '03 1 * * MON-FRI'
+
+concurrency:
+  # cancel previous runs of the same workflow, except for pushes on given branches
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
+
+jobs:
+  binary:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [kilted, rolling]
+    with:
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      ros_repo: testing
+      ref_for_scheduled_build: master
+      upstream_workspace: realtime_tools.${{ matrix.ROS_DISTRO }}.repos
+  binary_clang:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [kilted, rolling]
+    with:
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      ros_repo: testing
+      ref_for_scheduled_build: master
+      upstream_workspace: realtime_tools.${{ matrix.ROS_DISTRO }}.repos
+      additional_debs: clang
+      c_compiler: clang
+      cxx_compiler: clang++
+      not_test_build: true
