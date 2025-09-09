@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   binary-windows:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@msvc/build/test
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@master
     with:
       ros_distro: rolling
       pixi_dependencies: boost compilers
