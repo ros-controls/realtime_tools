@@ -190,9 +190,6 @@ public:
     return true;
   }
 
-#ifndef _WIN32
-  // TODO(anyone): Fix MSVC issues with SFINAE and enable the code below
-
   /**
    * @brief Wait until the mutex can be locked and set the content (RealtimeThreadSafeBox behavior)
    * @note disabled for pointer types
@@ -205,6 +202,9 @@ public:
     // cppcheck-suppress missingReturn
     value_ = value;
   }
+
+#ifndef _WIN32
+  // TODO(anyone): Fix MSVC issues with SFINAE and enable the code below
 
   /**
    * @brief wait until the mutex could be locked and access the content (rw)
