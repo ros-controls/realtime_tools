@@ -16,6 +16,7 @@
 #include <memory>
 
 #include "gmock/gmock.h"
+#include "rclcpp/node.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "test_async_function_handler.hpp"
 
@@ -432,12 +433,16 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduli
 {
   realtime_tools::TestAsyncFunctionHandler async_class;
 
-  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
+  rclcpp::NodeOptions node_options;
+  node_options.arguments(
+    {"--ros-args", "-p", "scheduling_policy:=detached", "-p", "wait_until_initial_trigger:=false",
+     "-p", "execution_rate:=500", "-p", "thread_priority:=60", "-p", "cpu_affinity:=[0]"});
+  node_options.allow_undeclared_parameters(true);
+  node_options.automatically_declare_parameters_from_overrides(true);
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("test_node", node_options);
   realtime_tools::AsyncFunctionHandlerParams params;
-  params.scheduling_policy = realtime_tools::AsyncSchedulingPolicy::DETACHED;
-  params.clock = clock;
-  params.exec_rate = 500u;  // 500 Hz
-  params.wait_until_initial_trigger = false;
+  params.clock = node->get_clock();
+  params.initialize(node);
   async_class.initialize(params);
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_FALSE(async_class.get_handler().is_running());

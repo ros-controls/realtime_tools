@@ -94,7 +94,7 @@ private:
 
 struct AsyncFunctionHandlerParams
 {
-  bool validate()
+  bool validate() const
   {
     if (thread_priority < 0 || thread_priority > 99) {
       RCLCPP_ERROR(
@@ -120,7 +120,44 @@ struct AsyncFunctionHandlerParams
       RCLCPP_ERROR(logger, "The parsed trigger predicate is not valid!");
       return false;
     }
+    for (const int & core : cpu_affinity_cores) {
+      if (core < 0) {
+        RCLCPP_ERROR(logger, "Invalid CPU core id: %d. It should be a non-negative integer.", core);
+        return false;
+      }
+    }
     return true;
+  }
+
+  template <typename NodeT>
+  void initialize(NodeT & node)
+  {
+    if (node->has_parameter("thread_priority")) {
+      thread_priority = static_cast<int>(node->get_parameter("thread_priority").as_int());
+    }
+    if (node->has_parameter("cpu_affinity")) {
+      const auto cpu_affinity_param = node->get_parameter("cpu_affinity").as_integer_array();
+      for (const auto & core : cpu_affinity_param) {
+        cpu_affinity_cores.push_back(static_cast<int>(core));
+      }
+    }
+    if (node->has_parameter("scheduling_policy")) {
+      scheduling_policy =
+        AsyncSchedulingPolicy(node->get_parameter("scheduling_policy").as_string());
+    }
+    if (
+      scheduling_policy == AsyncSchedulingPolicy::DETACHED &&
+      node->has_parameter("execution_rate")) {
+      const int execution_rate = static_cast<int>(node->get_parameter("execution_rate").as_int());
+      if (execution_rate <= 0) {
+        throw std::runtime_error(
+          "AsyncFunctionHandler: execution_rate parameter must be positive.");
+      }
+      exec_rate = static_cast<unsigned int>(execution_rate);
+    }
+    if (node->has_parameter("wait_until_initial_trigger")) {
+      wait_until_initial_trigger = node->get_parameter("wait_until_initial_trigger").as_bool();
+    }
   }
 
   /// @brief The AsyncFunctionHandlerParams struct is used to configure the AsyncFunctionHandler.
@@ -210,6 +247,7 @@ public:
     std::function<T(const rclcpp::Time &, const rclcpp::Duration &)> callback,
     const AsyncFunctionHandlerParams & params)
   {
+    params.validate();
     init(callback, params.trigger_predicate, params.thread_priority);
     params_ = params;
     pause_thread_ = params.wait_until_initial_trigger;
