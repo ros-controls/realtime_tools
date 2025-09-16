@@ -45,7 +45,7 @@ Changelog for package realtime_tools
 * Adapt API style of lock_memory to match the one of the other functions (backport `#209 <https://github.com/ros-controls/realtime_tools/issues/209>`_) (`#229 <https://github.com/ros-controls/realtime_tools/issues/229>`_)
 * [Humble] Move the header files to `.hpp` extension (`#206 <https://github.com/ros-controls/realtime_tools/issues/206>`_) - No deprecation notice (`#225 <https://github.com/ros-controls/realtime_tools/issues/225>`_)
 * Add support to parse multiple cores for setting CPU affinity (backport `#208 <https://github.com/ros-controls/realtime_tools/issues/208>`_) (`#223 <https://github.com/ros-controls/realtime_tools/issues/223>`_)
-* remove unused state\_ field (backport `#215 <https://github.com/ros-controls/realtime_tools/issues/215>`_) (`#218 <https://github.com/ros-controls/realtime_tools/issues/218>`_)
+* remove unused ``state_`` field (backport `#215 <https://github.com/ros-controls/realtime_tools/issues/215>`_) (`#218 <https://github.com/ros-controls/realtime_tools/issues/218>`_)
 * Changes after branching humble (backport `#217 <https://github.com/ros-controls/realtime_tools/issues/217>`_) (`#224 <https://github.com/ros-controls/realtime_tools/issues/224>`_)
 * Add downstream build CI job (backport `#201 <https://github.com/ros-controls/realtime_tools/issues/201>`_) (`#222 <https://github.com/ros-controls/realtime_tools/issues/222>`_)
 * Use windows CI build (backport `#204 <https://github.com/ros-controls/realtime_tools/issues/204>`_) (`#221 <https://github.com/ros-controls/realtime_tools/issues/221>`_)
@@ -254,7 +254,7 @@ Changelog for package realtime_tools
 * Merge remote-tracking branch 'origin/master' into hydro-devel
 * Merge pull request `#2 <https://github.com/ros-controls/realtime_tools/issues/2>`_ from davetcoleman/master
   Made member vars mutable in realtime buffer to allow const read
-* initialize realtime_data_ and non_realtime_data_ before dereferencing and assigning to them in copy constructor
+* initialize ``realtime_data_`` and ``non_realtime_data_`` before dereferencing and assigning to them in copy constructor
 * Added comments
 * Added readFromNonRT() function, overloaded assignment and copy constructor, and made mutex mutable.
 * Fix typos.
