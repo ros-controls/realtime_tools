@@ -11,13 +11,6 @@ on:
 jobs:
   source:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        - ROS_DISTRO: humble
-          CONTAINER: ""
-          OS_NAME: ubuntu-22.04
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref: humble
