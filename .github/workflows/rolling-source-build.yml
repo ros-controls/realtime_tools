@@ -17,7 +17,7 @@ on:
       - '**.xml'
   pull_request:
     branches:
-      - rolling
+      - master
     paths:
       - .github/workflows/rolling-source-build.yml
   schedule:
