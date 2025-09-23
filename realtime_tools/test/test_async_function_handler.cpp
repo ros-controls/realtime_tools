@@ -442,7 +442,7 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduli
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("test_node", node_options);
   realtime_tools::AsyncFunctionHandlerParams params;
   params.clock = node->get_clock();
-  params.initialize(node);
+  params.initialize(node, "");
   async_class.initialize(params);
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_FALSE(async_class.get_handler().is_running());

@@ -178,38 +178,43 @@ struct AsyncFunctionHandlerParams
    *   before starting the async callback method. Default is true.
    * - print_warnings (bool): Whether to print warnings when the async callback method is not triggered
    *   due to any reason. Default is true.
+   * @param node The node that is used to get the parameters.
+   * @param prefix Parameter prefix to use when accessing node parameters.
    */
   template <typename NodeT>
-  void initialize(NodeT & node)
+  void initialize(NodeT & node, const std::string & prefix)
   {
-    if (node->has_parameter("thread_priority")) {
-      thread_priority = static_cast<int>(node->get_parameter("thread_priority").as_int());
+    if (node->has_parameter(prefix + "thread_priority")) {
+      thread_priority = static_cast<int>(node->get_parameter(prefix + "thread_priority").as_int());
     }
-    if (node->has_parameter("cpu_affinity")) {
-      const auto cpu_affinity_param = node->get_parameter("cpu_affinity").as_integer_array();
+    if (node->has_parameter(prefix + "cpu_affinity")) {
+      const auto cpu_affinity_param =
+        node->get_parameter(prefix + "cpu_affinity").as_integer_array();
       for (const auto & core : cpu_affinity_param) {
         cpu_affinity_cores.push_back(static_cast<int>(core));
       }
     }
-    if (node->has_parameter("scheduling_policy")) {
+    if (node->has_parameter(prefix + "scheduling_policy")) {
       scheduling_policy =
-        AsyncSchedulingPolicy(node->get_parameter("scheduling_policy").as_string());
+        AsyncSchedulingPolicy(node->get_parameter(prefix + "scheduling_policy").as_string());
     }
     if (
       scheduling_policy == AsyncSchedulingPolicy::DETACHED &&
-      node->has_parameter("execution_rate")) {
-      const int execution_rate = static_cast<int>(node->get_parameter("execution_rate").as_int());
+      node->has_parameter(prefix + "execution_rate")) {
+      const int execution_rate =
+        static_cast<int>(node->get_parameter(prefix + "execution_rate").as_int());
       if (execution_rate <= 0) {
         throw std::runtime_error(
           "AsyncFunctionHandler: execution_rate parameter must be positive.");
       }
       exec_rate = static_cast<unsigned int>(execution_rate);
     }
-    if (node->has_parameter("wait_until_initial_trigger")) {
-      wait_until_initial_trigger = node->get_parameter("wait_until_initial_trigger").as_bool();
+    if (node->has_parameter(prefix + "wait_until_initial_trigger")) {
+      wait_until_initial_trigger =
+        node->get_parameter(prefix + "wait_until_initial_trigger").as_bool();
     }
-    if (node->has_parameter("print_warnings")) {
-      print_warnings = node->get_parameter("print_warnings").as_bool();
+    if (node->has_parameter(prefix + "print_warnings")) {
+      print_warnings = node->get_parameter(prefix + "print_warnings").as_bool();
     }
   }
 
