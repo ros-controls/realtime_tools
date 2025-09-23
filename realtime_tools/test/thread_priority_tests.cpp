@@ -69,7 +69,7 @@ TEST(thread_priority, set_current_thread_affinity_invalid_too_many_cores)
   const int count = static_cast<int>(realtime_tools::get_number_of_available_processors());
   // We should always have at least one core
   EXPECT_FALSE(realtime_tools::set_current_thread_affinity(count + 10).first);
-  EXPECT_FALSE(realtime_tools::set_current_thread_affinity({count + 10}).first);
+  EXPECT_FALSE(realtime_tools::set_current_thread_affinity(std::vector<int>({count + 10})).first);
   EXPECT_FALSE(realtime_tools::set_current_thread_affinity({0, count + 10}).first);
   EXPECT_FALSE(realtime_tools::set_current_thread_affinity({0, -1}).first);
   EXPECT_FALSE(realtime_tools::set_current_thread_affinity(std::vector<int>({-1})).first);
