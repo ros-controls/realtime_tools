@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.8.1 (2025-09-25)
+------------------
 * Fix -Wbraced-scalar-init (backport `#409 <https://github.com/ros-controls/realtime_tools/issues/409>`_) (`#410 <https://github.com/ros-controls/realtime_tools/issues/410>`_)
 * Contributors: mergify[bot]
 
