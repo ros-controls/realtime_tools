@@ -2,6 +2,13 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add AsyncFunctionHandlerParams initialization through ROS parameters (`#402 <https://github.com/ros-controls/realtime_tools/issues/402>`_)
+* Fix -Wbraced-scalar-init (`#409 <https://github.com/ros-controls/realtime_tools/issues/409>`_)
+* Add DETACHED scheduling policy for Async function handler (`#383 <https://github.com/ros-controls/realtime_tools/issues/383>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota
+
 4.5.0 (2025-09-09)
 ------------------
 * Fix RealtimeThreadSafeBox for MSVC (`#400 <https://github.com/ros-controls/realtime_tools/issues/400>`_)
