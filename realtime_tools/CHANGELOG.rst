@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.6.0 (2025-09-25)
+------------------
 * Add AsyncFunctionHandlerParams initialization through ROS parameters (`#402 <https://github.com/ros-controls/realtime_tools/issues/402>`_)
 * Fix -Wbraced-scalar-init (`#409 <https://github.com/ros-controls/realtime_tools/issues/409>`_)
 * Add DETACHED scheduling policy for Async function handler (`#383 <https://github.com/ros-controls/realtime_tools/issues/383>`_)
