@@ -2,6 +2,11 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix -Wbraced-scalar-init (backport `#409 <https://github.com/ros-controls/realtime_tools/issues/409>`_) (`#410 <https://github.com/ros-controls/realtime_tools/issues/410>`_)
+* Contributors: mergify[bot]
+
 3.8.0 (2025-09-09)
 ------------------
 * Fix RealtimeThreadSafeBox for MSVC (backport `#400 <https://github.com/ros-controls/realtime_tools/issues/400>`_) (`#401 <https://github.com/ros-controls/realtime_tools/issues/401>`_)
