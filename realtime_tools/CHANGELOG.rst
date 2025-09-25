@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.9.0 (2025-09-25)
+------------------
 * Add AsyncFunctionHandlerParams initialization through ROS parameters (backport `#402 <https://github.com/ros-controls/realtime_tools/issues/402>`_) (`#413 <https://github.com/ros-controls/realtime_tools/issues/413>`_)
 * Add DETACHED scheduling policy for Async function handler (backport `#383 <https://github.com/ros-controls/realtime_tools/issues/383>`_) (`#412 <https://github.com/ros-controls/realtime_tools/issues/412>`_)
 * Contributors: mergify[bot]
