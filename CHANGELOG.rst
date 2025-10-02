@@ -2,6 +2,22 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Bump version of pre-commit hooks (backport `#414 <https://github.com/ros-controls/realtime_tools/issues/414>`_) (`#415 <https://github.com/ros-controls/realtime_tools/issues/415>`_)
+* Fix source builds (backport `#406 <https://github.com/ros-controls/realtime_tools/issues/406>`_) (`#407 <https://github.com/ros-controls/realtime_tools/issues/407>`_)
+* Fix rst syntax in changelog (backport `#403 <https://github.com/ros-controls/realtime_tools/issues/403>`_) (`#404 <https://github.com/ros-controls/realtime_tools/issues/404>`_)
+* Bump actions/stale from 9 to 10 (backport `#397 <https://github.com/ros-controls/realtime_tools/issues/397>`_) (`#398 <https://github.com/ros-controls/realtime_tools/issues/398>`_)
+* Add prerelease jobs (backport `#390 <https://github.com/ros-controls/realtime_tools/issues/390>`_) (`#392 <https://github.com/ros-controls/realtime_tools/issues/392>`_)
+* Bump version of pre-commit hooks (backport `#387 <https://github.com/ros-controls/realtime_tools/issues/387>`_) (`#388 <https://github.com/ros-controls/realtime_tools/issues/388>`_)
+* Fix `github.ref` check for concurrency settings (backport `#384 <https://github.com/ros-controls/realtime_tools/issues/384>`_) (`#385 <https://github.com/ros-controls/realtime_tools/issues/385>`_)
+* Bump version of pre-commit hooks (backport `#378 <https://github.com/ros-controls/realtime_tools/issues/378>`_) (`#379 <https://github.com/ros-controls/realtime_tools/issues/379>`_)
+* Add CI job for docs (backport `#367 <https://github.com/ros-controls/realtime_tools/issues/367>`_) (`#368 <https://github.com/ros-controls/realtime_tools/issues/368>`_)
+* Run workflow on pushes to save cache (backport `#364 <https://github.com/ros-controls/realtime_tools/issues/364>`_) (`#365 <https://github.com/ros-controls/realtime_tools/issues/365>`_)
+* Bump version of pre-commit hooks (backport `#361 <https://github.com/ros-controls/realtime_tools/issues/361>`_) (`#362 <https://github.com/ros-controls/realtime_tools/issues/362>`_)
+* Use new windows workflow (backport `#358 <https://github.com/ros-controls/realtime_tools/issues/358>`_) (`#359 <https://github.com/ros-controls/realtime_tools/issues/359>`_)
+* Contributors: mergify[bot]
+
 2.14.0 (2025-06-13)
 -------------------
 * Fix the deadlock in the destructor of RealtimePublisher (backport `#320 <https://github.com/ros-controls/realtime_tools/issues/320>`_) (`#324 <https://github.com/ros-controls/realtime_tools/issues/324>`_)
