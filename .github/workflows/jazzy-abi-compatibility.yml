@@ -12,6 +12,6 @@ concurrency:
 
 jobs:
   abi_check:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@ci/fix/conflicts
     with:
       ros_distro: jazzy

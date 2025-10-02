@@ -17,4 +17,4 @@ concurrency:
 
 jobs:
   check:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-rosdoc2.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-rosdoc2.yml@ci/fix/conflicts

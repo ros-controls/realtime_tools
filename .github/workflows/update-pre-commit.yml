@@ -9,4 +9,4 @@ on:
 
 jobs:
   auto_update_and_create_pr:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-update-pre-commit.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-update-pre-commit.yml@ci/fix/conflicts

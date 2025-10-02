@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   binary:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@ci/fix/conflicts
     strategy:
       fail-fast: false
       matrix:
@@ -31,7 +31,7 @@ jobs:
       ros_repo: ${{ matrix.ROS_REPO }}
       ref_for_scheduled_build: humble
   binary_clang:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@ci/fix/conflicts
     with:
       ros_distro: humble
       ros_repo: testing

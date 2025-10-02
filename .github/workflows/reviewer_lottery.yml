@@ -7,4 +7,4 @@ on:
 
 jobs:
   assign_reviewers:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-reviewer-lottery.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-reviewer-lottery.yml@ci/fix/conflicts
