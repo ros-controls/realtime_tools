@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.14.1 (2025-10-02)
+-------------------
 * Bump version of pre-commit hooks (backport `#414 <https://github.com/ros-controls/realtime_tools/issues/414>`_) (`#415 <https://github.com/ros-controls/realtime_tools/issues/415>`_)
 * Fix source builds (backport `#406 <https://github.com/ros-controls/realtime_tools/issues/406>`_) (`#407 <https://github.com/ros-controls/realtime_tools/issues/407>`_)
 * Fix rst syntax in changelog (backport `#403 <https://github.com/ros-controls/realtime_tools/issues/403>`_) (`#404 <https://github.com/ros-controls/realtime_tools/issues/404>`_)
