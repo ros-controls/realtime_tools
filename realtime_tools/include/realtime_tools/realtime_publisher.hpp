@@ -63,10 +63,6 @@ public:
 
   RCLCPP_SMART_PTR_DEFINITIONS(RealtimePublisher<MessageT>)
 
-  [[deprecated(
-    "This variable is deprecated, it is recommended to use the try_publish() method instead.")]]
-  MessageT msg_;
-
   /**
    * \brief Constructor for the realtime publisher
    *
@@ -277,6 +273,8 @@ private:
   std::atomic<bool> keep_running_;
 
   std::thread thread_;
+
+  MessageT msg_;
 
   mutable std::mutex msg_mutex_;  // Protects msg_
   std::condition_variable updated_cond_;
