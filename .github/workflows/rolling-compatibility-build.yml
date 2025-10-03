@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, jazzy, kilted]
+        ROS_DISTRO: [humble, kilted, kilted]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: testing
