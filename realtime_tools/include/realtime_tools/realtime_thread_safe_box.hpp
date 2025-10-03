@@ -203,8 +203,37 @@ public:
     value_ = value;
   }
 
+#ifndef _WIN32
+  // TODO(anyone): Fix MSVC issues with SFINAE and enable the code below
+
   /**
    * @brief wait until the mutex could be locked and access the content (rw)
+   * @note Only accepts callables that take T& as argument (not by value).
+   */
+  template <
+    typename F,
+    typename = std::enable_if_t<std::is_invocable_v<F, T &> && !std::is_invocable_v<F, T>>>
+  void set(F && func)
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    std::forward<F>(func)(value_);
+  }
+
+  /**
+   * @brief wait until the mutex could be locked and access the content (rw)
+   * @note Overload to allow setting pointer types to nullptr directly.
+   */
+  template <typename U = T, typename = std::enable_if_t<is_ptr_or_smart_ptr<U>>>
+  void set(std::nullptr_t)
+  {
+    std::lock_guard<mutex_t> guard(lock_);
+    value_ = nullptr;
+  }
+
+#else
+  /**
+   * @brief wait until the mutex could be locked and access the content (rw)
+   * @note MSVC does not work with the code above.
    */
   void set(const std::function<void(T &)> & func)
   {
@@ -217,6 +246,7 @@ public:
     }
     func(value_);
   }
+#endif
 
   /**
    * @brief Wait until the mutex could be locked and get the content (RealtimeThreadSafeBox behaviour)
