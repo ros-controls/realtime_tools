@@ -7,9 +7,31 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-compatibility-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'realtime_tools.rolling.repos'
+      - '**.xml'
   push:
     branches:
       - master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-compatibility-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'realtime_tools.rolling.repos'
+      - '**.xml'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches

@@ -4,9 +4,33 @@ on:
   push:
     branches:
       - jazzy
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-source-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'ros2_controllers.rolling.repos'
+      - 'ros2_controllers.kilted.repos'
+      - '**.xml'
   pull_request:
     branches:
       - jazzy
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-source-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'ros2_controllers.rolling.repos'
+      - 'ros2_controllers.kilted.repos'
+      - '**.xml'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches

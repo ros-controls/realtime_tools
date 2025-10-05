@@ -7,9 +7,29 @@ on:
   pull_request:
     branches:
       - kilted
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/kilted-binary-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
   push:
     branches:
       - kilted
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/kilted-binary-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
   schedule:
     # Run every morning to detect flakiness and broken dependencies
     - cron: '03 1 * * MON-FRI'

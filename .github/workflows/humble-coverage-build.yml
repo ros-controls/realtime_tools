@@ -4,9 +4,29 @@ on:
   push:
     branches:
       - humble
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/humble-coverage-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
   pull_request:
     branches:
       - humble
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/humble-coverage-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches

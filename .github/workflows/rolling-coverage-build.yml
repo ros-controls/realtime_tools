@@ -4,9 +4,29 @@ on:
   push:
     branches:
       - master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-coverage-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
   pull_request:
     branches:
       - master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-coverage-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches
