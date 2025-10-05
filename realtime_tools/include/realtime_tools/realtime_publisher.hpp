@@ -264,6 +264,12 @@ public:
   std::thread & get_thread() { return thread_; }
 
   const std::thread & get_thread() const { return thread_; }
+
+  [[deprecated(
+    "This getter method will be removed. It is recommended to use the try_publish() instead of "
+    "accessing the msg_ variable.")]]
+  const MessageT & get_msg() const
+  {
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4996)
@@ -271,12 +277,13 @@ public:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
-  const MessageT & get_msg() const { return msg_; }
+    return msg_;
 #ifdef _MSC_VER
 #pragma warning(pop)
 #else
 #pragma GCC diagnostic pop
 #endif
+  }
 
   std::mutex & get_mutex() { return msg_mutex_; }
 
