@@ -444,6 +444,14 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduli
   params.clock = node->get_clock();
   params.initialize(node, "");
   async_class.initialize(params);
+  ASSERT_EQ(
+    async_class.get_handler().get_params().scheduling_policy,
+    realtime_tools::AsyncSchedulingPolicy::DETACHED);
+  ASSERT_FALSE(async_class.get_handler().get_params().wait_until_initial_trigger);
+  ASSERT_EQ(async_class.get_handler().get_params().exec_rate, 500);
+  ASSERT_EQ(async_class.get_handler().get_params().thread_priority, 60);
+  ASSERT_EQ(async_class.get_handler().get_params().cpu_affinity_cores.size(), 1u);
+  ASSERT_EQ(async_class.get_handler().get_params().cpu_affinity_cores[0], 0);
   ASSERT_TRUE(async_class.get_handler().is_initialized());
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_FALSE(async_class.get_handler().is_stopped());

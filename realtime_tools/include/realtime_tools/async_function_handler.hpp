@@ -495,6 +495,12 @@ public:
    */
   const std::thread & get_thread() const { return thread_; }
 
+  /// Get the parameters used to configure the AsyncFunctionHandler
+  /**
+   * @return The parameters used to configure the AsyncFunctionHandler
+   */
+  const AsyncFunctionHandlerParams & get_params() const { return params_; }
+
   /// Check if the async callback method is in progress
   /**
    * @return True if the async callback method is in progress, false otherwise

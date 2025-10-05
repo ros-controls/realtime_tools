@@ -63,6 +63,8 @@ public:
 
   RCLCPP_SMART_PTR_DEFINITIONS(RealtimePublisher<MessageT>)
 
+  [[deprecated(
+    "This variable is deprecated, it is recommended to use the try_publish() method instead.")]]
   MessageT msg_;
 
   /**
@@ -74,6 +76,13 @@ public:
    *
    * \param publisher the ROS publisher to wrap
    */
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
   explicit RealtimePublisher(PublisherSharedPtr publisher)
   : publisher_(publisher), is_running_(false), keep_running_(true), turn_(State::LOOP_NOT_STARTED)
   {
@@ -102,6 +111,11 @@ public:
       thread_.join();
     }
   }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
+#endif
 
   /**
    * \brief Stop the realtime publisher
@@ -138,7 +152,6 @@ public:
   /**
    * \brief Check if the realtime publisher is in a state to publish messages
    * \return true if the publisher is in a state to publish messages
-   * \note The msg_ variable can be safely accessed if this function returns true
   */
   bool can_publish() const
   {
@@ -161,7 +174,19 @@ public:
     if (can_publish(lock)) {
       {
         std::unique_lock<std::mutex> scoped_lock(std::move(lock));
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
         msg_ = msg;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
+#endif
         turn_.store(State::NON_REALTIME, std::memory_order_release);
       }
       updated_cond_.notify_one();  // Notify the publishing thread
@@ -235,14 +260,48 @@ public:
     updated_cond_.notify_one();
   }
 
+  /**
+   * \brief Get the thread object for the publishing thread.
+   *
+   * This can be used to set thread properties.
+   */
   std::thread & get_thread() { return thread_; }
 
+  /**
+   * \brief Get the thread object for the publishing thread.
+   *
+   * This can be used to set thread properties.
+   */
   const std::thread & get_thread() const { return thread_; }
 
-  const MessageT & get_msg() const { return msg_; }
+  [[deprecated(
+    "This getter method will be removed. It is recommended to use the try_publish() instead of "
+    "accessing the msg_ variable.")]]
+  const MessageT & get_msg() const
+  {
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+    return msg_;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
+#endif
+  }
 
+  /**
+   * \brief Get the mutex protecting the stored message.
+   */
   std::mutex & get_mutex() { return msg_mutex_; }
 
+  /**
+   * \brief Get the mutex protecting the stored message.
+   */
   const std::mutex & get_mutex() const { return msg_mutex_; }
 
 private:
@@ -250,7 +309,6 @@ private:
    * \brief Check if the realtime publisher is in a state to publish messages
    * \param lock A unique_lock that is already acquired on the msg_mutex_
    * \return true if the publisher is in a state to publish messages
-   * \note The msg_ variable can be safely accessed if this function returns true
   */
   bool can_publish(std::unique_lock<std::mutex> & lock) const
   {
@@ -286,7 +344,19 @@ private:
         // Locks msg_ and copies it to outgoing
         std::unique_lock<std::mutex> lock_(msg_mutex_);
         updated_cond_.wait(lock_, [&] { return turn_ == State::NON_REALTIME || !keep_running_; });
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
         outgoing = msg_;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
+#endif
       }
 
       // Sends the outgoing message
