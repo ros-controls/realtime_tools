@@ -1,9 +1,12 @@
-name: Rolling ABI Compatibility Check
+name: Kilted Coverage Build
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - kilted
   pull_request:
     branches:
-      - master
+      - kilted
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches
@@ -11,11 +14,9 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  abi_check:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@master
-    strategy:
-      fail-fast: false
-      matrix:
-        ROS_DISTRO: [rolling]
+  coverage:
+    name: coverage build
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
+    secrets: inherit
     with:
-      ros_distro: ${{ matrix.ROS_DISTRO }}
+      ros_distro: kilted
