@@ -7,9 +7,17 @@ on:
   pull_request:
     branches:
       - jazzy
-  push:
-    branches:
-      - jazzy
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/jazzy-binary-downstream-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'ros_controls.jazzy.repos'
+      - '**.xml'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches
