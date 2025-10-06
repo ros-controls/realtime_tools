@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.10.0 (2025-10-06)
+-------------------
 * Add get_params method to the AsyncFunctionHandler (backport `#419 <https://github.com/ros-controls/realtime_tools/issues/419>`_) (`#420 <https://github.com/ros-controls/realtime_tools/issues/420>`_)
 * Contributors: mergify[bot]
 
