@@ -179,6 +179,11 @@ public:
     return false;
   }
 
+  /**
+   * \brief Get the thread object for the publishing thread.
+   *
+   * This can be used to set thread properties.
+   */
   std::thread & get_thread() { return thread_; }
 
   /**
