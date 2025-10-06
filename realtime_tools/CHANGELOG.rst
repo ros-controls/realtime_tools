@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.7.0 (2025-10-06)
+------------------
 * Update docstrings of RT publisher (`#424 <https://github.com/ros-controls/realtime_tools/issues/424>`_)
 * Deprecate `get_msg` method of RT publisher (`#422 <https://github.com/ros-controls/realtime_tools/issues/422>`_)
 * Deprecate `msg\_` field (`#421 <https://github.com/ros-controls/realtime_tools/issues/421>`_)
