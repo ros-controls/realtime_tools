@@ -4,6 +4,17 @@ on:
   pull_request:
     branches:
       - humble
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/humble-rhel-semi-binary-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
+      - 'realtime_tools.humble.repos'
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * MON-FRI'
@@ -19,3 +30,4 @@ jobs:
     with:
       ros_distro: humble
       ref_for_scheduled_build: humble
+      upstream_workspace: realtime_tools.humble.repos

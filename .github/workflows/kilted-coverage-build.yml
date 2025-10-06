@@ -1,12 +1,20 @@
 name: Kilted Coverage Build
 on:
   workflow_dispatch:
-  push:
+  pull_request: &event
     branches:
       - kilted
-  pull_request:
-    branches:
-      - kilted
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/kilted-coverage-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
+  push: *event
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches
