@@ -2,6 +2,14 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.7.0 (2025-10-06)
+------------------
+* Update docstrings of RT publisher (`#424 <https://github.com/ros-controls/realtime_tools/issues/424>`_)
+* Deprecate `get_msg` method of RT publisher (`#422 <https://github.com/ros-controls/realtime_tools/issues/422>`_)
+* Deprecate `msg\_` field (`#421 <https://github.com/ros-controls/realtime_tools/issues/421>`_)
+* Add get_params method to the AsyncFunctionHandler (`#419 <https://github.com/ros-controls/realtime_tools/issues/419>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota
+
 4.6.0 (2025-09-25)
 ------------------
 * Add AsyncFunctionHandlerParams initialization through ROS parameters (`#402 <https://github.com/ros-controls/realtime_tools/issues/402>`_)

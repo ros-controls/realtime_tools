@@ -136,7 +136,6 @@ public:
   /**
    * \brief Check if the realtime publisher is in a state to publish messages
    * \return true if the publisher is in a state to publish messages
-   * \note The msg_ variable can be safely accessed if this function returns true
   */
   bool can_publish() const
   {
@@ -182,6 +181,11 @@ public:
 
   std::thread & get_thread() { return thread_; }
 
+  /**
+   * \brief Get the thread object for the publishing thread.
+   *
+   * This can be used to set thread properties.
+   */
   const std::thread & get_thread() const { return thread_; }
 
   [[deprecated(
@@ -204,8 +208,14 @@ public:
 #endif
   }
 
+  /**
+   * \brief Get the mutex protecting the stored message.
+   */
   std::mutex & get_mutex() { return msg_mutex_; }
 
+  /**
+   * \brief Get the mutex protecting the stored message.
+   */
   const std::mutex & get_mutex() const { return msg_mutex_; }
 
 private:
@@ -213,7 +223,6 @@ private:
    * \brief Check if the realtime publisher is in a state to publish messages
    * \param lock A unique_lock that is already acquired on the msg_mutex_
    * \return true if the publisher is in a state to publish messages
-   * \note The msg_ variable can be safely accessed if this function returns true
   */
   bool can_publish(std::unique_lock<std::mutex> & lock) const
   {

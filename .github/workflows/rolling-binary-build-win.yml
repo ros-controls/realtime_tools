@@ -4,12 +4,20 @@ name: Rolling Windows Binary Build
 
 on:
   workflow_dispatch:
-  pull_request:
+  pull_request: &event
     branches:
       - master
-  push:
-    branches:
-      - master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-binary-build-win.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
+  push: *event
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches

@@ -1,23 +1,23 @@
-name: Humble - RHEL Semi-Binary Build
+name: Kilted - Debian Semi-Binary Build
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - humble
+      - kilted
     paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/humble-rhel-semi-binary-build.yml'
+      - '.github/workflows/kilted-debian-build.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
+      - 'realtime_tools.kilted.repos'
       - '**.xml'
-      - 'realtime_tools.humble.repos'
   schedule:
     # Run every day to detect flakiness and broken dependencies
-    - cron: '03 3 * * MON-FRI'
+    - cron: '33 2 * * MON-FRI'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches
@@ -25,9 +25,9 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  rhel_semi_binary_build:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-rhel-binary-build.yml@master
+  debian_semi_binary_build:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-debian-build.yml@master
     with:
-      ros_distro: humble
-      ref_for_scheduled_build: humble
-      upstream_workspace: realtime_tools.humble.repos
+      ros_distro: kilted
+      upstream_workspace: realtime_tools.kilted.repos
+      ref_for_scheduled_build: kilted
