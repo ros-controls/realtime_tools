@@ -10,7 +10,7 @@ on:
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/humble-abi-compatibility-build.yml'
+      - '.github/workflows/humble-abi-compatibility.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
       - '**.xml'
