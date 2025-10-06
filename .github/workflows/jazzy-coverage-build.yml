@@ -1,12 +1,20 @@
 name: Jazzy Coverage Build
 on:
   workflow_dispatch:
-  push:
+  pull_request: &event
     branches:
       - jazzy
-  pull_request:
-    branches:
-      - jazzy
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/jazzy-coverage-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
+  push: *event
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches
