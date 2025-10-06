@@ -4,6 +4,17 @@ on:
   pull_request:
     branches:
       - jazzy
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/jazzy-debian-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'realtime_tools.jazzy.repos'
+      - '**.xml'
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '33 2 * * MON-FRI'

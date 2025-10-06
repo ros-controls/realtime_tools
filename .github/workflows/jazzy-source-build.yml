@@ -13,7 +13,6 @@ on:
       - '.github/workflows/jazzy-source-build.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
-      - 'realtime_tools.jazzy.repos'
       - '**.xml'
   pull_request:
     branches:
