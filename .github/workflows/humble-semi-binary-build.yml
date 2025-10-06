@@ -1,4 +1,4 @@
-name: Rolling Binary Build
+name: Humble Semi-Binary Build
 # author: Denis Štogl <denis@stoglrobotics.de>
 # description: 'Build & test all dependencies from released (binary) packages.'
 
@@ -6,16 +6,17 @@ on:
   workflow_dispatch:
   pull_request: &event
     branches:
-      - master
+      - humble
     paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/rolling-binary-build.yml'
+      - '.github/workflows/humble-semi-binary-build.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
+      - 'realtime_tools.humble.repos'
       - '**.xml'
   push: *event
   schedule:
@@ -30,12 +31,19 @@ concurrency:
 jobs:
   binary:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
-    strategy:
-      fail-fast: false
-      matrix:
-        ROS_DISTRO: [rolling]
-        ROS_REPO: [main, testing]
     with:
-      ros_distro: ${{ matrix.ROS_DISTRO }}
-      ros_repo: ${{ matrix.ROS_REPO }}
-      ref_for_scheduled_build: master
+      ros_distro: humble
+      ros_repo: testing
+      ref_for_scheduled_build: humble
+      upstream_workspace: realtime_tools.humble.repos
+  binary_clang:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+    with:
+      ros_distro: humble
+      ros_repo: testing
+      ref_for_scheduled_build: humble
+      upstream_workspace: realtime_tools.humble.repos
+      additional_debs: clang
+      c_compiler: clang
+      cxx_compiler: clang++
+      not_test_build: true
