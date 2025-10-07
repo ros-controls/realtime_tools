@@ -1,20 +1,19 @@
-name: Jazzy Coverage Build
+name: Kilted ABI Compatibility Check
 on:
   workflow_dispatch:
-  pull_request: &event
+  pull_request:
     branches:
-      - jazzy
+      - kilted
     paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/jazzy-coverage-build.yml'
+      - '.github/workflows/kilted-abi-compatibility.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
       - '**.xml'
-  push: *event
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches
@@ -22,9 +21,7 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  coverage:
-    name: coverage build
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
-    secrets: inherit
+  abi_check:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@master
     with:
-      ros_distro: jazzy
+      ros_distro: kilted

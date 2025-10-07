@@ -1,24 +1,24 @@
-name: Humble Source Build
+name: Kilted Source Build
 on:
   workflow_dispatch:
   push:
     branches:
-      - humble
+      - kilted
     paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/humble-source-build.yml'
+      - '.github/workflows/kilted-source-build.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
       - '**.xml'
   pull_request:
     branches:
-      - humble
+      - kilted
     paths:
-      - .github/workflows/humble-source-build.yml
+      - .github/workflows/kilted-source-build.yml
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * MON-FRI'
@@ -27,6 +27,6 @@ jobs:
   source:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
     with:
-      ros_distro: humble
-      ref: humble
-      container: ubuntu:22.04
+      ros_distro: kilted
+      ref: kilted
+      container: ubuntu:24.04

@@ -4,6 +4,17 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-rhel-semi-binary-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'realtime_tools.rolling.repos'
+      - '**.xml'
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * MON-FRI'
@@ -19,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [kilted, rolling]
+        ROS_DISTRO: [rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       upstream_workspace: realtime_tools.${{ matrix.ROS_DISTRO }}.repos
