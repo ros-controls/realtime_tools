@@ -2,6 +2,11 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.0.0 (2025-10-27)
+------------------
+* Cleanup deprecations (`#371 <https://github.com/ros-controls/realtime_tools/issues/371>`_)
+* Contributors: Christoph Fröhlich
+
 4.7.0 (2025-10-06)
 ------------------
 * Update docstrings of RT publisher (`#424 <https://github.com/ros-controls/realtime_tools/issues/424>`_)
