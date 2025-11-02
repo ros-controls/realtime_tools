@@ -37,9 +37,11 @@
 #include <mutex>
 #include <thread>
 
+#include "realtime_tools/mutex.hpp"
+
 namespace realtime_tools
 {
-template <class T>
+  template <class T, class MutexType=prio_inherit_mutex>
 class RealtimeBuffer
 {
 public:
@@ -100,7 +102,7 @@ public:
   T * readFromRT()
   {
     // Check if the data is currently being written to (is locked)
-    std::unique_lock<std::mutex> guard(mutex_, std::try_to_lock);
+    std::unique_lock<MutexType> guard(mutex_, std::try_to_lock);
     if (guard.owns_lock()) {
       // swap pointers
       if (new_data_available_) {
@@ -115,7 +117,7 @@ public:
 
   T * readFromNonRT() const
   {
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::lock_guard<MutexType> guard(mutex_);
 
     if (new_data_available_) {
       return non_realtime_data_;
@@ -127,9 +129,9 @@ public:
   void writeFromNonRT(const T & data)
   {
 #ifdef NON_POLLING
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::lock_guard<MutexType> guard(mutex_);
 #else
-    std::unique_lock<std::mutex> guard(mutex_, std::defer_lock);
+    std::unique_lock<MutexType> guard(mutex_, std::defer_lock);
     while (!guard.try_lock()) {
       std::this_thread::sleep_for(std::chrono::microseconds(500));
     }
@@ -167,7 +169,7 @@ private:
   bool new_data_available_;
 
   // Set as mutable so that readFromNonRT() can be performed on a const buffer
-  mutable std::mutex mutex_;
+  mutable MutexType mutex_;
 };  // class
 
 }  // namespace realtime_tools
