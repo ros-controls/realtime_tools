@@ -41,7 +41,7 @@
 
 namespace realtime_tools
 {
-  template <class T, class MutexType=prio_inherit_mutex>
+template <class T, class MutexType = prio_inherit_mutex>
 class RealtimeBuffer
 {
 public:

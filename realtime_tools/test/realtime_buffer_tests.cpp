@@ -28,8 +28,8 @@
 
 #include <gtest/gtest.h>
 #include <mutex>
-#include <realtime_tools/realtime_buffer.hpp>
 #include <realtime_tools/mutex.hpp>
+#include <realtime_tools/realtime_buffer.hpp>
 
 using realtime_tools::RealtimeBuffer;
 
@@ -43,9 +43,12 @@ public:
 
 // Dummy test fixture to enable parameterized template types
 template <typename T>
-class TypedTest : public testing::Test {};
+class TypedTest : public testing::Test
+{
+};
 
-using TestTypes = ::testing::Types<std::mutex, realtime_tools::prio_inherit_mutex, realtime_tools::prio_inherit_recursive_mutex>;
+using TestTypes = ::testing::Types<
+  std::mutex, realtime_tools::prio_inherit_mutex, realtime_tools::prio_inherit_recursive_mutex>;
 
 TYPED_TEST_SUITE(TypedTest, TestTypes);
 
