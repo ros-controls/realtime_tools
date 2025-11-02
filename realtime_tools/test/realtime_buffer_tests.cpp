@@ -26,8 +26,10 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <mutex>
 #include <realtime_tools/realtime_buffer.hpp>
+#include <realtime_tools/mutex.hpp>
 
 using realtime_tools::RealtimeBuffer;
 
@@ -39,46 +41,54 @@ public:
   int number_;
 };
 
-TEST(RealtimeBuffer, default_construct)
+// Dummy test fixture to enable parameterized template types
+template <typename T>
+class TypedTest : public testing::Test {};
+
+using TestTypes = ::testing::Types<std::mutex, realtime_tools::prio_inherit_mutex, realtime_tools::prio_inherit_recursive_mutex>;
+
+TYPED_TEST_SUITE(TypedTest, TestTypes);
+
+TYPED_TEST(TypedTest, default_construct)
 {
-  RealtimeBuffer<DefaultConstructable> buffer;
+  RealtimeBuffer<DefaultConstructable, TypeParam> buffer;
   EXPECT_EQ(42, buffer.readFromRT()->number_);
 }
 
-TEST(RealtimeBuffer, initial_value)
+TYPED_TEST(TypedTest, initial_value)
 {
-  RealtimeBuffer<double> buffer(3.14);
+  RealtimeBuffer<double, TypeParam> buffer(3.14);
   EXPECT_DOUBLE_EQ(3.14, *buffer.readFromRT());
 }
 
-TEST(RealtimeBuffer, copy_construct)
+TYPED_TEST(TypedTest, copy_construct)
 {
-  const RealtimeBuffer<char> buffer('a');
-  RealtimeBuffer<char> buffer_copy(buffer);
+  const RealtimeBuffer<char, TypeParam> buffer('a');
+  RealtimeBuffer<char, TypeParam> buffer_copy(buffer);
   EXPECT_EQ('a', *buffer_copy.readFromRT());
 }
 
-TEST(RealtimeBuffer, assignment_operator)
+TYPED_TEST(TypedTest, assignment_operator)
 {
-  const RealtimeBuffer<char> buffer('a');
-  RealtimeBuffer<char> buffer2('z');
+  const RealtimeBuffer<char, TypeParam> buffer('a');
+  RealtimeBuffer<char, TypeParam> buffer2('z');
 
   EXPECT_EQ('z', *buffer2.readFromRT());
   buffer2 = buffer;
   EXPECT_EQ('a', *buffer2.readFromRT());
 }
 
-TEST(RealtimeBuffer, write_read_non_rt)
+TYPED_TEST(TypedTest, write_read_non_rt)
 {
-  RealtimeBuffer<int> buffer(42);
+  RealtimeBuffer<int, TypeParam> buffer(42);
 
   buffer.writeFromNonRT(28);
   EXPECT_EQ(28, *buffer.readFromNonRT());
 }
 
-TEST(RealtimeBuffer, initRT)
+TYPED_TEST(TypedTest, initRT)
 {
-  RealtimeBuffer<int> buffer(42);
+  RealtimeBuffer<int, TypeParam> buffer(42);
   buffer.initRT(28);
   EXPECT_EQ(28, *buffer.readFromRT());
 }

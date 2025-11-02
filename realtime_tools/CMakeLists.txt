@@ -66,6 +66,7 @@ endif()
 # Unit Tests
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
   find_package(lifecycle_msgs REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
   find_package(test_msgs REQUIRED)
@@ -76,7 +77,7 @@ if(BUILD_TESTING)
   ament_add_gmock(realtime_thread_safe_box_tests test/realtime_thread_safe_box_tests.cpp)
   target_link_libraries(realtime_thread_safe_box_tests realtime_tools)
 
-  ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
+  ament_add_gtest(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests realtime_tools)
 
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
