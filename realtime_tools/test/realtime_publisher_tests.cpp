@@ -88,7 +88,7 @@ TEST(RealtimePublisher, rt_can_try_publish)
   auto sub = node->create_subscription<StringMsg>(
     "~/rt_publish", qos,
     std::bind(&StringCallback::callback, &str_callback, std::placeholders::_1));
-  
+
   rclcpp::executors::SingleThreadedExecutor exec;
   exec.add_node(node);
   for (size_t i = 0; i < ATTEMPTS && str_callback.msg_.string_value.empty(); ++i) {

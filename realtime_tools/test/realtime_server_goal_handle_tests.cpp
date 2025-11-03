@@ -137,8 +137,8 @@ std::shared_ptr<ClientGoalHandle> send_goal(
       executor.spin_some();
       std::this_thread::sleep_for(DELAY);
     }
-  } 
-  
+  }
+
   if (ac->action_server_is_ready()) {
     Fibonacci::Goal goal;
     goal.order = 10;
