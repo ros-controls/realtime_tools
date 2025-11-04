@@ -76,8 +76,10 @@ struct ActionServerCallbacks
 
   bool wait_for_handle(rclcpp::Node::SharedPtr node)
   {
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
     for (size_t i = 0; i < ATTEMPTS; ++i) {
-      rclcpp::spin_some(node);
+      executor.spin_some();
       std::this_thread::sleep_for(DELAY);
       std::unique_lock<std::mutex> lock(mtx_);
       if (have_handle_) {
@@ -109,8 +111,10 @@ struct ActionClientCallbacks
 
   bool wait_for_feedback(rclcpp::Node::SharedPtr node)
   {
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
     for (size_t i = 0; i < ATTEMPTS; ++i) {
-      rclcpp::spin_some(node);
+      executor.spin_some();
       std::this_thread::sleep_for(DELAY);
       std::unique_lock<std::mutex> lock(mtx_);
       if (have_feedback_) {
@@ -126,10 +130,15 @@ std::shared_ptr<ClientGoalHandle> send_goal(
   rclcpp::Node::SharedPtr node, std::shared_ptr<rclcpp_action::Client<Fibonacci>> ac,
   const std::string & /*server_name*/, ActionClientCallbacks & client_callbacks)
 {
-  for (size_t i = 0; i < ATTEMPTS && !ac->action_server_is_ready(); ++i) {
-    rclcpp::spin_some(node);
-    std::this_thread::sleep_for(DELAY);
+  {
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
+    for (size_t i = 0; i < ATTEMPTS && !ac->action_server_is_ready(); ++i) {
+      executor.spin_some();
+      std::this_thread::sleep_for(DELAY);
+    }
   }
+
   if (ac->action_server_is_ready()) {
     Fibonacci::Goal goal;
     goal.order = 10;
@@ -229,7 +238,9 @@ TEST(RealtimeServerGoalHandle, set_canceled)
     if (callbacks.handle_->is_canceling()) {
       break;
     }
-    rclcpp::spin_some(node);
+    rclcpp::executors::SingleThreadedExecutor exec;
+    exec.add_node(node);
+    exec.spin_some();
     std::this_thread::sleep_for(DELAY);
   }
 
