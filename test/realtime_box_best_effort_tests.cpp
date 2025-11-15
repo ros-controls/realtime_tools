@@ -29,6 +29,8 @@
 // Author: Lennart Nachtigall
 
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <realtime_tools/mutex.hpp>
 #include <realtime_tools/realtime_box_best_effort.hpp>
 
 struct DefaultConstructable
@@ -53,40 +55,52 @@ struct FromInitializerList
   std::array<int, 3> data;
 };
 
+// Dummy test fixture to enable parameterized template types
+template <typename T>
+class TypedRealtimeBoxBestEffort : public testing::Test
+{
+};
+
+using TestTypes = ::testing::Types<
+  std::mutex, realtime_tools::prio_inherit_mutex, realtime_tools::prio_inherit_recursive_mutex>;
+
+TYPED_TEST_SUITE(TypedRealtimeBoxBestEffort, TestTypes);
+
 using realtime_tools::RealtimeBoxBestEffort;
 
-TEST(RealtimeBoxBestEffort, empty_construct)
+TYPED_TEST(TypedRealtimeBoxBestEffort, empty_construct)
 {
-  RealtimeBoxBestEffort<DefaultConstructable> box;
+  RealtimeBoxBestEffort<DefaultConstructable, TypeParam> box;
 
   auto value = box.get();
   EXPECT_EQ(value.a, 10);
   EXPECT_EQ(value.str, "hallo");
 }
 
-TEST(RealtimeBoxBestEffort, default_construct)
+TYPED_TEST(TypedRealtimeBoxBestEffort, default_construct)
 {
   DefaultConstructable data;
   data.a = 100;
 
-  RealtimeBoxBestEffort<DefaultConstructable> box(data);
+  RealtimeBoxBestEffort<DefaultConstructable, TypeParam> box(data);
 
   auto value = box.get();
   EXPECT_EQ(value.a, 100);
   EXPECT_EQ(value.str, "hallo");
 }
 
-TEST(RealtimeBoxBestEffort, non_default_constructable)
+TYPED_TEST(TypedRealtimeBoxBestEffort, non_default_constructable)
 {
-  RealtimeBoxBestEffort<NonDefaultConstructable> box(NonDefaultConstructable(-10, "hello"));
+  RealtimeBoxBestEffort<NonDefaultConstructable, TypeParam> box(
+    NonDefaultConstructable(-10, "hello"));
 
   auto value = box.get();
   EXPECT_EQ(value.a, -10);
   EXPECT_EQ(value.str, "hello");
 }
-TEST(RealtimeBoxBestEffort, standard_get)
+TYPED_TEST(TypedRealtimeBoxBestEffort, standard_get)
 {
-  RealtimeBoxBestEffort<DefaultConstructable> box(DefaultConstructable{1000});
+  RealtimeBoxBestEffort<DefaultConstructable, TypeParam> box(DefaultConstructable{1000});
 
   DefaultConstructable data;
   box.get(data);
@@ -99,9 +113,9 @@ TEST(RealtimeBoxBestEffort, standard_get)
   EXPECT_EQ(value.a, 10000);
 }
 
-TEST(RealtimeBoxBestEffort, initializer_list)
+TYPED_TEST(TypedRealtimeBoxBestEffort, initializer_list)
 {
-  RealtimeBoxBestEffort<FromInitializerList> box({1, 2, 3});
+  RealtimeBoxBestEffort<FromInitializerList, TypeParam> box({1, 2, 3});
 
   auto value = box.get();
   EXPECT_EQ(value.data[0], 1);
@@ -109,23 +123,24 @@ TEST(RealtimeBoxBestEffort, initializer_list)
   EXPECT_EQ(value.data[2], 3);
 }
 
-TEST(RealtimeBoxBestEffort, assignment_operator)
+TYPED_TEST(TypedRealtimeBoxBestEffort, assignment_operator)
 {
   DefaultConstructable data;
   data.a = 1000;
-  RealtimeBoxBestEffort<DefaultConstructable> box;
+  RealtimeBoxBestEffort<DefaultConstructable, TypeParam> box;
   // Assignment operator is always non RT!
   box = data;
 
   auto value = box.get();
   EXPECT_EQ(value.a, 1000);
 }
-TEST(RealtimeBoxBestEffort, typecast_operator)
+
+TYPED_TEST(TypedRealtimeBoxBestEffort, typecast_operator)
 {
   DefaultConstructable data_construct;
   data_construct.a = 100;
   data_construct.str = "";
-  RealtimeBoxBestEffort box(data_construct);
+  RealtimeBoxBestEffort<DefaultConstructable, TypeParam> box(data_construct);
 
   // Use non RT access
   DefaultConstructable data = box;
@@ -140,12 +155,12 @@ TEST(RealtimeBoxBestEffort, typecast_operator)
   }
 }
 
-TEST(RealtimeBoxBestEffort, pointer_type)
+TYPED_TEST(TypedRealtimeBoxBestEffort, pointer_type)
 {
   int a = 100;
   int * ptr = &a;
 
-  RealtimeBoxBestEffort box(ptr);
+  RealtimeBoxBestEffort<int *, TypeParam> box(ptr);
   // This does not and should not compile!
   // auto value = box.get();
 
@@ -160,11 +175,11 @@ TEST(RealtimeBoxBestEffort, pointer_type)
   box.tryGet([](const auto & i) { EXPECT_EQ(*i, 200); });
 }
 
-TEST(RealtimeBoxBestEffort, smart_ptr_type)
+TYPED_TEST(TypedRealtimeBoxBestEffort, smart_ptr_type)
 {
   std::shared_ptr<int> ptr = std::make_shared<int>(100);
 
-  RealtimeBoxBestEffort box(ptr);
+  RealtimeBoxBestEffort<std::shared_ptr<int>, TypeParam> box(ptr);
   // This does not and should not compile!
   // auto value = box.get();
 

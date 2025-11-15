@@ -56,8 +56,6 @@ constexpr auto is_ptr_or_smart_ptr = rcpputils::is_pointer<T>::value;
 template <class T, typename mutex_type = std::mutex>
 class RealtimeBoxBestEffort
 {
-  static_assert(
-    std::is_same_v<mutex_type, std::mutex> || std::is_same_v<mutex_type, std::recursive_mutex>);
   static_assert(std::is_copy_constructible_v<T>, "Passed type must be copy constructible");
 
 public:
