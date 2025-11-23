@@ -33,7 +33,11 @@
 #include <array>
 #include <mutex>
 
+// Priority mutexes are not available on Windows platforms
+#if defined(__linux__)
 #include "realtime_tools/mutex.hpp"
+#endif
+
 #include "realtime_tools/realtime_thread_safe_box.hpp"
 
 struct DefaultConstructable
@@ -64,8 +68,13 @@ class TypedRealtimeThreadSafeBox : public testing::Test
 {
 };
 
+// Priority mutexes are not available on Windows platforms
+#ifdef _WIN32
+using TestTypes = ::testing::Types<std::mutex>;
+#else
 using TestTypes = ::testing::Types<
   std::mutex, realtime_tools::prio_inherit_mutex, realtime_tools::prio_inherit_recursive_mutex>;
+#endif
 
 TYPED_TEST_SUITE(TypedRealtimeThreadSafeBox, TestTypes);
 
