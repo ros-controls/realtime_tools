@@ -65,38 +65,38 @@ endif()
 
 # Unit Tests
 if(BUILD_TESTING)
-  find_package(ament_cmake_gmock REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
   find_package(lifecycle_msgs REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
   find_package(test_msgs REQUIRED)
 
-  ament_add_gmock(thread_priority_tests test/thread_priority_tests.cpp)
+  ament_add_gtest(thread_priority_tests test/thread_priority_tests.cpp)
   target_link_libraries(thread_priority_tests thread_priority)
 
-  ament_add_gmock(realtime_thread_safe_box_tests test/realtime_thread_safe_box_tests.cpp)
+  ament_add_gtest(realtime_thread_safe_box_tests test/realtime_thread_safe_box_tests.cpp)
   target_link_libraries(realtime_thread_safe_box_tests realtime_tools)
 
-  ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
+  ament_add_gtest(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests realtime_tools)
 
-  ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
+  ament_add_gtest(lock_free_queue_tests test/lock_free_queue_tests.cpp)
 
   target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
   if(UNIX AND NOT APPLE)
     target_link_libraries(lock_free_queue_tests atomic)
   endif()
 
-  ament_add_gmock(realtime_publisher_tests
+  ament_add_gtest(realtime_publisher_tests
                   test/realtime_publisher.test
                   test/realtime_publisher_tests.cpp)
   target_link_libraries(realtime_publisher_tests realtime_tools ${test_msgs_TARGETS})
 
-  ament_add_gmock(realtime_server_goal_handle_tests
+  ament_add_gtest(realtime_server_goal_handle_tests
                   test/realtime_server_goal_handle.test
                   test/realtime_server_goal_handle_tests.cpp)
   target_link_libraries(realtime_server_goal_handle_tests realtime_tools ${test_msgs_TARGETS})
 
-  ament_add_gmock(test_async_function_handler test/test_async_function_handler.cpp)
+  ament_add_gtest(test_async_function_handler test/test_async_function_handler.cpp)
   target_link_libraries(test_async_function_handler
                         realtime_tools
                         thread_priority
@@ -104,7 +104,7 @@ if(BUILD_TESTING)
                         rclcpp_lifecycle::rclcpp_lifecycle)
 
   if(NOT WIN32)
-    ament_add_gmock(realtime_mutex_tests test/realtime_mutex_tests.cpp)
+    ament_add_gtest(realtime_mutex_tests test/realtime_mutex_tests.cpp)
     target_link_libraries(realtime_mutex_tests realtime_tools)
   endif()
 endif()

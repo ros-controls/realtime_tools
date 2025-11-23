@@ -15,7 +15,7 @@
 #include <limits>
 #include <memory>
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "rclcpp/node.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "test_async_function_handler.hpp"
