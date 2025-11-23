@@ -14,7 +14,7 @@
 
 /// \author Sai Kishor Kothakota
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <mutex>
 #include <thread>
