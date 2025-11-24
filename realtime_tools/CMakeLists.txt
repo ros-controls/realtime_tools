@@ -90,9 +90,10 @@ if(BUILD_TESTING)
   ament_add_gmock(realtime_publisher_tests
                   test/realtime_publisher.test
                   test/realtime_publisher_tests.cpp)
-                target_link_libraries(realtime_publisher_tests realtime_tools ${test_msgs_TARGETS})
+  target_link_libraries(realtime_publisher_tests realtime_tools ${test_msgs_TARGETS})
 
-                ament_add_gmock(wait_free_publisher_test
+  ament_add_gmock(wait_free_publisher_test
+                  test/wait_free_publisher_test.test
                   test/wait_free_publisher_test.cpp)
   target_link_libraries(wait_free_publisher_test realtime_tools ${test_msgs_TARGETS})
 

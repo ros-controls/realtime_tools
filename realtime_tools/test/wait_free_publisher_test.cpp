@@ -22,6 +22,8 @@
 #include <mutex>
 #include <test_msgs/msg/empty.hpp>
 
+#include "rclcpp/node.hpp"
+
 #include <realtime_tools/utils/publisher_interface.hpp>
 #include <realtime_tools/wait_free_realtime_publisher.hpp>
 
@@ -170,4 +172,19 @@ TEST(WaitFreeRealtimePublisherTests, Stop)
   // Subsequent calls should have no effect
   rt_pub.stop();
   EXPECT_FALSE(rt_pub.running());
+}
+
+TEST(WaitFreeRealtimePublisherTests, ROSPublisher)
+{
+  rclcpp::init(0, nullptr);
+  auto node = std::make_shared<rclcpp::Node>("construct_move_destruct");
+  rclcpp::QoS qos(10);
+  qos.reliable().transient_local();
+  auto pub = node->create_publisher<test_msgs::msg::Empty>("~/rt_publish", qos);
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
+
+  rt_pub.start();
+  EXPECT_TRUE(rt_pub.running());
+
+  rclcpp::shutdown();
 }

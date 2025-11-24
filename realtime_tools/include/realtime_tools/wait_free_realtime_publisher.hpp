@@ -36,7 +36,7 @@ public:
   using PublisherSharedPtr = typename rclcpp::Publisher<MessageT>::SharedPtr;
 
   explicit WaitFreeRealtimePublisher(PublisherSharedPtr publisher)
-  : WaitFreeRealtimePublisher(publisher)
+  : WaitFreeRealtimePublisher(std::make_shared<utils::ROSPublisherWrapper<MessageT>>(publisher))
   {
   }
 

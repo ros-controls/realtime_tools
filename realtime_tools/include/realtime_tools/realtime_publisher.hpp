@@ -47,6 +47,7 @@
 #include <utility>
 
 #include "rclcpp/publisher.hpp"
+#include "realtime_tools/utils/publisher_interface.hpp"
 
 namespace realtime_tools
 {
@@ -73,6 +74,11 @@ public:
    * \param publisher the ROS publisher to wrap
    */
   explicit RealtimePublisher(PublisherSharedPtr publisher)
+  : RealtimePublisher(std::make_shared<utils::ROSPublisherWrapper<MessageT>>(publisher))
+  {
+  }
+
+  explicit RealtimePublisher(std::shared_ptr<utils::PublisherInterface<MessageT>> publisher)
   : publisher_(publisher), is_running_(false), keep_running_(true), turn_(State::LOOP_NOT_STARTED)
   {
     thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
@@ -226,7 +232,7 @@ private:
     is_running_ = false;
   }
 
-  PublisherSharedPtr publisher_;
+  std::shared_ptr<utils::PublisherInterface<MessageT>> publisher_;
   std::atomic<bool> is_running_;
   std::atomic<bool> keep_running_;
 
