@@ -117,7 +117,7 @@ endif()
 
 # Benchmark Tests
 add_executable(realtime_publishers_benchmark benchmark/realtime_publishers_benchmark.cpp)
-target_link_libraries(realtime_publishers_benchmark benchmark::benchmark realtime_tools)
+target_link_libraries(realtime_publishers_benchmark benchmark::benchmark realtime_tools ${test_msgs_TARGETS})
 
 # Install
 install(
