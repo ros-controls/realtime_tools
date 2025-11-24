@@ -16,7 +16,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <test_msgs/msg/empty.hpp>
 
 #include <realtime_tools/wait_free_realtime_publisher.hpp>
@@ -29,18 +31,31 @@ public:
 
 TEST(WaitFreeRealtimePublisherTests, push_and_publish)
 {
-  auto mock_publisher = std::make_shared<MockPublisher>();
-
-  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher);
-
+  auto mock_publisher_ptr = std::make_shared<MockPublisher>();
   test_msgs::msg::Empty msg;
+
+  // Synchronization primitives to wait for publish call
+  std::mutex mtx;
+  std::condition_variable cv;
+  bool published = false;
+
+  EXPECT_CALL(*mock_publisher_ptr, publish(testing::Eq(msg)))
+    .Times(1)
+    .WillOnce(testing::Invoke([&]() {
+      std::unique_lock<std::mutex> lock(mtx);
+      published = true;
+      cv.notify_one();
+    }));
+
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
 
   ASSERT_TRUE(rt_pub.push(msg));
 
-  EXPECT_CALL(*mock_publisher, publish(testing::Eq(msg))).Times(1);
-
-  // Give some time for the publishing thread to process the message
-  std::this_thread::sleep_for(std::chrono::seconds(1));
+  // block until called
+  {
+    std::unique_lock<std::mutex> lock(mtx);
+    cv.wait(lock, [&published]() { return published; });
+  }
 
   rt_pub.stop();
 }

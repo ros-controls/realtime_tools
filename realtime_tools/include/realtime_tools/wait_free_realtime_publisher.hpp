@@ -42,7 +42,7 @@ public:
   using PublisherSharedPtr = typename rclcpp::Publisher<MessageT>::SharedPtr;
 
   explicit WaitFreeRealtimePublisher(PublisherSharedPtr publisher)
-  : WaitFreeRealtimePublisher(std::make_unique<ROSPublisherWrapper>(publisher))
+  : WaitFreeRealtimePublisher(publisher)
   {
   }
 
@@ -71,6 +71,8 @@ public:
   }
 
   bool push(const MessageT & msg) { return message_queue_.push(msg); }
+
+  bool running() const { return is_running_; }
 
 private:
   class ROSPublisherWrapper : public PublisherInterface<MessageT>
