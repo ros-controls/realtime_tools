@@ -70,6 +70,7 @@ static void BM_WaitFreeRealtimePublisher(benchmark::State & state)
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, Capacity> rt_pub(
     pub, std::chrono::microseconds(poll_duration_us));
+  rt_pub.start();
 
   test_msgs::msg::Empty msg;
   for (auto _ : state) {
@@ -96,11 +97,11 @@ BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 10)->Apply(MicrosecondSweepArgs
 ////////////////////////////////////////////////////////////////
 // Manually Configured WaitFree Realtime Publisher Benchmark
 ////////////////////////////////////////////////////////////////
-static void BM_ManualWaitFreeRealtimePublisher(benchmark::State & state)
+static void BM_DefaultWaitFreeRealtimePublisher(benchmark::State & state)
 {
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
-  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, 2> rt_pub(
-    pub, std::chrono::microseconds(1));
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
+  rt_pub.start();
 
   test_msgs::msg::Empty msg;
   for (auto _ : state) {
@@ -110,6 +111,6 @@ static void BM_ManualWaitFreeRealtimePublisher(benchmark::State & state)
   state.counters["num_publishes"] = pub->count();
 }
 
-BENCHMARK(BM_ManualWaitFreeRealtimePublisher);
+BENCHMARK(BM_DefaultWaitFreeRealtimePublisher);
 
 BENCHMARK_MAIN();

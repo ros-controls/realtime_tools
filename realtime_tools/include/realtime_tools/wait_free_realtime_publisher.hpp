@@ -29,7 +29,7 @@
 namespace realtime_tools
 {
 
-template <class MessageT, std::size_t Capacity = 1>
+template <class MessageT, std::size_t Capacity = 2>
 class WaitFreeRealtimePublisher
 {
 public:
@@ -46,13 +46,8 @@ public:
   explicit WaitFreeRealtimePublisher(
     std::shared_ptr<utils::PublisherInterface<MessageT>> publisher,
     std::chrono::microseconds sleep_poll_duration = std::chrono::microseconds(1))
-  : publisher_(publisher), is_running_(true), sleep_poll_duration_(sleep_poll_duration)
+  : publisher_(publisher), sleep_poll_duration_(sleep_poll_duration)
   {
-    thread_ = std::thread(&WaitFreeRealtimePublisher::publishingLoop, this);
-
-    while (!thread_.joinable()) {
-      std::this_thread::sleep_for(std::chrono::microseconds(1));
-    }
   }
 
   ~WaitFreeRealtimePublisher() { stop(); }
@@ -70,6 +65,10 @@ public:
     if (!thread_.joinable()) {
       is_running_ = true;
       thread_ = std::thread(&WaitFreeRealtimePublisher::publishingLoop, this);
+
+      while (!thread_.joinable()) {
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+      }
     }
   }
 
@@ -101,7 +100,7 @@ private:
 
   LockFreeSPSCQueue<MessageT, Capacity> message_queue_;
   std::shared_ptr<utils::PublisherInterface<MessageT>> publisher_;
-  std::atomic<bool> is_running_;
+  std::atomic<bool> is_running_{false};
   const std::chrono::microseconds sleep_poll_duration_;
 
   std::thread thread_;

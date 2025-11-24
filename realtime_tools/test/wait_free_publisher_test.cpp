@@ -61,7 +61,8 @@ TEST_P(PublishTest, PushAndPublish)
       publish_cv.notify_one();
     }));
 
-  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, 1> rt_pub(mock_publisher_ptr);
+  rt_pub.start();
 
   for (int i = 0; i < expected_publish_calls; ++i) {
     ASSERT_TRUE(rt_pub.push(msg));
@@ -108,6 +109,7 @@ TEST(WaitFreeRealtimePublisherTests, PushCapacity)
 
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, kExpectedPublishCalls> rt_pub(
     mock_publisher_ptr);
+  rt_pub.start();
 
   for (int i = 0; i < kExpectedPublishCalls; ++i) {
     ASSERT_TRUE(rt_pub.push(msg));
@@ -129,7 +131,8 @@ TEST(WaitFreeRealtimePublisherTests, Constructor)
   auto mock_publisher_ptr = std::make_shared<MockPublisher>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
 
-  // Should be running after construction  EXPECT_TRUE(rt_pub.running());
+  // Should not be running after construction
+  EXPECT_FALSE(rt_pub.running());
 }
 
 TEST(WaitFreeRealtimePublisherTests, Destructor)
