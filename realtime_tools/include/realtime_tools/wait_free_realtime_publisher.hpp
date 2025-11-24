@@ -19,15 +19,27 @@
 
 #include <atomic>
 #include <chrono>
+#include <iostream>
 #include <memory>
+#include <string>
 #include <thread>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "rclcpp/publisher.hpp"
 #include "realtime_tools/lock_free_queue.hpp"
+#include "realtime_tools/realtime_helpers.hpp"
 #include "realtime_tools/utils/publisher_interface.hpp"
 
 namespace realtime_tools
 {
+
+#if defined(_WIN32) || defined(__APPLE__)
+static constexpr bool kRealtimeSupport = false;
+#else
+static constexpr bool kRealtimeSupport = true;
+#endif
 
 template <class MessageT, std::size_t Capacity = 2>
 class WaitFreeRealtimePublisher
@@ -60,16 +72,36 @@ public:
     }
   }
 
-  void start()
+  template <bool Allow = kRealtimeSupport, typename = void, typename = std::enable_if_t<!Allow>>
+  [[nodiscard]] bool start(int thread_priority, const std::vector<int> & cpu_affinity)
   {
-    if (!thread_.joinable()) {
-      is_running_ = true;
-      thread_ = std::thread(&WaitFreeRealtimePublisher::publishingLoop, this);
+    static_assert(
+      kRealtimeSupport,
+      "WaitFreeRealtimePublisher::start with realtime settings is not supported on this platform.");
+    return false;
+  }
 
-      while (!thread_.joinable()) {
-        std::this_thread::sleep_for(std::chrono::microseconds(1));
-      }
+  template <bool Allow = kRealtimeSupport, typename = std::enable_if_t<Allow>>
+  [[nodiscard]] bool start(int thread_priority, const std::vector<int> & cpu_affinity)
+  {
+    auto result = start_(thread_priority, cpu_affinity);
+
+    if (!result.first) {
+      std::cout << "Failed to start WaitFreeRealtimePublisher thread: " << result.second
+                << std::endl;
     }
+    return result.first;
+  }
+
+  [[nodiscard]] bool start()
+  {
+    auto result = start_(-1, {});
+
+    if (!result.first) {
+      std::cout << "Failed to start WaitFreeRealtimePublisher thread: " << result.second
+                << std::endl;
+    }
+    return result.first;
   }
 
   bool push(const MessageT & msg) { return message_queue_.push(msg); }
@@ -77,6 +109,67 @@ public:
   bool running() const { return is_running_; }
 
 private:
+  std::pair<bool, std::string> start_(int thread_priority, const std::vector<int> & cpu_affinity)
+  {
+    if (!thread_.joinable()) {
+      is_running_ = true;
+
+      // Check if realtime settings are applied. Note: condition variable complexity is to
+      // workaround current API limitation of realtime_helpers.
+      // FIXME: is it a problem if these go out of scope?
+      std::mutex notify_mtx;
+      std::condition_variable notify_cv;
+      bool ready = false;
+      bool settings_applied = false;
+      std::string msg = "Did not apply settings.";
+
+      thread_ = std::thread([this, &notify_mtx, &notify_cv, &settings_applied, &msg, &ready,
+                             thread_priority, cpu_affinity]() {
+        {
+          std::unique_lock<std::mutex> lock(notify_mtx);
+          if (thread_priority > 0 && !configure_sched_fifo(thread_priority)) {
+            msg = "Failed to set SCHED_FIFO with priority " + std::to_string(thread_priority);
+            settings_applied = false;
+            notify_cv.notify_one();
+            ready = true;
+            return;
+          } else {
+            settings_applied = true;
+            msg = "Settings applied successfully.";
+            notify_cv.notify_one();
+            ready = true;
+          }
+        }
+
+        // Publishing loop
+        publishingLoop();
+      });
+
+      if (!cpu_affinity.empty()) {
+        auto affinity_result = set_thread_affinity(thread_.native_handle(), cpu_affinity);
+        if (!affinity_result.first) {
+          stop();
+          return affinity_result;
+        }
+      }
+
+      // Wait for thread scheduling/priorities to be applied, then check for result
+      {
+        std::unique_lock<std::mutex> lock(notify_mtx);
+        notify_cv.wait(lock, [&ready]() { return ready; });
+
+        if (!settings_applied) {
+          stop();
+          return {false, msg};
+        }
+      }
+
+      return {true, "Thread started."};
+    }
+
+    return {true, "Thread is already running."};
+  }
+
   void publishingLoop()
   {
     while (is_running_) {

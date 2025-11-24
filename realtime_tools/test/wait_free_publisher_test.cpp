@@ -16,10 +16,13 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
 #include <condition_variable>
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <vector>
+
 #include <test_msgs/msg/empty.hpp>
 
 #include "rclcpp/node.hpp"
@@ -62,7 +65,7 @@ TEST_P(PublishTest, PushAndPublish)
     }));
 
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, 1> rt_pub(mock_publisher_ptr);
-  rt_pub.start();
+  ASSERT_TRUE(rt_pub.start());
 
   for (int i = 0; i < expected_publish_calls; ++i) {
     ASSERT_TRUE(rt_pub.push(msg));
@@ -109,7 +112,7 @@ TEST(WaitFreeRealtimePublisherTests, PushCapacity)
 
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, kExpectedPublishCalls> rt_pub(
     mock_publisher_ptr);
-  rt_pub.start();
+  ASSERT_TRUE(rt_pub.start());
 
   for (int i = 0; i < kExpectedPublishCalls; ++i) {
     ASSERT_TRUE(rt_pub.push(msg));
@@ -148,13 +151,28 @@ TEST(WaitFreeRealtimePublisherTests, Start)
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
 
   // Call once
-  rt_pub.start();
+  ASSERT_TRUE(rt_pub.start());
   EXPECT_TRUE(rt_pub.running());
 
   // Subsequent calls should have no effect
-  rt_pub.start();
+  ASSERT_TRUE(rt_pub.start());
   EXPECT_TRUE(rt_pub.running());
 }
+
+// We don't want to run this test, but we do want this to compile for linux platforms
+#if defined(__linux__)
+TEST(DISABLED_WaitFreeRealtimePublisherTests, RealtimeStart)
+{
+  auto mock_publisher_ptr = std::make_shared<MockPublisher>();
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
+
+  int thread_priority = 10;
+  std::vector<int> cpu_affinity = {0};
+
+  // Call once
+  ASSERT_TRUE(rt_pub.start(thread_priority, cpu_affinity));
+}
+#endif
 
 TEST(WaitFreeRealtimePublisherTests, Stop)
 {
@@ -166,7 +184,7 @@ TEST(WaitFreeRealtimePublisherTests, Stop)
   EXPECT_FALSE(rt_pub.running());
 
   // Call once
-  rt_pub.start();
+  ASSERT_TRUE(rt_pub.start());
 
   // Regular stop should also be ok
   rt_pub.stop();
@@ -186,7 +204,7 @@ TEST(WaitFreeRealtimePublisherTests, ROSPublisher)
   auto pub = node->create_publisher<test_msgs::msg::Empty>("~/rt_publish", qos);
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
 
-  rt_pub.start();
+  ASSERT_TRUE(rt_pub.start());
   EXPECT_TRUE(rt_pub.running());
 
   rclcpp::shutdown();
