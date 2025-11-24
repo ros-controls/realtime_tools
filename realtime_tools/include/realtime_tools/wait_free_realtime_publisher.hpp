@@ -43,10 +43,48 @@ static constexpr bool kRealtimeSupport = true;
 
 template <class MessageT, std::size_t Capacity = 2>
 class WaitFreeRealtimePublisher
+/**
+ * @brief A wait-free realtime-safe publisher using a lock-free queue
+ *
+ * This class provides a mechanism to publish ROS messages from a realtime context
+ * without blocking or using locks. Messages are pushed to a lock-free single-producer
+ * single-consumer (SPSC) queue from the realtime thread, and a separate non-realtime
+ * thread handles the actual publishing operation.
+ *
+ * The publisher uses a polling mechanism with configurable sleep duration to check
+ * for new messages in the queue, balancing CPU usage with publishing latency.
+ *
+ * @tparam MessageT The ROS message type to publish
+ * @tparam Capacity The maximum number of messages that can be queued (default: 2)
+ *
+ * Example usage:
+ * @code
+ *   auto ros_pub = node->create_publisher<std_msgs::msg::String>("topic", 10);
+ *   WaitFreeRealtimePublisher<std_msgs::msg::String> rt_pub(ros_pub);
+ *   rt_pub.start();  // Start the publishing thread
+ *
+ *   // From realtime context:
+ *   std_msgs::msg::String msg;
+ *   msg.data = "Hello";
+ *   rt_pub.push(msg);  // Wait-free operation
+ * @endcode
+ */
 {
 public:
   using PublisherSharedPtr = typename rclcpp::Publisher<MessageT>::SharedPtr;
 
+  /**
+   * @brief Constructor that wraps a ROS publisher
+   *
+   * Creates a wait-free realtime publisher by wrapping a standard ROS publisher.
+   * The publishing thread is not started automatically; call start() to begin publishing.
+   *
+   * @param publisher The ROS publisher to wrap for realtime-safe publishing
+   * @param sleep_poll_duration The duration to sleep when the queue is empty, in microseconds
+   *                            (default: 1 microsecond). Lower values reduce latency but
+   *                            increase CPU usage; higher values reduce CPU usage but may
+   *                            increase publishing latency.
+   */
   explicit WaitFreeRealtimePublisher(
     PublisherSharedPtr publisher,
     std::chrono::microseconds sleep_poll_duration = std::chrono::microseconds(1))
@@ -55,6 +93,17 @@ public:
   {
   }
 
+  /**
+   * @brief Constructor that accepts a custom publisher interface
+   *
+   * Creates a wait-free realtime publisher using a custom publisher implementation.
+   * Useful for testing or alternative publishing implementations.
+   * The publishing thread is not started automatically; call start() to begin publishing.
+   *
+   * @param publisher A shared pointer to a publisher interface implementation
+   * @param sleep_poll_duration The duration to sleep when the queue is empty, in microseconds
+   *                            (default: 1 microsecond)
+   */
   explicit WaitFreeRealtimePublisher(
     std::shared_ptr<utils::PublisherInterface<MessageT>> publisher,
     std::chrono::microseconds sleep_poll_duration = std::chrono::microseconds(1))
@@ -62,8 +111,20 @@ public:
   {
   }
 
+  /**
+   * @brief Destructor
+   *
+   * Automatically stops the publishing thread and waits for it to complete.
+   */
   ~WaitFreeRealtimePublisher() { stop(); }
 
+  /**
+   * @brief Stop the publishing thread
+   *
+   * Signals the publishing thread to exit and waits for it to complete.
+   * This method is idempotent and can be called multiple times safely.
+   * It is automatically called by the destructor.
+   */
   void stop()
   {
     is_running_ = false;
@@ -72,6 +133,16 @@ public:
     }
   }
 
+  /**
+   * @brief Start the publishing thread with realtime settings (not supported on Windows/macOS)
+   *
+   * This overload is disabled on platforms that don't support realtime scheduling.
+   * Attempting to call this method on unsupported platforms will result in a compile-time error.
+   *
+   * @tparam Allow Template parameter used for SFINAE to disable this method on unsupported platforms
+   * @param thread_priority The realtime thread priority (ignored on unsupported platforms)
+   * @param cpu_affinity The CPU affinity mask (ignored on unsupported platforms)
+   */
   template <bool Allow = kRealtimeSupport, typename = void, typename = std::enable_if_t<!Allow>>
   void start(int thread_priority, const std::vector<int> & cpu_affinity)
   {
@@ -80,6 +151,16 @@ public:
       "WaitFreeRealtimePublisher::start with realtime settings is not supported on this platform.");
   }
 
+  /**
+   * @brief Start the publishing thread with realtime scheduling and CPU affinity
+   *
+   * Starts the publishing thread with SCHED_FIFO scheduling policy and the specified
+   * thread priority and CPU affinity. This method is only available on Linux platforms.
+   *
+   * @param thread_priority The realtime thread priority for SCHED_FIFO scheduling (1-99)
+   * @param cpu_affinity Vector of CPU core IDs to which the thread should be pinned
+   * @throws std::runtime_error If the thread fails to start or realtime settings cannot be applied
+   */
   template <bool Allow = kRealtimeSupport, typename = std::enable_if_t<Allow>>
   void start(int thread_priority, const std::vector<int> & cpu_affinity)
   {
@@ -90,6 +171,14 @@ public:
     }
   }
 
+  /**
+   * @brief Start the publishing thread with default settings
+   *
+   * Starts the publishing thread without realtime scheduling or CPU affinity.
+   * The thread will run with the default scheduling policy of the system.
+   *
+   * @throws std::runtime_error If the thread fails to start
+   */
   void start()
   {
     auto result = start_(-1, {});
@@ -100,11 +189,35 @@ public:
     }
   }
 
+  /**
+   * @brief Push a message to the publishing queue (wait-free operation)
+   *
+   * This method is wait-free and can be safely called from a realtime context.
+   * If the queue is full, the message will be dropped and the method returns false.
+   *
+   * @param msg The message to publish
+   * @return true if the message was successfully queued, false if the queue was full
+   */
   bool push(const MessageT & msg) { return message_queue_.push(msg); }
 
+  /**
+   * @brief Check if the publishing thread is running
+   *
+   * @return true if the publishing thread is active, false otherwise
+   */
   bool running() const { return is_running_; }
 
 private:
+  /**
+   * @brief Internal method to start the publishing thread with optional realtime settings
+   *
+   * This method handles the actual thread creation and configuration. It attempts to
+   * apply realtime scheduling and CPU affinity if requested.
+   *
+   * @param thread_priority The realtime thread priority (-1 for default scheduling, 1-99 for SCHED_FIFO)
+   * @param cpu_affinity Vector of CPU core IDs for thread affinity (empty for no affinity)
+   * @return A pair containing success status and a descriptive message
+   */
   std::pair<bool, std::string> start_(int thread_priority, const std::vector<int> & cpu_affinity)
   {
     if (!thread_.joinable()) {
@@ -138,7 +251,7 @@ private:
         }
 
         // Publishing loop
-        publishingLoop();
+        publishing_loop();
       });
 
       if (!cpu_affinity.empty()) {
@@ -166,7 +279,15 @@ private:
     return {true, "Thread is already running."};
   }
 
-  void publishingLoop()
+  /**
+   * @brief The main publishing loop executed by the background thread
+   *
+   * This method runs in a separate thread and continuously polls the message queue.
+   * When a message is available, it pops the message and publishes it using the
+   * configured publisher. When the queue is empty, it sleeps for the configured
+   * duration to avoid busy-waiting.
+   */
+  void publishing_loop()
   {
     while (is_running_) {
       MessageT outgoing;
@@ -187,11 +308,19 @@ private:
     }
   }
 
+  /// Lock-free single-producer single-consumer queue for storing messages
   LockFreeSPSCQueue<MessageT, Capacity> message_queue_;
+
+  /// Publisher interface used to publish messages
   std::shared_ptr<utils::PublisherInterface<MessageT>> publisher_;
+
+  /// Atomic flag indicating whether the publishing thread is running
   std::atomic<bool> is_running_{false};
+
+  /// Duration to sleep when the queue is empty (configurable to balance CPU usage vs latency)
   const std::chrono::microseconds sleep_poll_duration_;
 
+  /// Background thread that handles message publishing
   std::thread thread_;
 };
 
