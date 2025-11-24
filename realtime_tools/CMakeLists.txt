@@ -21,6 +21,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp_action
   Threads
   rcpputils
+  benchmark
 )
 
 find_package(ament_cmake REQUIRED)
@@ -112,6 +113,10 @@ if(BUILD_TESTING)
     target_link_libraries(realtime_mutex_tests realtime_tools)
   endif()
 endif()
+
+# Benchmark Tests
+add_executable(realtime_publishers_benchmark benchmark/realtime_publishers_benchmark.cpp)
+target_link_libraries(realtime_publishers_benchmark benchmark::benchmark realtime_tools)
 
 # Install
 install(

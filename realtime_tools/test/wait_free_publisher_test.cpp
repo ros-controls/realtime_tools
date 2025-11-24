@@ -22,9 +22,10 @@
 #include <mutex>
 #include <test_msgs/msg/empty.hpp>
 
+#include <realtime_tools/utils/publisher_interface.hpp>
 #include <realtime_tools/wait_free_realtime_publisher.hpp>
 
-class MockPublisher : public realtime_tools::PublisherInterface<test_msgs::msg::Empty>
+class MockPublisher : public realtime_tools::utils::PublisherInterface<test_msgs::msg::Empty>
 {
 public:
   MOCK_METHOD(void, publish, (const test_msgs::msg::Empty & msg), (override));

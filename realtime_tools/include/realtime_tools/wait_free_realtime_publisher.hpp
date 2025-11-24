@@ -24,16 +24,10 @@
 
 #include "rclcpp/publisher.hpp"
 #include "realtime_tools/lock_free_queue.hpp"
+#include "realtime_tools/utils/publisher_interface.hpp"
 
 namespace realtime_tools
 {
-
-template <class MessageT>
-class PublisherInterface
-{
-public:
-  virtual void publish(const MessageT & msg) = 0;
-};
 
 template <class MessageT, std::size_t Capacity = 1>
 class WaitFreeRealtimePublisher
@@ -46,7 +40,7 @@ public:
   {
   }
 
-  explicit WaitFreeRealtimePublisher(std::shared_ptr<PublisherInterface<MessageT>> publisher)
+  explicit WaitFreeRealtimePublisher(std::shared_ptr<utils::PublisherInterface<MessageT>> publisher)
   : publisher_(publisher), is_running_(true)
   {
     thread_ = std::thread(&WaitFreeRealtimePublisher::publishingLoop, this);
@@ -79,17 +73,6 @@ public:
   bool running() const { return is_running_; }
 
 private:
-  class ROSPublisherWrapper : public PublisherInterface<MessageT>
-  {
-  public:
-    explicit ROSPublisherWrapper(PublisherSharedPtr publisher) : publisher_(publisher) {}
-
-    void publish(const MessageT & msg) override { publisher_->publish(msg); }
-
-  private:
-    PublisherSharedPtr publisher_;
-  };
-
   void publishingLoop()
   {
     while (is_running_) {
@@ -112,7 +95,7 @@ private:
   }
 
   LockFreeSPSCQueue<MessageT, Capacity> message_queue_;
-  std::shared_ptr<PublisherInterface<MessageT>> publisher_;
+  std::shared_ptr<utils::PublisherInterface<MessageT>> publisher_;
 
   std::thread thread_;
   std::atomic<bool> is_running_;
