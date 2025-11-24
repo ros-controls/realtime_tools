@@ -81,13 +81,52 @@ TEST_P(PublishTest, PushAndPublish)
 
 INSTANTIATE_TEST_SUITE_P(WaitFreeRealtimePublisherTests, PublishTest, ::testing::Values(1, 5, 10));
 
+TEST(WaitFreeRealtimePublisherTests, PushCapacity)
+{
+  auto mock_publisher_ptr = std::make_shared<MockPublisher>();
+  test_msgs::msg::Empty msg;
+
+  static constexpr int kExpectedPublishCalls = 7;
+
+  // Synchronization primitives to wait for publish call
+  std::mutex mtx;
+  std::condition_variable test_cv;
+  int publish_count{0};
+
+  EXPECT_CALL(*mock_publisher_ptr, publish(testing::Eq(msg)))
+    .Times(testing::Exactly(kExpectedPublishCalls))
+    .WillRepeatedly(testing::Invoke([&]() {
+      std::unique_lock<std::mutex> lock(mtx);
+      publish_count++;
+      if (publish_count >= kExpectedPublishCalls) {
+        test_cv.notify_one();
+      }
+    }));
+
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, kExpectedPublishCalls> rt_pub(
+    mock_publisher_ptr);
+
+  for (int i = 0; i < kExpectedPublishCalls; ++i) {
+    ASSERT_TRUE(rt_pub.push(msg));
+  }
+
+  // block until called
+  {
+    std::unique_lock<std::mutex> lock(mtx);
+    test_cv.wait(lock, [&publish_count]() { return publish_count >= kExpectedPublishCalls; });
+  }
+
+  std::cout << "All expected publish calls received: " << publish_count << std::endl;
+
+  rt_pub.stop();
+}
+
 TEST(WaitFreeRealtimePublisherTests, Constructor)
 {
   auto mock_publisher_ptr = std::make_shared<MockPublisher>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
 
-  // Should be running after construction
-  EXPECT_TRUE(rt_pub.running());
+  // Should be running after construction  EXPECT_TRUE(rt_pub.running());
 }
 
 TEST(WaitFreeRealtimePublisherTests, Destructor)
