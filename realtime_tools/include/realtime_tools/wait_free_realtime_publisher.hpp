@@ -56,10 +56,14 @@ public:
     }
   }
 
+  ~WaitFreeRealtimePublisher() { stop(); }
+
   void stop()
   {
     is_running_ = false;
-    thread_.join();
+    if (thread_.joinable()) {
+      thread_.join();
+    }
   }
 
   void start()

@@ -29,7 +29,7 @@ public:
   MOCK_METHOD(void, publish, (const test_msgs::msg::Empty & msg), (override));
 };
 
-TEST(WaitFreeRealtimePublisherTests, push_and_publish)
+TEST(WaitFreeRealtimePublisherTests, PushAndPublish)
 {
   auto mock_publisher_ptr = std::make_shared<MockPublisher>();
   test_msgs::msg::Empty msg;
@@ -58,4 +58,55 @@ TEST(WaitFreeRealtimePublisherTests, push_and_publish)
   }
 
   rt_pub.stop();
+}
+
+TEST(WaitFreeRealtimePublisherTests, Constructor)
+{
+  auto mock_publisher_ptr = std::make_shared<MockPublisher>();
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
+
+  // Should be running after construction
+  EXPECT_TRUE(rt_pub.running());
+}
+
+TEST(WaitFreeRealtimePublisherTests, Destructor)
+{
+  auto mock_publisher_ptr = std::make_shared<MockPublisher>();
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
+  // Should destruct without blocking
+}
+
+TEST(WaitFreeRealtimePublisherTests, Start)
+{
+  auto mock_publisher_ptr = std::make_shared<MockPublisher>();
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
+
+  // Call once
+  rt_pub.start();
+  EXPECT_TRUE(rt_pub.running());
+
+  // Subsequent calls should have no effect
+  rt_pub.start();
+  EXPECT_TRUE(rt_pub.running());
+}
+
+TEST(WaitFreeRealtimePublisherTests, Stop)
+{
+  auto mock_publisher_ptr = std::make_shared<MockPublisher>();
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
+
+  // Empty call should be ok
+  rt_pub.stop();
+  EXPECT_FALSE(rt_pub.running());
+
+  // Call once
+  rt_pub.start();
+
+  // Regular stop should also be ok
+  rt_pub.stop();
+  EXPECT_FALSE(rt_pub.running());
+
+  // Subsequent calls should have no effect
+  rt_pub.stop();
+  EXPECT_FALSE(rt_pub.running());
 }
