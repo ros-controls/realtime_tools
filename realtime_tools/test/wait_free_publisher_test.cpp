@@ -17,6 +17,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <condition_variable>
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <test_msgs/msg/empty.hpp>
@@ -29,36 +30,56 @@ public:
   MOCK_METHOD(void, publish, (const test_msgs::msg::Empty & msg), (override));
 };
 
-TEST(WaitFreeRealtimePublisherTests, PushAndPublish)
+class PublishTest : public ::testing::TestWithParam<int>
+{
+};
+
+TEST_P(PublishTest, PushAndPublish)
 {
   auto mock_publisher_ptr = std::make_shared<MockPublisher>();
   test_msgs::msg::Empty msg;
 
+  const int expected_publish_calls = GetParam();
+
   // Synchronization primitives to wait for publish call
   std::mutex mtx;
-  std::condition_variable cv;
-  bool published = false;
+  std::condition_variable test_cv;
+  std::condition_variable publish_cv;
+  int publish_count{0};
 
   EXPECT_CALL(*mock_publisher_ptr, publish(testing::Eq(msg)))
-    .Times(1)
-    .WillOnce(testing::Invoke([&]() {
+    .Times(testing::Exactly(expected_publish_calls))
+    .WillRepeatedly(testing::Invoke([&]() {
       std::unique_lock<std::mutex> lock(mtx);
-      published = true;
-      cv.notify_one();
+      publish_count++;
+      if (publish_count >= expected_publish_calls) {
+        test_cv.notify_one();
+      }
+      publish_cv.notify_one();
     }));
 
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
 
-  ASSERT_TRUE(rt_pub.push(msg));
+  for (int i = 0; i < expected_publish_calls; ++i) {
+    ASSERT_TRUE(rt_pub.push(msg));
+    std::unique_lock<std::mutex> lock(mtx);
+    publish_cv.wait(lock);
+  }
 
   // block until called
   {
     std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [&published]() { return published; });
+    test_cv.wait(lock, [&publish_count, expected_publish_calls]() {
+      return publish_count >= expected_publish_calls;
+    });
   }
+
+  std::cout << "All expected publish calls received: " << publish_count << std::endl;
 
   rt_pub.stop();
 }
+
+INSTANTIATE_TEST_SUITE_P(WaitFreeRealtimePublisherTests, PublishTest, ::testing::Values(1, 5, 10));
 
 TEST(WaitFreeRealtimePublisherTests, Constructor)
 {
