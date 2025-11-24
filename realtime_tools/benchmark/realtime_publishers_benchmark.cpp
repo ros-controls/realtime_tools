@@ -94,7 +94,7 @@ BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 5)->Apply(MicrosecondSweepArgs)
 BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 10)->Apply(MicrosecondSweepArgs);
 
 ////////////////////////////////////////////////////////////////
-// Manually Configured  WaitFree Realtime Publisher Benchmark
+// Manually Configured WaitFree Realtime Publisher Benchmark
 ////////////////////////////////////////////////////////////////
 static void BM_ManualWaitFreeRealtimePublisher(benchmark::State & state)
 {
