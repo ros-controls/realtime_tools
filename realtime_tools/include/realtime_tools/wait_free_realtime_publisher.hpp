@@ -19,8 +19,8 @@
 
 #include <atomic>
 #include <chrono>
-#include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <type_traits>
@@ -73,35 +73,31 @@ public:
   }
 
   template <bool Allow = kRealtimeSupport, typename = void, typename = std::enable_if_t<!Allow>>
-  [[nodiscard]] bool start(int thread_priority, const std::vector<int> & cpu_affinity)
+  void start(int thread_priority, const std::vector<int> & cpu_affinity)
   {
     static_assert(
       kRealtimeSupport,
       "WaitFreeRealtimePublisher::start with realtime settings is not supported on this platform.");
-    return false;
   }
 
   template <bool Allow = kRealtimeSupport, typename = std::enable_if_t<Allow>>
-  [[nodiscard]] bool start(int thread_priority, const std::vector<int> & cpu_affinity)
+  void start(int thread_priority, const std::vector<int> & cpu_affinity)
   {
     auto result = start_(thread_priority, cpu_affinity);
 
     if (!result.first) {
-      std::cout << "Failed to start WaitFreeRealtimePublisher thread: " << result.second
-                << std::endl;
+      throw std::runtime_error(result.second);
     }
-    return result.first;
   }
 
-  [[nodiscard]] bool start()
+  void start()
   {
     auto result = start_(-1, {});
 
     if (!result.first) {
-      std::cout << "Failed to start WaitFreeRealtimePublisher thread: " << result.second
-                << std::endl;
+      throw std::runtime_error(
+        "Failed to start WaitFreeRealtimePublisher thread: " + result.second);
     }
-    return result.first;
   }
 
   bool push(const MessageT & msg) { return message_queue_.push(msg); }

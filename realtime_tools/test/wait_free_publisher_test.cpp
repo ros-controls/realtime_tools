@@ -65,7 +65,7 @@ TEST_P(PublishTest, PushAndPublish)
     }));
 
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, 1> rt_pub(mock_publisher_ptr);
-  ASSERT_TRUE(rt_pub.start());
+  rt_pub.start();
 
   for (int i = 0; i < expected_publish_calls; ++i) {
     ASSERT_TRUE(rt_pub.push(msg));
@@ -112,7 +112,7 @@ TEST(WaitFreeRealtimePublisherTests, PushCapacity)
 
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, kExpectedPublishCalls> rt_pub(
     mock_publisher_ptr);
-  ASSERT_TRUE(rt_pub.start());
+  rt_pub.start();
 
   for (int i = 0; i < kExpectedPublishCalls; ++i) {
     ASSERT_TRUE(rt_pub.push(msg));
@@ -151,11 +151,11 @@ TEST(WaitFreeRealtimePublisherTests, Start)
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(mock_publisher_ptr);
 
   // Call once
-  ASSERT_TRUE(rt_pub.start());
+  rt_pub.start();
   EXPECT_TRUE(rt_pub.running());
 
   // Subsequent calls should have no effect
-  ASSERT_TRUE(rt_pub.start());
+  rt_pub.start();
   EXPECT_TRUE(rt_pub.running());
 }
 
@@ -170,7 +170,7 @@ TEST(DISABLED_WaitFreeRealtimePublisherTests, RealtimeStart)
   std::vector<int> cpu_affinity = {0};
 
   // Call once
-  ASSERT_TRUE(rt_pub.start(thread_priority, cpu_affinity));
+  rt_pub.start(thread_priority, cpu_affinity);
 }
 #endif
 
@@ -184,7 +184,7 @@ TEST(WaitFreeRealtimePublisherTests, Stop)
   EXPECT_FALSE(rt_pub.running());
 
   // Call once
-  ASSERT_TRUE(rt_pub.start());
+  rt_pub.start();
 
   // Regular stop should also be ok
   rt_pub.stop();
@@ -204,7 +204,7 @@ TEST(WaitFreeRealtimePublisherTests, ROSPublisher)
   auto pub = node->create_publisher<test_msgs::msg::Empty>("~/rt_publish", qos);
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
 
-  ASSERT_TRUE(rt_pub.start());
+  rt_pub.start();
   EXPECT_TRUE(rt_pub.running());
 
   rclcpp::shutdown();

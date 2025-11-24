@@ -71,9 +71,7 @@ static void BM_WaitFreeRealtimePublisher(benchmark::State & state)
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, Capacity> rt_pub(
     pub, std::chrono::microseconds(poll_duration_us));
-  if (!rt_pub.start()) {
-    throw std::runtime_error("Failed to start WaitFreeRealtimePublisher");
-  }
+  rt_pub.start();
 
   test_msgs::msg::Empty msg;
   for (auto _ : state) {
@@ -104,9 +102,7 @@ static void BM_DefaultWaitFreeRealtimePublisher(benchmark::State & state)
 {
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
-  if (!rt_pub.start()) {
-    throw std::runtime_error("Failed to start WaitFreeRealtimePublisher");
-  }
+  rt_pub.start();
 
   test_msgs::msg::Empty msg;
   for (auto _ : state) {
