@@ -42,6 +42,9 @@ private:
 };
 }  // namespace
 
+////////////////////////////////////////////////////////////////
+// Realtime Publisher Benchmark
+////////////////////////////////////////////////////////////////
 static void BM_RealtimePublisher(benchmark::State & state)
 {
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
@@ -57,7 +60,9 @@ static void BM_RealtimePublisher(benchmark::State & state)
 // Register the function as a benchmark
 BENCHMARK(BM_RealtimePublisher);
 
-// Define another benchmark
+////////////////////////////////////////////////////////////////
+// WaitFree Realtime Publisher Parameter Sweep
+////////////////////////////////////////////////////////////////
 template <std::size_t Capacity>
 static void BM_WaitFreeRealtimePublisher(benchmark::State & state)
 {
@@ -88,6 +93,9 @@ BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 2)->Apply(MicrosecondSweepArgs)
 BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 5)->Apply(MicrosecondSweepArgs);
 BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 10)->Apply(MicrosecondSweepArgs);
 
+////////////////////////////////////////////////////////////////
+// Manually Configured  WaitFree Realtime Publisher Benchmark
+////////////////////////////////////////////////////////////////
 static void BM_ManualWaitFreeRealtimePublisher(benchmark::State & state)
 {
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
