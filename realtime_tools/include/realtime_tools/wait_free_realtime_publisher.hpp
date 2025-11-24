@@ -35,18 +35,23 @@ class WaitFreeRealtimePublisher
 public:
   using PublisherSharedPtr = typename rclcpp::Publisher<MessageT>::SharedPtr;
 
-  explicit WaitFreeRealtimePublisher(PublisherSharedPtr publisher)
-  : WaitFreeRealtimePublisher(std::make_shared<utils::ROSPublisherWrapper<MessageT>>(publisher))
+  explicit WaitFreeRealtimePublisher(
+    PublisherSharedPtr publisher,
+    std::chrono::microseconds sleep_poll_duration = std::chrono::microseconds(1))
+  : WaitFreeRealtimePublisher(
+      std::make_shared<utils::ROSPublisherWrapper<MessageT>>(publisher), sleep_poll_duration)
   {
   }
 
-  explicit WaitFreeRealtimePublisher(std::shared_ptr<utils::PublisherInterface<MessageT>> publisher)
-  : publisher_(publisher), is_running_(true)
+  explicit WaitFreeRealtimePublisher(
+    std::shared_ptr<utils::PublisherInterface<MessageT>> publisher,
+    std::chrono::microseconds sleep_poll_duration = std::chrono::microseconds(1))
+  : publisher_(publisher), is_running_(true), sleep_poll_duration_(sleep_poll_duration)
   {
     thread_ = std::thread(&WaitFreeRealtimePublisher::publishingLoop, this);
 
     while (!thread_.joinable()) {
-      std::this_thread::sleep_for(std::chrono::microseconds(100));
+      std::this_thread::sleep_for(std::chrono::microseconds(1));
     }
   }
 
@@ -80,7 +85,7 @@ private:
 
       if (message_queue_.empty()) {
         // No message to publish, sleep briefly to avoid busy-waiting
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
+        std::this_thread::sleep_for(sleep_poll_duration_);
         continue;
       }
 
@@ -96,9 +101,10 @@ private:
 
   LockFreeSPSCQueue<MessageT, Capacity> message_queue_;
   std::shared_ptr<utils::PublisherInterface<MessageT>> publisher_;
+  std::atomic<bool> is_running_;
+  const std::chrono::microseconds sleep_poll_duration_;
 
   std::thread thread_;
-  std::atomic<bool> is_running_;
 };
 
 }  // namespace realtime_tools

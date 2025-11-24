@@ -16,8 +16,10 @@
 
 #include <benchmark/benchmark.h>
 
+#include <chrono>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <test_msgs/msg/empty.hpp>
 
@@ -56,10 +58,13 @@ static void BM_RealtimePublisher(benchmark::State & state)
 BENCHMARK(BM_RealtimePublisher);
 
 // Define another benchmark
+template <std::size_t Capacity>
 static void BM_WaitFreeRealtimePublisher(benchmark::State & state)
 {
+  auto poll_duration_us = state.range(0);
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
-  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, Capacity> rt_pub(
+    pub, std::chrono::microseconds(poll_duration_us));
 
   test_msgs::msg::Empty msg;
   for (auto _ : state) {
@@ -68,6 +73,35 @@ static void BM_WaitFreeRealtimePublisher(benchmark::State & state)
 
   state.counters["num_publishes"] = pub->count();
 }
-BENCHMARK(BM_WaitFreeRealtimePublisher);
+
+// Custom args generator
+static void MicrosecondSweepArgs(benchmark::internal::Benchmark * b)
+{
+  std::vector<int> microsecond_sweep = {1, 10, 50, 100};
+  for (auto micro : microsecond_sweep) {
+    b->Arg(micro);
+  }
+}
+
+BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 1)->Apply(MicrosecondSweepArgs);
+BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 2)->Apply(MicrosecondSweepArgs);
+BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 5)->Apply(MicrosecondSweepArgs);
+BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 10)->Apply(MicrosecondSweepArgs);
+
+static void BM_ManualWaitFreeRealtimePublisher(benchmark::State & state)
+{
+  auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
+  realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, 2> rt_pub(
+    pub, std::chrono::microseconds(1));
+
+  test_msgs::msg::Empty msg;
+  for (auto _ : state) {
+    rt_pub.push(msg);
+  }
+
+  state.counters["num_publishes"] = pub->count();
+}
+
+BENCHMARK(BM_ManualWaitFreeRealtimePublisher);
 
 BENCHMARK_MAIN();
