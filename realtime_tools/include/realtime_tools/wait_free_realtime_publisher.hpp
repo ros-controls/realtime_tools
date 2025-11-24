@@ -54,6 +54,9 @@ class WaitFreeRealtimePublisher
  * The publisher uses a polling mechanism with configurable sleep duration to check
  * for new messages in the queue, balancing CPU usage with publishing latency.
  *
+ * Default settings are derived from benchmarks, and are selected to balance low latency
+ * while still having high publish rates. Use benchmarks to find your optimal settings.
+ *
  * @tparam MessageT The ROS message type to publish
  * @tparam Capacity The maximum number of messages that can be queued (default: 2)
  *
