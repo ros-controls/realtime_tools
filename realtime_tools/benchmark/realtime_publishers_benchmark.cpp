@@ -14,6 +14,13 @@
 
 // Author: Brian Jin
 
+/* Recommendations to run benchmarks:
+ * - isolate cores 0,1 on a Linux machine
+ * - follow recommendations to reduce variation:
+ *   https://google.github.io/benchmark/reducing_variance.html
+ * - pin the benchmark process to core 0. The background thread will run on core 1.
+ */
+
 #include <benchmark/benchmark.h>
 
 #include <chrono>
@@ -71,7 +78,7 @@ static void BM_WaitFreeRealtimePublisher(benchmark::State & state)
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, Capacity> rt_pub(
     pub, std::chrono::microseconds(poll_duration_us));
-  rt_pub.start();
+  rt_pub.start(-1, {1});  // pin publish thread to cpu 1
 
   test_msgs::msg::Empty msg;
   for (auto _ : state) {
@@ -84,7 +91,7 @@ static void BM_WaitFreeRealtimePublisher(benchmark::State & state)
 // Custom args generator
 static void MicrosecondSweepArgs(benchmark::internal::Benchmark * b)
 {
-  std::vector<int> microsecond_sweep = {1, 10, 50, 100};
+  std::vector<int> microsecond_sweep = {1, 5, 10, 50};
   for (auto micro : microsecond_sweep) {
     b->Arg(micro);
   }
@@ -93,7 +100,6 @@ static void MicrosecondSweepArgs(benchmark::internal::Benchmark * b)
 BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 1)->Apply(MicrosecondSweepArgs);
 BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 2)->Apply(MicrosecondSweepArgs);
 BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 5)->Apply(MicrosecondSweepArgs);
-BENCHMARK_TEMPLATE(BM_WaitFreeRealtimePublisher, 10)->Apply(MicrosecondSweepArgs);
 
 ////////////////////////////////////////////////////////////////
 // Manually Configured WaitFree Realtime Publisher Benchmark
@@ -102,7 +108,7 @@ static void BM_DefaultWaitFreeRealtimePublisher(benchmark::State & state)
 {
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
-  rt_pub.start();
+  rt_pub.start(-1, {1});  // pin publish thread to cpu 1
 
   test_msgs::msg::Empty msg;
   for (auto _ : state) {
