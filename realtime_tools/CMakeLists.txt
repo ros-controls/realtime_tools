@@ -21,6 +21,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp_action
   Threads
   rcpputils
+  benchmark
 )
 
 find_package(ament_cmake REQUIRED)
@@ -91,6 +92,11 @@ if(BUILD_TESTING)
                   test/realtime_publisher_tests.cpp)
   target_link_libraries(realtime_publisher_tests realtime_tools ${test_msgs_TARGETS})
 
+  ament_add_gmock(wait_free_publisher_test
+                  test/wait_free_publisher_test.test
+                  test/wait_free_publisher_test.cpp)
+  target_link_libraries(wait_free_publisher_test realtime_tools ${test_msgs_TARGETS})
+
   ament_add_gmock(realtime_server_goal_handle_tests
                   test/realtime_server_goal_handle.test
                   test/realtime_server_goal_handle_tests.cpp)
@@ -108,6 +114,10 @@ if(BUILD_TESTING)
     target_link_libraries(realtime_mutex_tests realtime_tools)
   endif()
 endif()
+
+# Benchmark Tests
+add_executable(realtime_publishers_benchmark benchmark/realtime_publishers_benchmark.cpp)
+target_link_libraries(realtime_publishers_benchmark benchmark::benchmark realtime_tools ${test_msgs_TARGETS})
 
 # Install
 install(
