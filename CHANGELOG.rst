@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.0 (2025-12-01)
+-------------------
 * Expand RealtimeBoxBestEffort to use priority mutexes (`#454 <https://github.com/ros-controls/realtime_tools/issues/454>`_)
 * Contributors: Brian Jin, mergify[bot]
 
