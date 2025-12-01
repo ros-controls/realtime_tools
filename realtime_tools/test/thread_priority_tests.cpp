@@ -28,7 +28,7 @@
 
 // Author: Lennart Nachtigall
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <thread>
 
 #include <realtime_tools/realtime_helpers.hpp>
