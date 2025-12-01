@@ -2,6 +2,11 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Expand RealtimeBoxBestEffort to use priority mutexes (`#454 <https://github.com/ros-controls/realtime_tools/issues/454>`_)
+* Contributors: Brian Jin, mergify[bot]
+
 2.14.1 (2025-10-02)
 -------------------
 * Bump version of pre-commit hooks (backport `#414 <https://github.com/ros-controls/realtime_tools/issues/414>`_) (`#415 <https://github.com/ros-controls/realtime_tools/issues/415>`_)
