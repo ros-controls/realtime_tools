@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.7.1 (2025-12-01)
+------------------
 * Replace deprecated spin_some in realtime_tools (backport `#448 <https://github.com/ros-controls/realtime_tools/issues/448>`_) (`#451 <https://github.com/ros-controls/realtime_tools/issues/451>`_)
 * Contributors: mergify[bot]
 
