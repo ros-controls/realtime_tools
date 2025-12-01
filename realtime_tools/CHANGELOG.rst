@@ -2,6 +2,12 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Mark `msg\_` variable in RT publisher as private (`#423 <https://github.com/ros-controls/realtime_tools/issues/423>`_)
+* Replace deprecated spin_some in realtime_tools (`#448 <https://github.com/ros-controls/realtime_tools/issues/448>`_)
+* Contributors: Abdullah, Christoph Fröhlich
+
 5.0.0 (2025-10-27)
 ------------------
 * Cleanup deprecations (`#371 <https://github.com/ros-controls/realtime_tools/issues/371>`_)
