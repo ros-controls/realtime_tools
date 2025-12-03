@@ -151,7 +151,7 @@ TEST_F(RealtimePublisherTest, publish_latched_message)
   ASSERT_TRUE(rt_pub.can_publish());
   ASSERT_TRUE(rt_pub.try_publish(msg));
 
-  // create another node and subscriber to verify message receipt
+  // create another node and subscriber to verify message received
   StringCallback str_callback;
   std::promise<StringMsg> promise;
   std::future<StringMsg> future = promise.get_future();
