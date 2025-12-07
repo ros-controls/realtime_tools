@@ -90,7 +90,7 @@ public:
    */
   explicit WaitFreeRealtimePublisher(
     PublisherSharedPtr publisher,
-    std::chrono::microseconds sleep_poll_duration = std::chrono::microseconds(1))
+    std::chrono::nanoseconds sleep_poll_duration = std::chrono::microseconds(1))
   : WaitFreeRealtimePublisher(
       std::make_shared<utils::ROSPublisherWrapper<MessageT>>(publisher), sleep_poll_duration)
   {
@@ -109,7 +109,7 @@ public:
    */
   explicit WaitFreeRealtimePublisher(
     std::shared_ptr<utils::PublisherInterface<MessageT>> publisher,
-    std::chrono::microseconds sleep_poll_duration = std::chrono::microseconds(1))
+    std::chrono::nanoseconds sleep_poll_duration = std::chrono::microseconds(1))
   : publisher_(publisher), sleep_poll_duration_(sleep_poll_duration)
   {
   }
@@ -322,7 +322,7 @@ private:
   std::atomic<bool> is_running_{false};
 
   /// Duration to sleep when the queue is empty (configurable to balance CPU usage vs latency)
-  const std::chrono::microseconds sleep_poll_duration_;
+  const std::chrono::nanoseconds sleep_poll_duration_;
 
   /// Background thread that handles message publishing
   std::thread thread_;

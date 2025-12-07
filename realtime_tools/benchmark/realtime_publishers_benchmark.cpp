@@ -59,11 +59,16 @@ static void BM_RealtimePublisher(benchmark::State & state)
   realtime_tools::RealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
 
   test_msgs::msg::Empty msg;
+  double push_failure_count = 0.0;
   for (auto _ : state) {
-    rt_pub.try_publish(msg);
+    if (!rt_pub.try_publish(msg)) {
+      push_failure_count += 1.0;
+    }
   }
 
   state.counters["num_publishes"] = pub->count();
+  state.counters["push_failure_percent"] =
+    push_failure_count / static_cast<double>(state.iterations()) * 100.0;
 }
 // Register the function as a benchmark
 BENCHMARK(BM_RealtimePublisher);
@@ -78,20 +83,25 @@ static void BM_WaitFreeRealtimePublisher(benchmark::State & state)
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty, Capacity> rt_pub(
     pub, std::chrono::microseconds(poll_duration_us));
-  rt_pub.start(-1, {1});  // pin publish thread to cpu 1
+  rt_pub.start(50, {2});  // pin publish thread to cpu 1
 
   test_msgs::msg::Empty msg;
+  double push_failure_count = 0.0;
   for (auto _ : state) {
-    rt_pub.push(msg);
+    if (!rt_pub.push(msg)) {
+      push_failure_count += 1.0;
+    }
   }
 
   state.counters["num_publishes"] = pub->count();
+  state.counters["push_failure_percent"] =
+    push_failure_count / static_cast<double>(state.iterations()) * 100.0;
 }
 
 // Custom args generator
 static void MicrosecondSweepArgs(benchmark::internal::Benchmark * b)
 {
-  std::vector<int> microsecond_sweep = {1, 5, 10, 50};
+  std::vector<int> microsecond_sweep = {0, 1, 5, 10};
   for (auto micro : microsecond_sweep) {
     b->Arg(micro);
   }
@@ -108,14 +118,19 @@ static void BM_DefaultWaitFreeRealtimePublisher(benchmark::State & state)
 {
   auto pub = std::make_shared<BenchmarkPublisher<test_msgs::msg::Empty>>();
   realtime_tools::WaitFreeRealtimePublisher<test_msgs::msg::Empty> rt_pub(pub);
-  rt_pub.start(-1, {1});  // pin publish thread to cpu 1
+  rt_pub.start(50, {2});  // pin publish thread to cpu 1
 
   test_msgs::msg::Empty msg;
+  double push_failure_count = 0.0;
   for (auto _ : state) {
-    rt_pub.push(msg);
+    if (!rt_pub.push(msg)) {
+      push_failure_count += 1.0;
+    }
   }
 
   state.counters["num_publishes"] = pub->count();
+  state.counters["push_failure_percent"] =
+    push_failure_count / static_cast<double>(state.iterations()) * 100.0;
 }
 
 BENCHMARK(BM_DefaultWaitFreeRealtimePublisher);
