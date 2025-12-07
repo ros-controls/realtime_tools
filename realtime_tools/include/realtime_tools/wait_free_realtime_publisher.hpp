@@ -197,6 +197,7 @@ public:
    *
    * This method is wait-free and can be safely called from a realtime context.
    * If the queue is full, the message will be dropped and the method returns false.
+   * WARNING: This method is not threadsafe if called in multiple threads.
    *
    * @param msg The message to publish
    * @return true if the message was successfully queued, false if the queue was full
@@ -270,6 +271,7 @@ private:
         std::unique_lock<std::mutex> lock(notify_mtx);
         notify_cv.wait(lock, [&ready]() { return ready; });
 
+        // Stop thread if thread settings were not applied successfully.
         if (!settings_applied) {
           stop();
           return {false, msg};
@@ -292,9 +294,8 @@ private:
    */
   void publishing_loop()
   {
+    MessageT outgoing;
     while (is_running_) {
-      MessageT outgoing;
-
       if (message_queue_.empty()) {
         // No message to publish, sleep briefly to avoid busy-waiting
         std::this_thread::sleep_for(sleep_poll_duration_);
