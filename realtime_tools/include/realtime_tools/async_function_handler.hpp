@@ -44,6 +44,8 @@ namespace realtime_tools
  * thread will be triggering the async callback method.
  * DETACHED: The async worker thread will be detached from the main thread and will have its own
  * execution cycle.
+ * SLAVE: The async worker thread will be a slave to the hardware execution and will be blocked
+ * by it - usually when waiting for data in the read() method.
  * UNKNOWN: The scheduling policy is unknown.
  */
 class AsyncSchedulingPolicy
@@ -53,6 +55,7 @@ public:
     UNKNOWN = -1,  /// Unknown scheduling policy
     SYNCHRONIZED,  /// Synchronized scheduling policy
     DETACHED,      /// Detached scheduling policy
+    SLAVE,         /// Slave scheduling policy
   };
 
   AsyncSchedulingPolicy() = default;
@@ -63,6 +66,8 @@ public:
       value_ = SYNCHRONIZED;
     } else if (data_type == "detached") {
       value_ = DETACHED;
+    } else if (data_type == "slave") {
+      value_ = SLAVE;
     } else {
       value_ = UNKNOWN;
     }
@@ -105,22 +110,24 @@ private:
  * thread, as the main thread will be triggering the async callback method.
  * If the type is DETACHED, the async worker thread will be detached from the main thread and
  * will have its own execution cycle.
+ * If the type is SLAVE, the async worker thread will be a slave to the hardware execution and
+ * will be not sleep but it is expected to be blocked by the hardware interface itself.
  *
  * @param thread_priority Priority of the async worker thread. Should be between 0 and 99.
  * @param cpu_affinity_cores CPU cores to which the async worker thread should be pinned.
  * If empty, the thread will not be pinned to any CPU core.
  * @param scheduling_policy Scheduling policy for the async worker thread. Can be either
- * SYNCHRONIZED or DETACHED.
+ * SYNCHRONIZED, DETACHED, or SLAVE.
  * @param exec_rate Execution rate of the async worker thread in Hz. Only used if the
- * scheduling_policy is DETACHED. Must be a positive integer.
+ * scheduling_policy is DETACHED or SLAVE. Must be a positive integer.
  * @param clock Clock to be used for the async worker thread. Only used if the scheduling_policy
- * is DETACHED.
+ * is DETACHED or SLAVE.
  * @param logger Logger to be used for the async worker thread. If not set, a default logger will be used.
  * @param trigger_predicate Predicate function to check if the async callback method should be triggered or not.
  * If not set, the async callback method will be triggered every time.
  * @param wait_until_initial_trigger Whether to wait until the initial trigger predicate is true before starting
  * the async callback method. If true, the async callback method will not be called until the trigger predicate
- * returns true for the first time. Very useful when the type is DETACHED.
+ * returns true for the first time. Very useful when the type is DETACHED or SLAVE.
  * @param print_warnings Whether to print warnings when the async callback method is not triggered due to any reason.
  */
 struct AsyncFunctionHandlerParams
@@ -137,20 +144,21 @@ struct AsyncFunctionHandlerParams
         logger, "Invalid thread priority: %d. It should be between 0 and 99.", thread_priority);
       return false;
     }
-    if (scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+    if (scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
+        scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
       if (!clock) {
-        RCLCPP_ERROR(logger, "Clock must be set when using DETACHED scheduling policy.");
+        RCLCPP_ERROR(logger, "Clock must be set when using DETACHED or SLAVE scheduling policy.");
         return false;
       }
       if (exec_rate == 0u) {
-        RCLCPP_ERROR(logger, "Execution rate must be set when using DETACHED scheduling policy.");
+        RCLCPP_ERROR(logger, "Execution rate must be set when using DETACHED or SLAVE scheduling policy.");
         return false;
       }
     }
     if (scheduling_policy == AsyncSchedulingPolicy::UNKNOWN) {
       throw std::runtime_error(
         "AsyncFunctionHandlerParams: scheduling policy is unknown. "
-        "Please set it to either 'synchronized' or 'detached'.");
+        "Please set it to either 'synchronized', 'detached' or 'slave'.");
     }
     if (trigger_predicate == nullptr) {
       RCLCPP_ERROR(logger, "The parsed trigger predicate is not valid!");
@@ -172,7 +180,7 @@ struct AsyncFunctionHandlerParams
    * - cpu_affinity (int[]): CPU cores to which the async worker thread should be pinned.
    *   Default is empty, which means the thread will not be pinned to any CPU core.
    * - scheduling_policy (string): Scheduling policy for the async worker thread. Can be either
-   *   "synchronized" or "detached". Default is "synchronized".
+   *   "synchronized", "detached", or "slave". Default is "synchronized".
    * - execution_rate (int): Execution rate of the async worker thread in Hz.
    * - wait_until_initial_trigger (bool): Whether to wait until the initial trigger predicate is true
    *   before starting the async callback method. Default is true.
@@ -199,7 +207,7 @@ struct AsyncFunctionHandlerParams
         AsyncSchedulingPolicy(node->get_parameter(prefix + "scheduling_policy").as_string());
     }
     if (
-      scheduling_policy == AsyncSchedulingPolicy::DETACHED &&
+      (scheduling_policy == AsyncSchedulingPolicy::DETACHED || scheduling_policy == AsyncSchedulingPolicy::SLAVE) &&
       node->has_parameter(prefix + "execution_rate")) {
       const int execution_rate =
         static_cast<int>(node->get_parameter(prefix + "execution_rate").as_int());
@@ -332,11 +340,12 @@ public:
         params_.logger, "AsyncFunctionHandler: Exception caught in the async callback thread!");
       std::rethrow_exception(async_exception_ptr_);
     }
-    if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+    if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
+        params_.scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
       RCLCPP_WARN_ONCE(
         params_.logger,
-        "AsyncFunctionHandler is configured with DETACHED scheduling policy. "
-        "This means that the async callback may not be synchronized with the main thread. ");
+        "AsyncFunctionHandler is configured with DETACHED or SLAVE scheduling policy. "
+        "This means that the async callback may not be synchronized with the main thread.");
       if (pause_thread_.load(std::memory_order_relaxed)) {
         {
           std::unique_lock<std::mutex> lock(async_mtx_);
@@ -621,7 +630,9 @@ private:
     }
     // for calculating the measured period of the loop
     previous_time_ = params_.clock->now();
-    std::this_thread::sleep_for(period);
+    if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+      std::this_thread::sleep_for(period);
+    }
     std::chrono::steady_clock::time_point next_iteration_time{std::chrono::steady_clock::now()};
     while (!stop_async_callback_.load(std::memory_order_relaxed)) {
       {
@@ -661,7 +672,9 @@ private:
             }
             next_iteration_time += (overrun_count * period);
           }
-          std::this_thread::sleep_until(next_iteration_time);
+          if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+            std::this_thread::sleep_until(next_iteration_time);
+          }
         }
         trigger_in_progress_ = false;
       }
