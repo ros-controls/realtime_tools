@@ -90,6 +90,8 @@ public:
         return "synchronized";
       case DETACHED:
         return "detached";
+      case SLAVE:
+        return "slave";
       default:
         return "unknown";
     }
@@ -577,8 +579,10 @@ public:
         }
         if (params_.scheduling_policy == AsyncSchedulingPolicy::SYNCHRONIZED) {
           execute_synchronized_callback();
-        } else {
+        } else if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
           execute_detached_callback();
+        } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
+          execute_slave_callback();
         }
       });
     }
@@ -603,6 +607,54 @@ private:
           const auto end_time = std::chrono::steady_clock::now();
           last_execution_time_ =
             std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+        }
+        trigger_in_progress_ = false;
+      }
+      cycle_end_condition_.notify_all();
+    }
+  }
+
+  void execute_slave_callback()
+  {
+    if (params_.exec_rate == 0u) {
+      throw std::runtime_error(
+        "AsyncFunctionHandler: Target Execution rate must be set when using SLAVE scheduling policy. It is used for cycle statistics reporting.");
+    }
+
+    if (pause_thread_) {
+      std::unique_lock<std::mutex> lock(async_mtx_);
+      async_callback_condition_.wait(
+        lock, [this] { return !pause_thread_ || stop_async_callback_; });
+    }
+
+    previous_time_ = params_.clock->now();
+
+    while (!stop_async_callback_.load(std::memory_order_relaxed)) {
+      {
+        // Handle pausing logic (e.g. during deactivation)
+        std::unique_lock<std::mutex> lock(async_mtx_);
+        if (pause_thread_) {
+             async_callback_condition_.wait(
+             lock, [this] { return !pause_thread_ || stop_async_callback_; });
+        }
+        
+        if (!stop_async_callback_) {
+          auto const current_time = params_.clock->now();
+          auto const measured_period = current_time - previous_time_;
+          previous_time_ = current_time;
+          current_callback_time_ = current_time;
+          current_callback_period_ = measured_period;
+
+          const auto exec_start = std::chrono::steady_clock::now();
+          try {
+            async_callback_return_ = async_function_(current_time, measured_period);
+          } catch (...) {
+            async_exception_ptr_ = std::current_exception();
+          }
+          last_execution_time_ = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now() - exec_start);
+
+          // No sleep! The loop immediately restarts, expecting the next async_function_ call to block.
         }
         trigger_in_progress_ = false;
       }
