@@ -616,6 +616,11 @@ private:
 
   void execute_slave_callback()
   {
+    if (!params_.clock) {
+      throw std::runtime_error(
+        "AsyncFunctionHandler: Clock must be set when using SLAVE scheduling policy.");
+    }
+
     if (params_.exec_rate == 0u) {
       throw std::runtime_error(
         "AsyncFunctionHandler: Target Execution rate must be set when using SLAVE scheduling policy. It is used for cycle statistics reporting.");
