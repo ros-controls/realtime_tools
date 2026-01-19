@@ -22,7 +22,7 @@ public:
     // HW read -> Controller update signal path
     void signal_read_finished() {
         auto now = std::chrono::steady_clock::now().time_since_epoch().count();
-        last_signal_time_.store(now, std::memory_order_relaxed);
+        last_signal_read_finished_time_.store(now, std::memory_order_relaxed);
         {
             std::lock_guard<std::mutex> lock(mutex_);
             completed_updates_ = 0;
@@ -64,7 +64,7 @@ public:
         completed_updates_++;
         if (completed_updates_ >= num_updates_to_wait_on_) {
             auto now = std::chrono::steady_clock::now().time_since_epoch().count();
-            last_signal_time_.store(now, std::memory_order_relaxed);
+            last_signal_update_finished_time_.store(now, std::memory_order_relaxed);
 
             cv_ctrl_to_hw_.notify_one();
         }
@@ -81,8 +81,12 @@ public:
         return num_updates_to_wait_on_;
     }
 
-    uint64_t get_last_signal_time() const {
-        return last_signal_time_.load(std::memory_order_relaxed);
+    uint64_t get_last_signal_read_finished_time() const {
+        return last_signal_read_finished_time_.load(std::memory_order_relaxed);
+    }
+
+    uint64_t get_last_signal_update_finished_time() const {
+        return last_signal_update_finished_time_.load(std::memory_order_relaxed);
     }
 
     uint64_t get_cycle_counter() const {
@@ -98,7 +102,8 @@ private:
     int completed_updates_ = 0;
 
     uint64_t cycle_counter_ = 0; // prevents spurious wakeups.
-    std::atomic<int64_t> last_signal_time_{0}; // either hw->controller or controller->hw signal
+    std::atomic<int64_t> last_signal_read_finished_time_{0};
+    std::atomic<int64_t> last_signal_update_finished_time_{0};
 };
 
 
