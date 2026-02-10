@@ -34,6 +34,8 @@
 #include <atomic>
 #include <memory>
 
+#include "realtime_tools/mutex.hpp"
+
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/logging.hpp"
 #include "rclcpp_action/server_goal_handle.hpp"
@@ -53,10 +55,8 @@ private:
   std::atomic<bool> req_succeed_;
   std::atomic<bool> req_execute_;
 
-  std::mutex mutex_;
+  realtime_tools::prio_inherit_mutex mutex_;
   ResultSharedPtr req_result_;
-  // Use raw pointer for lock-free feedback exchange from RT thread
-  std::atomic<typename Action::Feedback *> req_feedback_ptr_;
   FeedbackSharedPtr req_feedback_;
   rclcpp::Logger logger_;
 
@@ -80,7 +80,6 @@ public:
     req_cancel_(false),
     req_succeed_(false),
     req_execute_(false),
-    req_feedback_ptr_(nullptr),
     logger_(logger),
     gh_(gh),
     preallocated_result_(preallocated_result),
@@ -100,7 +99,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<std::mutex> guard(mutex_);
+      std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
 
       req_result_ = result;
       req_abort_.store(true, std::memory_order_release);
@@ -113,7 +112,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<std::mutex> guard(mutex_);
+      std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
 
       req_result_ = result;
       req_cancel_.store(true, std::memory_order_release);
@@ -126,7 +125,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<std::mutex> guard(mutex_);
+      std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
 
       req_result_ = result;
       req_succeed_.store(true, std::memory_order_release);
@@ -146,9 +145,10 @@ public:
    */
   void setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
-    // Lock-free exchange: store raw pointer for non-RT thread to pick up
-    // The shared_ptr ensures the object stays alive
-    req_feedback_ptr_.store(feedback.get(), std::memory_order_release);
+    std::unique_lock<realtime_tools::prio_inherit_mutex> lock(mutex_, std::try_to_lock);
+    if (lock.owns_lock()) {
+      req_feedback_ = feedback;
+    }
   }
 
   void execute()
@@ -156,7 +156,7 @@ public:
     if (
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<std::mutex> guard(mutex_);
+      std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
       req_execute_.store(true, std::memory_order_release);
     }
   }
@@ -169,10 +169,7 @@ public:
       return;
     }
 
-    // Read feedback pointer atomically (lock-free read from RT thread's write)
-    auto * feedback_ptr = req_feedback_ptr_.exchange(nullptr, std::memory_order_acq_rel);
-
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
 
     try {
       if (
@@ -192,12 +189,8 @@ public:
         gh_->succeed(req_result_);
         req_succeed_.store(false, std::memory_order_release);
       }
-      if (feedback_ptr && gh_->is_executing()) {
-        // Create a non-owning shared_ptr that points to the feedback object
-        // The original shared_ptr in the caller keeps the object alive
-        gh_->publish_feedback(
-          std::shared_ptr<typename Action::Feedback>(
-            std::shared_ptr<typename Action::Feedback>{}, feedback_ptr));
+      if (req_feedback_ && gh_->is_executing()) {
+        gh_->publish_feedback(req_feedback_);
       }
     } catch (const rclcpp::exceptions::RCLErrorBase & e) {
       // Likely invalid state transition
