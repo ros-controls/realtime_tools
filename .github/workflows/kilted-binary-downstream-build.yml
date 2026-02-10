@@ -33,4 +33,4 @@ jobs:
       ref_for_scheduled_build: kilted
       not_test_build: true
       downstream_workspace: ros_controls.kilted.repos
-      not_test_downstream: true
+      not_test_downstream: false
