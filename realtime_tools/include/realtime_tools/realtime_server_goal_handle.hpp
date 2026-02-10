@@ -31,6 +31,7 @@
 #ifndef REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_HPP_
 #define REALTIME_TOOLS__REALTIME_SERVER_GOAL_HANDLE_HPP_
 
+#include <atomic>
 #include <memory>
 
 #include "rclcpp/exceptions.hpp"
@@ -47,13 +48,15 @@ private:
   using ResultSharedPtr = typename Action::Result::SharedPtr;
   using FeedbackSharedPtr = typename Action::Feedback::SharedPtr;
 
-  bool req_abort_;
-  bool req_cancel_;
-  bool req_succeed_;
-  bool req_execute_;
+  std::atomic<bool> req_abort_;
+  std::atomic<bool> req_cancel_;
+  std::atomic<bool> req_succeed_;
+  std::atomic<bool> req_execute_;
 
   std::mutex mutex_;
   ResultSharedPtr req_result_;
+  // Use raw pointer for lock-free feedback exchange from RT thread
+  std::atomic<typename Action::Feedback *> req_feedback_ptr_;
   FeedbackSharedPtr req_feedback_;
   rclcpp::Logger logger_;
 
@@ -77,6 +80,7 @@ public:
     req_cancel_(false),
     req_succeed_(false),
     req_execute_(false),
+    req_feedback_ptr_(nullptr),
     logger_(logger),
     gh_(gh),
     preallocated_result_(preallocated_result),
@@ -92,45 +96,68 @@ public:
 
   void setAborted(ResultSharedPtr result = nullptr)
   {
-    if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_) {
+    if (
+      req_execute_.load(std::memory_order_acquire) &&
+      !req_succeed_.load(std::memory_order_acquire) &&
+      !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
       std::lock_guard<std::mutex> guard(mutex_);
 
       req_result_ = result;
-      req_abort_ = true;
+      req_abort_.store(true, std::memory_order_release);
     }
   }
 
   void setCanceled(ResultSharedPtr result = nullptr)
   {
-    if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_) {
+    if (
+      req_execute_.load(std::memory_order_acquire) &&
+      !req_succeed_.load(std::memory_order_acquire) &&
+      !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
       std::lock_guard<std::mutex> guard(mutex_);
 
       req_result_ = result;
-      req_cancel_ = true;
+      req_cancel_.store(true, std::memory_order_release);
     }
   }
 
   void setSucceeded(ResultSharedPtr result = nullptr)
   {
-    if (req_execute_ && !req_succeed_ && !req_abort_ && !req_cancel_) {
+    if (
+      req_execute_.load(std::memory_order_acquire) &&
+      !req_succeed_.load(std::memory_order_acquire) &&
+      !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
       std::lock_guard<std::mutex> guard(mutex_);
 
       req_result_ = result;
-      req_succeed_ = true;
+      req_succeed_.store(true, std::memory_order_release);
     }
   }
 
+  /**
+   * @brief Set feedback to be published by runNonRealtime().
+   *
+   * This method is lock-free and safe to call from real-time context.
+   * The feedback pointer is atomically exchanged, and the non-RT thread
+   * will pick it up on the next runNonRealtime() call.
+   *
+   * @param feedback Shared pointer to feedback message. The caller must ensure
+   *        the feedback object remains valid until runNonRealtime() processes it.
+   *        Using a preallocated feedback message is recommended.
+   */
   void setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
-    std::lock_guard<std::mutex> guard(mutex_);
-    req_feedback_ = feedback;
+    // Lock-free exchange: store raw pointer for non-RT thread to pick up
+    // The shared_ptr ensures the object stays alive
+    req_feedback_ptr_.store(feedback.get(), std::memory_order_release);
   }
 
   void execute()
   {
-    if (!req_succeed_ && !req_abort_ && !req_cancel_) {
+    if (
+      !req_succeed_.load(std::memory_order_acquire) &&
+      !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
       std::lock_guard<std::mutex> guard(mutex_);
-      req_execute_ = true;
+      req_execute_.store(true, std::memory_order_release);
     }
   }
 
@@ -142,26 +169,35 @@ public:
       return;
     }
 
+    // Read feedback pointer atomically (lock-free read from RT thread's write)
+    auto * feedback_ptr = req_feedback_ptr_.exchange(nullptr, std::memory_order_acq_rel);
+
     std::lock_guard<std::mutex> guard(mutex_);
 
     try {
-      if (req_execute_ && !gh_->is_executing() && gh_->is_active() && !gh_->is_canceling()) {
+      if (
+        req_execute_.load(std::memory_order_acquire) && !gh_->is_executing() && gh_->is_active() &&
+        !gh_->is_canceling()) {
         gh_->execute();
       }
-      if (req_abort_ && gh_->is_executing()) {
+      if (req_abort_.load(std::memory_order_acquire) && gh_->is_executing()) {
         gh_->abort(req_result_);
-        req_abort_ = false;
+        req_abort_.store(false, std::memory_order_release);
       }
-      if (req_cancel_ && gh_->is_active()) {
+      if (req_cancel_.load(std::memory_order_acquire) && gh_->is_active()) {
         gh_->canceled(req_result_);
-        req_cancel_ = false;
+        req_cancel_.store(false, std::memory_order_release);
       }
-      if (req_succeed_ && !gh_->is_canceling()) {
+      if (req_succeed_.load(std::memory_order_acquire) && !gh_->is_canceling()) {
         gh_->succeed(req_result_);
-        req_succeed_ = false;
+        req_succeed_.store(false, std::memory_order_release);
       }
-      if (req_feedback_ && gh_->is_executing()) {
-        gh_->publish_feedback(req_feedback_);
+      if (feedback_ptr && gh_->is_executing()) {
+        // Create a non-owning shared_ptr that points to the feedback object
+        // The original shared_ptr in the caller keeps the object alive
+        gh_->publish_feedback(
+          std::shared_ptr<typename Action::Feedback>(
+            std::shared_ptr<typename Action::Feedback>{}, feedback_ptr));
       }
     } catch (const rclcpp::exceptions::RCLErrorBase & e) {
       // Likely invalid state transition
