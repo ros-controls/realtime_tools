@@ -29,6 +29,7 @@
 #include <gmock/gmock.h>
 
 #include <chrono>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -97,4 +98,80 @@ TEST(RealtimePublisher, rt_can_try_publish)
   }
   EXPECT_STREQ(expected_msg, str_callback.msg_.string_value.c_str());
   rclcpp::shutdown();
+}
+
+class RealtimePublisherTest : public ::testing::Test {
+protected:
+  void SetUp() override {
+    rclcpp::init(0, nullptr);
+
+    node_ = std::make_shared<rclcpp::Node>("rt_test_node");
+
+    exec_ = std::make_unique<rclcpp::executors::SingleThreadedExecutor>();
+    exec_->add_node(node_);
+
+    spin_thread_ = std::thread([this]() { exec_->spin(); });
+  }
+
+  void TearDown() override {
+    if (exec_) {
+      exec_->cancel();
+    }
+    if (spin_thread_.joinable()) {
+      spin_thread_.join();
+    }
+    node_.reset();
+    rclcpp::shutdown();
+  }
+
+  std::shared_ptr<rclcpp::Node> node_ = nullptr;
+  std::unique_ptr<rclcpp::executors::SingleThreadedExecutor> exec_ = nullptr;
+  std::thread spin_thread_;
+  const std::string TOPIC_NAME_ = "/rt_publish";
+  const std::chrono::duration<int64_t> WAIT_ON_PUBLISH_TIMEOUT_ = std::chrono::seconds(1);
+};
+
+TEST_F(RealtimePublisherTest, node_based_init_works)
+{
+  rclcpp::QoS qos = rclcpp::QoS(10);
+  qos.reliable().transient_local();
+  RealtimePublisher<StringMsg> rt_pub(node_, TOPIC_NAME_, qos);
+  ASSERT_TRUE(rt_pub.can_publish());
+}
+
+TEST_F(RealtimePublisherTest, publish_latched_message)
+{
+  const char * expected_msg = "Hello World";
+  StringMsg msg;
+  msg.string_value = expected_msg;
+  rclcpp::QoS qos = rclcpp::QoS(10);
+  qos.reliable().transient_local();
+  RealtimePublisher<StringMsg> rt_pub(node_, TOPIC_NAME_, qos);
+  
+  ASSERT_TRUE(rt_pub.can_publish());
+  ASSERT_TRUE(rt_pub.try_publish(msg));
+
+  // create another node and subscriber to verify message received
+  StringCallback str_callback;
+  std::promise<StringMsg> promise;
+  std::future<StringMsg> future = promise.get_future();
+  auto node = std::make_shared<rclcpp::Node>("rt_msg_sub_node");
+  auto sub = node->create_subscription<StringMsg>(
+    TOPIC_NAME_, qos,
+    [&promise](const StringMsg::SharedPtr incoming_msg) {
+      promise.set_value(*incoming_msg);
+    }
+  );
+
+  exec_->add_node(node);
+
+  auto start = std::chrono::steady_clock::now();
+  while (future.wait_for(std::chrono::milliseconds(100)) != std::future_status::ready) {
+    if (std::chrono::steady_clock::now() - start > WAIT_ON_PUBLISH_TIMEOUT_) {
+      FAIL() << "Timed out while waiting for latched message";
+    }
+  }
+  // Validate received message
+  auto received = future.get();
+  EXPECT_STREQ(expected_msg, received.string_value.c_str());
 }
