@@ -145,20 +145,41 @@ public:
   /**
    * @brief Set feedback to be published by runNonRealtime().
    *
-   * This method is lock-free and safe to call from real-time context.
-   * The feedback pointer is atomically exchanged, and the non-RT thread
-   * will pick it up on the next runNonRealtime() call.
+   * This method uses a non-blocking lock acquisition with try_to_lock() and is safe
+   * to call from real-time context without causing thread blocking or priority inversion.
+   * If the lock cannot be acquired (because runNonRealtime() is holding it), the update
+   * is silently skipped to avoid blocking the real-time thread.
    *
-   * @param feedback Shared pointer to feedback message. The caller must ensure
-   *        the feedback object remains valid until runNonRealtime() processes it.
-   *        Using a preallocated feedback message is recommended.
+   * The feedback pointer is stored and the non-RT thread will publish it on the next
+   * runNonRealtime() call, provided the goal handle is in executing state.
+   *
+   * @param feedback Shared pointer to feedback message. Can be nullptr to clear pending
+   *        feedback. If a valid pointer is provided, the caller must ensure the feedback
+   *        object remains valid until runNonRealtime() processes it. Using a
+   *        preallocated feedback message (stored in preallocated_feedback_) is
+   *        recommended to avoid dynamic allocations in the real-time thread.
+   *
+   * @return true if the lock was acquired and feedback was successfully set,
+   *         false if the lock could not be acquired (feedback update was dropped).
+   *
+   * @note If the mutex lock cannot be acquired, the feedback update is dropped without
+   *       notification. This is intentional to preserve real-time guarantees. Check the
+   *       return value if you need to know whether the update succeeded.
+   *
+   * @note Feedback is only published if the goal is currently executing. If feedback
+   *       is set after the goal transitions out of executing state, it will be discarded.
+   *
+   * @see runNonRealtime() for the counterpart that publishes the feedback.
+   * @see preallocated_feedback_ for recommended pre-allocated feedback usage.
    */
-  void setFeedback(FeedbackSharedPtr feedback = nullptr)
+  bool setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
     std::unique_lock<rt_server_goal_handle_mutex> lock(mutex_, std::try_to_lock);
     if (lock.owns_lock()) {
       req_feedback_ = feedback;
+      return true;
     }
+    return false;
   }
 
   void execute()
