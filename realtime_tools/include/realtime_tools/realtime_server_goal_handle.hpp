@@ -38,8 +38,20 @@
 #include "rclcpp/logging.hpp"
 #include "rclcpp_action/server_goal_handle.hpp"
 
+// prio_inherit_mutex uses pthread APIs not available on Windows
+#ifndef _WIN32
+#include "realtime_tools/mutex.hpp"
+#else
+#include <mutex>
+#endif
+
 namespace realtime_tools
 {
+#ifndef _WIN32
+using rt_server_goal_handle_mutex = prio_inherit_mutex;
+#else
+using rt_server_goal_handle_mutex = std::mutex;
+#endif
 template <class Action>
 class RealtimeServerGoalHandle
 {
@@ -53,10 +65,8 @@ private:
   std::atomic<bool> req_succeed_;
   std::atomic<bool> req_execute_;
 
-  std::mutex mutex_;
+  rt_server_goal_handle_mutex mutex_;
   ResultSharedPtr req_result_;
-  // Use raw pointer for lock-free feedback exchange from RT thread
-  std::atomic<typename Action::Feedback *> req_feedback_ptr_;
   FeedbackSharedPtr req_feedback_;
   rclcpp::Logger logger_;
 
@@ -80,7 +90,6 @@ public:
     req_cancel_(false),
     req_succeed_(false),
     req_execute_(false),
-    req_feedback_ptr_(nullptr),
     logger_(logger),
     gh_(gh),
     preallocated_result_(preallocated_result),
@@ -100,7 +109,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<std::mutex> guard(mutex_);
+      std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
 
       req_result_ = result;
       req_abort_.store(true, std::memory_order_release);
@@ -113,7 +122,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<std::mutex> guard(mutex_);
+      std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
 
       req_result_ = result;
       req_cancel_.store(true, std::memory_order_release);
@@ -126,7 +135,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<std::mutex> guard(mutex_);
+      std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
 
       req_result_ = result;
       req_succeed_.store(true, std::memory_order_release);
@@ -136,19 +145,41 @@ public:
   /**
    * @brief Set feedback to be published by runNonRealtime().
    *
-   * This method is lock-free and safe to call from real-time context.
-   * The feedback pointer is atomically exchanged, and the non-RT thread
-   * will pick it up on the next runNonRealtime() call.
+   * This method uses a non-blocking lock acquisition with try_to_lock() and is safe
+   * to call from real-time context without causing thread blocking or priority inversion.
+   * If the lock cannot be acquired (because runNonRealtime() is holding it), the update
+   * is silently skipped to avoid blocking the real-time thread.
    *
-   * @param feedback Shared pointer to feedback message. The caller must ensure
-   *        the feedback object remains valid until runNonRealtime() processes it.
-   *        Using a preallocated feedback message is recommended.
+   * The feedback pointer is stored and the non-RT thread will publish it on the next
+   * runNonRealtime() call, provided the goal handle is in executing state.
+   *
+   * @param feedback Shared pointer to feedback message. Can be nullptr to clear pending
+   *        feedback. If a valid pointer is provided, the caller must ensure the feedback
+   *        object remains valid until runNonRealtime() processes it. Using a
+   *        preallocated feedback message (stored in preallocated_feedback_) is
+   *        recommended to avoid dynamic allocations in the real-time thread.
+   *
+   * @return true if the lock was acquired and feedback was successfully set,
+   *         false if the lock could not be acquired (feedback update was dropped).
+   *
+   * @note If the mutex lock cannot be acquired, the feedback update is dropped without
+   *       notification. This is intentional to preserve real-time guarantees. Check the
+   *       return value if you need to know whether the update succeeded.
+   *
+   * @note Feedback is only published if the goal is currently executing. If feedback
+   *       is set after the goal transitions out of executing state, it will be discarded.
+   *
+   * @see runNonRealtime() for the counterpart that publishes the feedback.
+   * @see preallocated_feedback_ for recommended pre-allocated feedback usage.
    */
-  void setFeedback(FeedbackSharedPtr feedback = nullptr)
+  bool setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
-    // Lock-free exchange: store raw pointer for non-RT thread to pick up
-    // The shared_ptr ensures the object stays alive
-    req_feedback_ptr_.store(feedback.get(), std::memory_order_release);
+    std::unique_lock<rt_server_goal_handle_mutex> lock(mutex_, std::try_to_lock);
+    if (lock.owns_lock()) {
+      req_feedback_ = feedback;
+      return true;
+    }
+    return false;
   }
 
   void execute()
@@ -156,7 +187,7 @@ public:
     if (
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<std::mutex> guard(mutex_);
+      std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
       req_execute_.store(true, std::memory_order_release);
     }
   }
@@ -169,10 +200,7 @@ public:
       return;
     }
 
-    // Read feedback pointer atomically (lock-free read from RT thread's write)
-    auto * feedback_ptr = req_feedback_ptr_.exchange(nullptr, std::memory_order_acq_rel);
-
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
 
     try {
       if (
@@ -192,12 +220,8 @@ public:
         gh_->succeed(req_result_);
         req_succeed_.store(false, std::memory_order_release);
       }
-      if (feedback_ptr && gh_->is_executing()) {
-        // Create a non-owning shared_ptr that points to the feedback object
-        // The original shared_ptr in the caller keeps the object alive
-        gh_->publish_feedback(
-          std::shared_ptr<typename Action::Feedback>(
-            std::shared_ptr<typename Action::Feedback>{}, feedback_ptr));
+      if (req_feedback_ && gh_->is_executing()) {
+        gh_->publish_feedback(req_feedback_);
       }
     } catch (const rclcpp::exceptions::RCLErrorBase & e) {
       // Likely invalid state transition
