@@ -34,14 +34,24 @@
 #include <atomic>
 #include <memory>
 
-#include "realtime_tools/mutex.hpp"
-
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/logging.hpp"
 #include "rclcpp_action/server_goal_handle.hpp"
 
+// prio_inherit_mutex uses pthread APIs not available on Windows
+#ifndef _WIN32
+#include "realtime_tools/mutex.hpp"
+#else
+#include <mutex>
+#endif
+
 namespace realtime_tools
 {
+#ifndef _WIN32
+using rt_server_goal_handle_mutex = prio_inherit_mutex;
+#else
+using rt_server_goal_handle_mutex = std::mutex;
+#endif
 template <class Action>
 class RealtimeServerGoalHandle
 {
@@ -55,7 +65,7 @@ private:
   std::atomic<bool> req_succeed_;
   std::atomic<bool> req_execute_;
 
-  realtime_tools::prio_inherit_mutex mutex_;
+  rt_server_goal_handle_mutex mutex_;
   ResultSharedPtr req_result_;
   FeedbackSharedPtr req_feedback_;
   rclcpp::Logger logger_;
@@ -99,7 +109,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
+      std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
 
       req_result_ = result;
       req_abort_.store(true, std::memory_order_release);
@@ -112,7 +122,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
+      std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
 
       req_result_ = result;
       req_cancel_.store(true, std::memory_order_release);
@@ -125,7 +135,7 @@ public:
       req_execute_.load(std::memory_order_acquire) &&
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
+      std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
 
       req_result_ = result;
       req_succeed_.store(true, std::memory_order_release);
@@ -145,7 +155,7 @@ public:
    */
   void setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
-    std::unique_lock<realtime_tools::prio_inherit_mutex> lock(mutex_, std::try_to_lock);
+    std::unique_lock<rt_server_goal_handle_mutex> lock(mutex_, std::try_to_lock);
     if (lock.owns_lock()) {
       req_feedback_ = feedback;
     }
@@ -156,7 +166,7 @@ public:
     if (
       !req_succeed_.load(std::memory_order_acquire) &&
       !req_abort_.load(std::memory_order_acquire) && !req_cancel_.load(std::memory_order_acquire)) {
-      std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
+      std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
       req_execute_.store(true, std::memory_order_release);
     }
   }
@@ -169,7 +179,7 @@ public:
       return;
     }
 
-    std::lock_guard<realtime_tools::prio_inherit_mutex> guard(mutex_);
+    std::lock_guard<rt_server_goal_handle_mutex> guard(mutex_);
 
     try {
       if (
