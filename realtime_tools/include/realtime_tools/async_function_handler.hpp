@@ -146,14 +146,16 @@ struct AsyncFunctionHandlerParams
         logger, "Invalid thread priority: %d. It should be between 0 and 99.", thread_priority);
       return false;
     }
-    if (scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
-        scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
+    if (
+      scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
+      scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
       if (!clock) {
         RCLCPP_ERROR(logger, "Clock must be set when using DETACHED or SLAVE scheduling policy.");
         return false;
       }
       if (exec_rate == 0u) {
-        RCLCPP_ERROR(logger, "Execution rate must be set when using DETACHED or SLAVE scheduling policy.");
+        RCLCPP_ERROR(
+          logger, "Execution rate must be set when using DETACHED or SLAVE scheduling policy.");
         return false;
       }
     }
@@ -209,7 +211,8 @@ struct AsyncFunctionHandlerParams
         AsyncSchedulingPolicy(node->get_parameter(prefix + "scheduling_policy").as_string());
     }
     if (
-      (scheduling_policy == AsyncSchedulingPolicy::DETACHED || scheduling_policy == AsyncSchedulingPolicy::SLAVE) &&
+      (scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
+       scheduling_policy == AsyncSchedulingPolicy::SLAVE) &&
       node->has_parameter(prefix + "execution_rate")) {
       const int execution_rate =
         static_cast<int>(node->get_parameter(prefix + "execution_rate").as_int());
@@ -342,8 +345,9 @@ public:
         params_.logger, "AsyncFunctionHandler: Exception caught in the async callback thread!");
       std::rethrow_exception(async_exception_ptr_);
     }
-    if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
-        params_.scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
+    if (
+      params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
+      params_.scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
       RCLCPP_WARN_ONCE(
         params_.logger,
         "AsyncFunctionHandler is configured with DETACHED or SLAVE scheduling policy. "
@@ -577,12 +581,20 @@ public:
             params_.logger, affinity_result.first,
             "Async worker thread is successfully pinned to the requested CPU cores!");
         }
-        if (params_.scheduling_policy == AsyncSchedulingPolicy::SYNCHRONIZED) {
-          execute_synchronized_callback();
-        } else if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
-          execute_detached_callback();
-        } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
-          execute_slave_callback();
+
+        switch (params_.scheduling_policy) {
+          case AsyncSchedulingPolicy::SYNCHRONIZED:
+            execute_synchronized_callback();
+            break;
+          case AsyncSchedulingPolicy::DETACHED:
+          case AsyncSchedulingPolicy::SLAVE:
+            execute_detached_callback();
+            break;
+          default:
+            throw std::runtime_error(
+              "AsyncFunctionHandler: start_thread(): Not a valid scheduling policy, this should "
+              "never happen!");
+            break;
         }
       });
     }
@@ -614,63 +626,16 @@ private:
     }
   }
 
-  void execute_slave_callback()
-  {
-    if (params_.exec_rate == 0u) {
-      throw std::runtime_error(
-        "AsyncFunctionHandler: Target Execution rate must be set when using SLAVE scheduling policy. It is used for cycle statistics reporting.");
-    }
-
-    if (pause_thread_) {
-      std::unique_lock<std::mutex> lock(async_mtx_);
-      async_callback_condition_.wait(
-        lock, [this] { return !pause_thread_ || stop_async_callback_; });
-    }
-
-    previous_time_ = params_.clock->now();
-
-    while (!stop_async_callback_.load(std::memory_order_relaxed)) {
-      {
-        // Handle pausing logic (e.g. during deactivation)
-        std::unique_lock<std::mutex> lock(async_mtx_);
-        if (pause_thread_) {
-             async_callback_condition_.wait(
-             lock, [this] { return !pause_thread_ || stop_async_callback_; });
-        }
-        
-        if (!stop_async_callback_) {
-          auto const current_time = params_.clock->now();
-          auto const measured_period = current_time - previous_time_;
-          previous_time_ = current_time;
-          current_callback_time_ = current_time;
-          current_callback_period_ = measured_period;
-
-          const auto exec_start = std::chrono::steady_clock::now();
-          try {
-            async_callback_return_ = async_function_(current_time, measured_period);
-          } catch (...) {
-            async_exception_ptr_ = std::current_exception();
-          }
-          last_execution_time_ = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::steady_clock::now() - exec_start);
-
-          // No sleep! The loop immediately restarts, expecting the next async_function_ call to block.
-        }
-        trigger_in_progress_ = false;
-      }
-      cycle_end_condition_.notify_all();
-    }
-  }
-
   void execute_detached_callback()
   {
     if (!params_.clock) {
       throw std::runtime_error(
-        "AsyncFunctionHandler: Clock must be set when using DETACHED scheduling policy.");
+        "AsyncFunctionHandler: Clock must be set when using DETACHED or SLAVE scheduling policy.");
     }
     if (params_.exec_rate == 0u) {
       throw std::runtime_error(
-        "AsyncFunctionHandler: Execution rate must be set when using DETACHED scheduling policy.");
+        "AsyncFunctionHandler: Execution rate must be set when using DETACHED or SLAVE scheduling "
+        "policy.");
     }
 
     auto const period = std::chrono::nanoseconds(1'000'000'000 / params_.exec_rate);
@@ -708,23 +673,23 @@ private:
           last_execution_time_ = std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now() - start_time);
 
-          next_iteration_time += period;
-          const auto time_now = std::chrono::steady_clock::now();
-          if (next_iteration_time < time_now) {
-            const double time_diff =
-              std::chrono::duration<double, std::milli>(time_now - next_iteration_time).count();
-            const double cm_period = 1.e3 / static_cast<double>(params_.exec_rate);
-            const int overrun_count = static_cast<int>(std::ceil(time_diff / cm_period));
-            if (params_.print_warnings) {
-              RCLCPP_WARN_THROTTLE(
-                params_.logger, *params_.clock, 1000,
-                "Overrun detected! The async callback missed its desired rate of %d Hz. The loop "
-                "took %f ms (missed cycles : %d).",
-                params_.exec_rate, time_diff + cm_period, overrun_count + 1);
-            }
-            next_iteration_time += (overrun_count * period);
-          }
           if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+            next_iteration_time += period;
+            const auto time_now = std::chrono::steady_clock::now();
+            if (next_iteration_time < time_now) {
+              const double time_diff =
+                std::chrono::duration<double, std::milli>(time_now - next_iteration_time).count();
+              const double cm_period = 1.e3 / static_cast<double>(params_.exec_rate);
+              const int overrun_count = static_cast<int>(std::ceil(time_diff / cm_period));
+              if (params_.print_warnings) {
+                RCLCPP_WARN_THROTTLE(
+                  params_.logger, *params_.clock, 1000,
+                  "Overrun detected! The async callback missed its desired rate of %d Hz. The loop "
+                  "took %f ms (missed cycles : %d).",
+                  params_.exec_rate, time_diff + cm_period, overrun_count + 1);
+              }
+              next_iteration_time += (overrun_count * period);
+            }
             std::this_thread::sleep_until(next_iteration_time);
           }
         }
