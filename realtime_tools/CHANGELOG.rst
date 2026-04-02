@@ -2,6 +2,13 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use realtime mutex and also try-lock while setting feedback (backport `#490 <https://github.com/ros-controls/realtime_tools/issues/490>`_) (`#494 <https://github.com/ros-controls/realtime_tools/issues/494>`_)
+* Use atomic to have lock-free feedback setting from RT loop (backport `#486 <https://github.com/ros-controls/realtime_tools/issues/486>`_) (`#487 <https://github.com/ros-controls/realtime_tools/issues/487>`_)
+* Update ThreadSafeBox Tests (backport `#459 <https://github.com/ros-controls/realtime_tools/issues/459>`_) (`#467 <https://github.com/ros-controls/realtime_tools/issues/467>`_)
+* Contributors: mergify[bot]
+
 3.10.1 (2025-12-01)
 -------------------
 * Replace deprecated spin_some in realtime_tools (backport `#448 <https://github.com/ros-controls/realtime_tools/issues/448>`_) (`#450 <https://github.com/ros-controls/realtime_tools/issues/450>`_)
