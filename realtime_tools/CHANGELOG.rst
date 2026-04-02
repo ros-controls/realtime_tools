@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.11.0 (2026-04-02)
+-------------------
 * Use realtime mutex and also try-lock while setting feedback (backport `#490 <https://github.com/ros-controls/realtime_tools/issues/490>`_) (`#494 <https://github.com/ros-controls/realtime_tools/issues/494>`_)
 * Use atomic to have lock-free feedback setting from RT loop (backport `#486 <https://github.com/ros-controls/realtime_tools/issues/486>`_) (`#487 <https://github.com/ros-controls/realtime_tools/issues/487>`_)
 * Update ThreadSafeBox Tests (backport `#459 <https://github.com/ros-controls/realtime_tools/issues/459>`_) (`#467 <https://github.com/ros-controls/realtime_tools/issues/467>`_)
