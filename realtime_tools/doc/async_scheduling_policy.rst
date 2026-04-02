@@ -28,7 +28,7 @@ SLAVE
 -----
 In ``SLAVE`` mode, the async worker thread runs independently of the main thread, but *without any software rate-limiting or sleeping*. The handler continuously loops and immediately restarts the callback, expecting the callback function itself to block execution.
 
-Used when ehardware interfaces that must synchronize directly with an external hardware clock. Avoids drift between control loops of manipulator controllers and ``controller_manager`` thread. This requires the hardware interface to wait on an UDP heartbeat/sync signal from hardware that a new control cycle can start.
+Used when hardware interfaces must synchronize directly with an external hardware clock. Avoids drift between control loops of manipulator controllers and ``controller_manager`` thread. This requires the hardware interface to wait on a heartbeat/sync signal from hardware that a new control cycle can start.
 
 * **Scheduling Control:** Blocking in hardware interface ``read()`` function.
 * **Sleep Mechanism:** None. Relies on a blocking hardware ``read()`` to pace the thread.
