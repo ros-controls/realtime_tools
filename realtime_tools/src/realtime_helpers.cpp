@@ -98,6 +98,31 @@ bool configure_sched_fifo(int priority)
 #endif
 }
 
+bool configure_sched_rr(int priority)
+{
+#ifdef _WIN32
+  (void)priority;
+  std::cerr << "SCHED_RR is not supported on Windows." << std::endl;
+  return false;
+#elif defined(__APPLE__)
+  pthread_t thread = pthread_self();
+  struct sched_param schedp;
+  memset(&schedp, 0, sizeof(schedp));
+  schedp.sched_priority = priority;
+
+  if (pthread_setschedparam(thread, SCHED_RR, &schedp) == 0) {
+    return true;
+  } else {
+    return false;
+  }
+#else
+  struct sched_param schedp;
+  memset(&schedp, 0, sizeof(schedp));
+  schedp.sched_priority = priority;
+  return !sched_setscheduler(0, SCHED_RR, &schedp);
+#endif
+}
+
 std::pair<bool, std::string> lock_memory()
 {
 #if defined(_WIN32) || defined(__APPLE__)
