@@ -30,9 +30,8 @@ endforeach()
 
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
-endif()
-find_package(Boost COMPONENTS headers)
-if(NOT Boost_headers_FOUND)
+  find_package(Boost REQUIRED CONFIG)
+else()
   find_package(Boost REQUIRED)
 endif()
 
