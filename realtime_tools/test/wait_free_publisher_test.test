@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <test test-name="wait_free_publisher_test" pkg="realtime_tools" type="wait_free_publisher_test" />
+</launch>
