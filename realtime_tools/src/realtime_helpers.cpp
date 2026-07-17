@@ -253,6 +253,39 @@ std::pair<bool, std::string> set_current_thread_affinity(const std::vector<int> 
 #endif
 }
 
+std::pair<bool, std::string> set_current_thread_name(const std::string & name)
+{
+  if (name.empty()) {
+    return std::make_pair(false, "Thread name cannot be empty. This should not happen!");
+  }
+
+#ifdef _WIN32
+  std::wstring wname(name.begin(), name.end());
+  HRESULT hr = SetThreadDescription(GetCurrentThread(), wname.c_str());
+  if (SUCCEEDED(hr)) {
+    return std::make_pair(true, "Thread name: " + name);
+  }
+  return std::make_pair(false, "Failed to set thread name on Windows.");
+#elif defined(__APPLE__)
+  std::string t_name = name.substr(0, 63);
+  std::string msg =
+    (name.length() > 63) ? "Thread name (truncated): " + t_name : "Thread name: " + t_name;
+  if (pthread_setname_np(t_name.c_str()) == 0) {
+    return std::make_pair(true, msg);
+  }
+  return std::make_pair(false, "Failed to set thread name on macOS.");
+#else
+  std::string t_name = name.substr(0, 15);
+  std::string msg =
+    (name.length() > 15) ? "Thread name (truncated): " + t_name : "Thread name: " + t_name;
+  int rc = pthread_setname_np(pthread_self(), t_name.c_str());
+  if (rc == 0) {
+    return std::make_pair(true, msg);
+  }
+  return std::make_pair(false, "Failed to set thread name. Error code: " + std::to_string(rc));
+#endif
+}
+
 int64_t get_number_of_available_processors()
 {
 #ifdef _WIN32
