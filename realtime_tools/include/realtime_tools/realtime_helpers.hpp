@@ -131,6 +131,15 @@ std::pair<bool, std::string> set_current_thread_affinity(int core);
 std::pair<bool, std::string> set_current_thread_affinity(const std::vector<int> & cores);
 
 /**
+ * Configure the current thread name.
+ * \param[in] name The name for the thread.
+ * On Linux, it will be automatically truncated to 15 characters.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_current_thread_name(const std::string & name);
+
+/**
  * Method to get the amount of available cpu cores
  * \ref https://man7.org/linux/man-pages/man3/sysconf.3.html
  * \ref https://stackoverflow.com/a/150971
