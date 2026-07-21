@@ -60,6 +60,15 @@ bool has_realtime_kernel();
 bool configure_sched_fifo(int priority);
 
 /**
+ * Configure SCHED_RR thread priority for the thread that calls this function.
+ * SCHED_RR threads of the same priority are time-sliced (round-robin)
+ * Useful on PREEMPT_RT kernels with multiple RT-priority threads.
+ * \param[in] priority the priority of this thread from 0-99
+ * \returns true if configuring scheduler succeeded
+ */
+bool configure_sched_rr(int priority);
+
+/**
  * Locks the memory pages of the calling thread to prevent page faults.
  * By calling this method, the programs locks all pages mapped into the address
  * space of the calling process and future mappings. This means that the kernel
