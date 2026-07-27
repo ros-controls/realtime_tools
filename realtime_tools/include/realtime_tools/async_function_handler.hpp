@@ -167,7 +167,7 @@ struct AsyncFunctionHandlerParams
   }
 
   /**
-   * @brief Initialize the parameters from a node's parameters.
+   * @brief Declare the parameters from a node.
    * The node should have the following parameters:
    * - thread_priority (int): Priority of the async worker thread. Default is 50.
    * - cpu_affinity (int[]): CPU cores to which the async worker thread should be pinned.
@@ -180,6 +180,39 @@ struct AsyncFunctionHandlerParams
    * - print_warnings (bool): Whether to print warnings when the async callback method is not triggered
    *   due to any reason. Default is true.
    * - thread_name (string): Name applied to the async thread. Defaults to component name. Truncated to 15 chars.
+   * @param node The node that is used to declare the parameters.
+   * @param prefix Parameter prefix to use when declaring node parameters.
+   * @param default_exec_rate The fallback execution rate to declare (usually the controller's update_rate).
+   */
+  template <typename NodeT>
+  static void declare(NodeT & node, const std::string & prefix, int default_exec_rate = 0)
+  {
+    if (!node->has_parameter(prefix + "thread_priority")) {
+      node->template declare_parameter<int>(prefix + "thread_priority", 50);
+    }
+    if (!node->has_parameter(prefix + "cpu_affinity")) {
+      node->template declare_parameter<std::vector<int64_t>>(
+        prefix + "cpu_affinity", std::vector<int64_t>());
+    }
+    if (!node->has_parameter(prefix + "scheduling_policy")) {
+      node->template declare_parameter<std::string>(prefix + "scheduling_policy", "synchronized");
+    }
+    if (!node->has_parameter(prefix + "execution_rate")) {
+      node->template declare_parameter<int>(prefix + "execution_rate", default_exec_rate);
+    }
+    if (!node->has_parameter(prefix + "wait_until_initial_trigger")) {
+      node->template declare_parameter<bool>(prefix + "wait_until_initial_trigger", true);
+    }
+    if (!node->has_parameter(prefix + "print_warnings")) {
+      node->template declare_parameter<bool>(prefix + "print_warnings", true);
+    }
+    if (!node->has_parameter(prefix + "thread_name")) {
+      node->template declare_parameter<std::string>(prefix + "thread_name", "");
+    }
+  }
+
+  /**
+   * @brief Initialize the parameters from a node's parameters.
    * @param node The node that is used to get the parameters.
    * @param prefix Parameter prefix to use when accessing node parameters.
    */
