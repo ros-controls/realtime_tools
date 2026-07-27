@@ -17,6 +17,8 @@
 #ifndef REALTIME_TOOLS__ASYNC_FUNCTION_HANDLER_HPP_
 #define REALTIME_TOOLS__ASYNC_FUNCTION_HANDLER_HPP_
 
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <atomic>
 #include <cmath>
 #include <condition_variable>
@@ -569,12 +571,8 @@ public:
             "Could not set CPU affinity for the async worker thread. Error: %s",
             affinity_result.second.c_str());
 
-          std::string cores_list_print = "[";
-          for (size_t i = 0; i < params_.cpu_affinity_cores.size(); ++i) {
-            cores_list_print += std::to_string(params_.cpu_affinity_cores[i]) +
-                                (i < params_.cpu_affinity_cores.size() - 1 ? ", " : "");
-          }
-          cores_list_print += "]";
+          std::string cores_list_print =
+            fmt::format("[{}]", fmt::join(params_.cpu_affinity_cores, ", "));
 
           RCLCPP_WARN_EXPRESSION(
             params_.logger, affinity_result.first,
