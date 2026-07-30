@@ -63,7 +63,7 @@ bool configure_sched_fifo(int priority);
  * Configure SCHED_RR thread priority for the thread that calls this function.
  * SCHED_RR threads of the same priority are time-sliced (round-robin)
  * Useful on PREEMPT_RT kernels with multiple RT-priority threads.
- * \param[in] priority the priority of this thread from 0-99
+ * \param[in] priority scheduling priority (platform-dependent; on Linux typically 1-99)
  * \returns true if configuring scheduler succeeded
  */
 bool configure_sched_rr(int priority);
