@@ -37,10 +37,19 @@
 #include <mutex>
 #include <thread>
 
+#ifndef SILENCE_DEPRECATION_WARNINGS
+#ifdef _MSC_VER
+#pragma message( \
+  "This header is obsolete, please use \"realtime_tools/realtime_thread_safe_box.hpp\" instead.")
+#else
+#warning This header is obsolete, please use "realtime_tools/realtime_thread_safe_box.hpp" instead.
+#endif
+#endif
+
 namespace realtime_tools
 {
 template <class T>
-class RealtimeBuffer
+class [[deprecated("Use realtime_tools::RealtimeThreadSafeBox instead.")]] RealtimeBuffer
 {
 public:
   RealtimeBuffer() : new_data_available_(false)
