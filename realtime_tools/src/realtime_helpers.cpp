@@ -98,13 +98,13 @@ bool configure_sched_fifo(int priority)
 #endif
 }
 
-<<<<<<< HEAD
 bool lock_memory(std::string & message)
 {
   const auto lock_result = lock_memory();
   message = lock_result.second;
   return lock_result.first;
-=======
+}
+
 bool configure_sched_rr(int priority)
 {
 #ifdef _WIN32
@@ -128,7 +128,6 @@ bool configure_sched_rr(int priority)
   schedp.sched_priority = priority;
   return !sched_setscheduler(0, SCHED_RR, &schedp);
 #endif
->>>>>>> 64be1bc (Add configure_sched_rr() for SCHED_RR scheduling policy (#513))
 }
 
 std::pair<bool, std::string> lock_memory()
