@@ -21,6 +21,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp_action
   Threads
   rcpputils
+  fmt
 )
 
 find_package(ament_cmake REQUIRED)
@@ -43,7 +44,13 @@ target_include_directories(realtime_tools PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
-target_link_libraries(realtime_tools PUBLIC rclcpp::rclcpp rclcpp_action::rclcpp_action rcpputils::rcpputils Threads::Threads Boost::boost)
+target_link_libraries(realtime_tools PUBLIC
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  rcpputils::rcpputils
+  Threads::Threads
+  Boost::boost
+  fmt::fmt)
 if(UNIX AND NOT APPLE)
   target_link_libraries(realtime_tools PUBLIC cap)
 endif()
@@ -68,6 +75,7 @@ if(BUILD_TESTING)
   find_package(lifecycle_msgs REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
   find_package(test_msgs REQUIRED)
+  find_package(fmt REQUIRED)
 
   ament_add_gmock(thread_priority_tests test/thread_priority_tests.cpp)
   target_link_libraries(thread_priority_tests thread_priority)
@@ -100,7 +108,8 @@ if(BUILD_TESTING)
                         realtime_tools
                         thread_priority
                         ${lifecycle_msgs_TARGETS}
-                        rclcpp_lifecycle::rclcpp_lifecycle)
+                        rclcpp_lifecycle::rclcpp_lifecycle
+                        fmt::fmt)
 
   if(NOT WIN32)
     ament_add_gmock(realtime_mutex_tests test/realtime_mutex_tests.cpp)
