@@ -182,10 +182,9 @@ struct AsyncFunctionHandlerParams
    * - thread_name (string): Name applied to the async thread. Defaults to component name. Truncated to 15 chars.
    * @param node The node that is used to declare the parameters.
    * @param prefix Parameter prefix to use when declaring node parameters.
-   * @param default_exec_rate The fallback execution rate to declare (usually the controller's update_rate).
    */
   template <typename NodeT>
-  static void declare(NodeT & node, const std::string & prefix, int default_exec_rate = 0)
+  static void declare(NodeT & node, const std::string & prefix)
   {
     if (!node->has_parameter(prefix + "thread_priority")) {
       node->template declare_parameter<int>(prefix + "thread_priority", 50);
@@ -196,9 +195,6 @@ struct AsyncFunctionHandlerParams
     }
     if (!node->has_parameter(prefix + "scheduling_policy")) {
       node->template declare_parameter<std::string>(prefix + "scheduling_policy", "synchronized");
-    }
-    if (!node->has_parameter(prefix + "execution_rate")) {
-      node->template declare_parameter<int>(prefix + "execution_rate", default_exec_rate);
     }
     if (!node->has_parameter(prefix + "wait_until_initial_trigger")) {
       node->template declare_parameter<bool>(prefix + "wait_until_initial_trigger", true);
@@ -232,17 +228,6 @@ struct AsyncFunctionHandlerParams
     if (node->has_parameter(prefix + "scheduling_policy")) {
       scheduling_policy =
         AsyncSchedulingPolicy(node->get_parameter(prefix + "scheduling_policy").as_string());
-    }
-    if (
-      scheduling_policy == AsyncSchedulingPolicy::DETACHED &&
-      node->has_parameter(prefix + "execution_rate")) {
-      const int execution_rate =
-        static_cast<int>(node->get_parameter(prefix + "execution_rate").as_int());
-      if (execution_rate <= 0) {
-        throw std::runtime_error(
-          "AsyncFunctionHandler: execution_rate parameter must be positive.");
-      }
-      exec_rate = static_cast<unsigned int>(execution_rate);
     }
     if (node->has_parameter(prefix + "wait_until_initial_trigger")) {
       wait_until_initial_trigger =
