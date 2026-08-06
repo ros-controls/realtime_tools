@@ -17,6 +17,8 @@
 #ifndef REALTIME_TOOLS__ASYNC_FUNCTION_HANDLER_HPP_
 #define REALTIME_TOOLS__ASYNC_FUNCTION_HANDLER_HPP_
 
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <atomic>
 #include <cmath>
 #include <condition_variable>
@@ -586,9 +588,13 @@ public:
             params_.logger, !affinity_result.first,
             "Could not set CPU affinity for the async worker thread. Error: %s",
             affinity_result.second.c_str());
+
+          std::string cores_list_print =
+            fmt::format("[{}]", fmt::join(params_.cpu_affinity_cores, ", "));
+
           RCLCPP_WARN_EXPRESSION(
             params_.logger, affinity_result.first,
-            "Async worker thread is successfully pinned to the requested CPU cores!");
+            "Async worker thread successfully pinned to Cores: %s", cores_list_print.c_str());
         }
         if (!params_.thread_name.empty()) {
           const auto rename_result = realtime_tools::set_current_thread_name(params_.thread_name);
