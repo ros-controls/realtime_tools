@@ -169,24 +169,12 @@ struct AsyncFunctionHandlerParams
   }
 
   /**
-   * @brief Declare the parameters from a node.
-   * The node should have the following parameters:
-   * - thread_priority (int): Priority of the async worker thread. Default is 50.
-   * - cpu_affinity (int[]): CPU cores to which the async worker thread should be pinned.
-   *   Default is empty, which means the thread will not be pinned to any CPU core.
-   * - scheduling_policy (string): Scheduling policy for the async worker thread. Can be either
-   *   "synchronized" or "detached". Default is "synchronized".
-   * - execution_rate (int): Execution rate of the async worker thread in Hz.
-   * - wait_until_initial_trigger (bool): Whether to wait until the initial trigger predicate is true
-   *   before starting the async callback method. Default is true.
-   * - print_warnings (bool): Whether to print warnings when the async callback method is not triggered
-   *   due to any reason. Default is true.
-   * - thread_name (string): Name applied to the async thread. Defaults to component name. Truncated to 15 chars.
-   * @param node The node that is used to declare the parameters.
-   * @param prefix Parameter prefix to use when declaring node parameters.
+   * @brief Declares and initialize the parameters from a node's parameters.
+   * @param node The node that is used to get the parameters.
+   * @param prefix Parameter prefix to use when accessing node parameters.
    */
   template <typename NodeT>
-  static void declare(NodeT & node, const std::string & prefix)
+  void initialize(NodeT & node, const std::string & prefix)
   {
     if (!node->has_parameter(prefix + "thread_priority")) {
       node->template declare_parameter<int>(prefix + "thread_priority", 50);
@@ -207,16 +195,7 @@ struct AsyncFunctionHandlerParams
     if (!node->has_parameter(prefix + "thread_name")) {
       node->template declare_parameter<std::string>(prefix + "thread_name", "");
     }
-  }
 
-  /**
-   * @brief Initialize the parameters from a node's parameters.
-   * @param node The node that is used to get the parameters.
-   * @param prefix Parameter prefix to use when accessing node parameters.
-   */
-  template <typename NodeT>
-  void initialize(NodeT & node, const std::string & prefix)
-  {
     if (node->has_parameter(prefix + "thread_priority")) {
       thread_priority = static_cast<int>(node->get_parameter(prefix + "thread_priority").as_int());
     }
