@@ -239,13 +239,13 @@ private:
   void publishingLoop(std::promise<void> started_promise)
   {
     is_running_ = true;
+    turn_.store(State::REALTIME, std::memory_order_release);
     started_promise.set_value();
 
     while (keep_running_) {
       MessageT outgoing;
 
       {
-        turn_.store(State::REALTIME, std::memory_order_release);
         // Locks msg_ and copies it to outgoing
         std::unique_lock<std::mutex> lock_(msg_mutex_);
         updated_cond_.wait(lock_, [&] { return turn_ == State::NON_REALTIME || !keep_running_; });
@@ -256,6 +256,7 @@ private:
       if (keep_running_) {
         publisher_->publish(outgoing);
       }
+      turn_.store(State::REALTIME, std::memory_order_release);
     }
     is_running_ = false;
   }

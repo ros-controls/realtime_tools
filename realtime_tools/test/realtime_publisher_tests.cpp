@@ -61,14 +61,14 @@ void verify_publisher(
   const char * expected_msg = "Hello World";
   ASSERT_TRUE(rt_pub.can_publish());
 
-  // make sure subscriber gets it
-  StringCallback str_callback;
-  auto sub = node->create_subscription<StringMsg>(
-    topic, qos, std::bind(&StringCallback::callback, &str_callback, std::placeholders::_1));
-
   StringMsg msg;
   msg.string_value = expected_msg;
   ASSERT_TRUE(rt_pub.try_publish(msg));
+
+  // make sure subscriber gets it (created after publishing to verify transient_local latching)
+  StringCallback str_callback;
+  auto sub = node->create_subscription<StringMsg>(
+    topic, qos, std::bind(&StringCallback::callback, &str_callback, std::placeholders::_1));
 
   rclcpp::executors::SingleThreadedExecutor exec;
   exec.add_node(node);
