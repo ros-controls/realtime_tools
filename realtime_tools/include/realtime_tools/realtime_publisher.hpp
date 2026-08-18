@@ -40,6 +40,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -80,21 +81,11 @@ public:
   explicit RealtimePublisher(
     NodeT && node, const std::string & topic_name, const rclcpp::QoS & qos,
     const rclcpp::PublisherOptions & options = rclcpp::PublisherOptions())
-  : publisher_(
-      rclcpp::create_publisher<MessageT>(std::forward<NodeT>(node), topic_name, qos, options)),
-    is_running_(false),
-    keep_running_(true),
-    turn_(State::LOOP_NOT_STARTED)
   {
-    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
-
-    // Wait for the thread to be ready before proceeding
-    // This is important to ensure that the thread is properly initialized and ready to handle
-    // messages before any other operations are performed on the RealtimePublisher instance.
-    while (!thread_.joinable() ||
-           turn_.load(std::memory_order_acquire) == State::LOOP_NOT_STARTED) {
-      std::this_thread::sleep_for(std::chrono::microseconds(100));
-    }
+    initialize([&]() {
+      return rclcpp::create_publisher<MessageT>(
+        std::forward<NodeT>(node), topic_name, qos, options);
+    });
   }
 
   /**
@@ -108,17 +99,8 @@ public:
    */
   [[deprecated("Use the constructor that creates the publisher internally instead.")]]
   explicit RealtimePublisher(PublisherSharedPtr publisher)
-  : publisher_(publisher), is_running_(false), keep_running_(true), turn_(State::LOOP_NOT_STARTED)
   {
-    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
-
-    // Wait for the thread to be ready before proceeding
-    // This is important to ensure that the thread is properly initialized and ready to handle
-    // messages before any other operations are performed on the RealtimePublisher instance.
-    while (!thread_.joinable() ||
-           turn_.load(std::memory_order_acquire) == State::LOOP_NOT_STARTED) {
-      std::this_thread::sleep_for(std::chrono::microseconds(100));
-    }
+    initialize([&]() { return publisher; });
   }
 
   /// Destructor
@@ -211,11 +193,27 @@ public:
   const std::mutex & get_mutex() const { return msg_mutex_; }
 
 private:
+  template <typename PublisherCreator>
+  void initialize(PublisherCreator && creator)
+  {
+    publisher_ = creator();
+    is_running_ = false;
+    keep_running_ = true;
+    turn_ = State::LOOP_NOT_STARTED;
+
+    std::promise<void> started_promise;
+    auto started_future = started_promise.get_future();
+
+    thread_ = std::thread(&RealtimePublisher::publishingLoop, this, std::move(started_promise));
+
+    started_future.wait();
+  }
+
   /**
    * \brief Check if the realtime publisher is in a state to publish messages
    * \param lock A unique_lock that is already acquired on the msg_mutex_
    * \return true if the publisher is in a state to publish messages
-  */
+   */
   bool can_publish(std::unique_lock<std::mutex> & lock) const
   {
     return turn_.load(std::memory_order_acquire) == State::REALTIME && lock.owns_lock();
@@ -238,9 +236,10 @@ private:
    *
    * The loop continues until keep_running_ is set to false.
    */
-  void publishingLoop()
+  void publishingLoop(std::promise<void> started_promise)
   {
     is_running_ = true;
+    started_promise.set_value();
 
     while (keep_running_) {
       MessageT outgoing;
