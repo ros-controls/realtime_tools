@@ -215,7 +215,7 @@ private:
    * \brief Check if the realtime publisher is in a state to publish messages
    * \param lock A unique_lock that is already acquired on the msg_mutex_
    * \return true if the publisher is in a state to publish messages
-   */
+  */
   bool can_publish(std::unique_lock<std::mutex> & lock) const
   {
     return turn_.load(std::memory_order_acquire) == State::REALTIME && lock.owns_lock();
