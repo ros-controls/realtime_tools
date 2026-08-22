@@ -6,5 +6,18 @@ This list summarizes important changes between Jazzy (previous) and Kilted (curr
 
 RealtimeBox
 *******************************
+<<<<<<< HEAD
 * ``RealtimeBox`` is deprecated. Update your code to use ``realtime_thread_safe_box.hpp`` header, and class name ``RealtimeThreadSafeBox`` instead. (`#318 <https://github.com/ros-controls/realtime_tools/pull/318>`__, `#342 <https://github.com/ros-controls/realtime_tools/pull/342>`__).
 * ``RealtimePublisher`` is updated with a new ``try_publish`` API. Update your code with a local message variable and call ``try_publish`` with that variable. The old API is deprecated and will be removed in a future release. (`#323 <https://github.com/ros-controls/realtime_tools/pull/323>`__).
+=======
+* ``RealtimePublisher`` is updated with a new ``try_publish`` API.
+
+  * Update your code with a local message variable and call ``try_publish`` with that variable. (`#323 <https://github.com/ros-controls/realtime_tools/pull/323>`__).
+  * ``msg_`` variable is inaccessible now (`#421 <https://github.com/ros-controls/realtime_tools/pull/421>`__).
+
+RealtimePublisher
+*****************
+* ``RealtimePublisher`` is updated with a template constructor that creates the publisher internally, and the legacy constructor taking a pre-created publisher has been deprecated.
+
+  * Instead of creating a publisher first and passing it to the constructor, you can now pass the node (or node interface/pointer), topic name, QoS, and publisher options directly to ``RealtimePublisher``. (`#573 <https://github.com/ros-controls/realtime_tools/pull/573>`__).
+>>>>>>> f237866 (feat: create publisher internally in RealtimePublisher (#573))
