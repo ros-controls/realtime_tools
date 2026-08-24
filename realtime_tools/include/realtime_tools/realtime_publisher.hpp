@@ -100,7 +100,6 @@ public:
    *
    * \param publisher the ROS publisher to wrap
    */
-<<<<<<< HEAD
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4996)
@@ -108,9 +107,7 @@ public:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
-=======
   [[deprecated("Use the constructor that creates the publisher internally instead.")]]
->>>>>>> f237866 (feat: create publisher internally in RealtimePublisher (#573))
   explicit RealtimePublisher(PublisherSharedPtr publisher)
   {
     initialize([&]() { return publisher; });
