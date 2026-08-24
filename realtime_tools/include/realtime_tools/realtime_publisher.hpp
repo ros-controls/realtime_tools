@@ -46,6 +46,7 @@
 #include <thread>
 #include <utility>
 
+#include "rclcpp/create_publisher.hpp"
 #include "rclcpp/publisher.hpp"
 
 namespace realtime_tools
@@ -67,6 +68,36 @@ public:
     "This variable is deprecated, it is recommended to use the try_publish() method instead.")]]
   MessageT msg_;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+  /**
+   * \brief Constructor for the realtime publisher that creates the publisher internally
+   *
+   * Starts a dedicated thread for message publishing.
+   * The publishing thread runs the publishingLoop() function to handle message
+   * delivery in a non-realtime context.
+   *
+   * \param node the node (or node interface/pointer) to create the publisher for
+   * \param topic_name the topic name on which we want to publish
+   * \param qos the QoS settings for the publisher
+   * \param options the publisher options
+   */
+  template <typename NodeT>
+  explicit RealtimePublisher(
+    NodeT && node, const std::string & topic_name, const rclcpp::QoS & qos,
+    const rclcpp::PublisherOptions & options = rclcpp::PublisherOptions())
+  {
+    initialize([&]() {
+      return rclcpp::create_publisher<MessageT>(
+        std::forward<NodeT>(node), topic_name, qos, options);
+    });
+  }
+
   /**
    * \brief Constructor for the realtime publisher
    *
@@ -76,25 +107,9 @@ public:
    *
    * \param publisher the ROS publisher to wrap
    */
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4996)
-#else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
   explicit RealtimePublisher(PublisherSharedPtr publisher)
-  : publisher_(publisher), is_running_(false), keep_running_(true), turn_(State::LOOP_NOT_STARTED)
   {
-    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
-
-    // Wait for the thread to be ready before proceeding
-    // This is important to ensure that the thread is properly initialized and ready to handle
-    // messages before any other operations are performed on the RealtimePublisher instance.
-    while (!thread_.joinable() ||
-           turn_.load(std::memory_order_acquire) == State::LOOP_NOT_STARTED) {
-      std::this_thread::sleep_for(std::chrono::microseconds(100));
-    }
+    initialize([&]() { return publisher; });
   }
 
   /// Destructor
@@ -305,6 +320,25 @@ public:
   const std::mutex & get_mutex() const { return msg_mutex_; }
 
 private:
+  template <typename PublisherCreator>
+  void initialize(PublisherCreator && creator)
+  {
+    publisher_ = creator();
+    is_running_ = false;
+    keep_running_ = true;
+    turn_ = State::LOOP_NOT_STARTED;
+
+    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
+
+    // Wait for the thread to be ready before proceeding
+    // This is important to ensure that the thread is properly initialized and ready to handle
+    // messages before any other operations are performed on the RealtimePublisher instance.
+    while (!thread_.joinable() ||
+           turn_.load(std::memory_order_acquire) == State::LOOP_NOT_STARTED) {
+      std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
+  }
+
   /**
    * \brief Check if the realtime publisher is in a state to publish messages
    * \param lock A unique_lock that is already acquired on the msg_mutex_
