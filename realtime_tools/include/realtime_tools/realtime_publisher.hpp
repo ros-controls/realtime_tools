@@ -98,7 +98,6 @@ public:
    *
    * \param publisher the ROS publisher to wrap
    */
-  [[deprecated("Use the constructor that creates the publisher internally instead.")]]
   explicit RealtimePublisher(PublisherSharedPtr publisher)
   {
     initialize([&]() { return publisher; });
