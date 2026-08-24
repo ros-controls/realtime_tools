@@ -107,7 +107,6 @@ public:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
-  [[deprecated("Use the constructor that creates the publisher internally instead.")]]
   explicit RealtimePublisher(PublisherSharedPtr publisher)
   {
     initialize([&]() { return publisher; });
