@@ -68,6 +68,13 @@ public:
     "This variable is deprecated, it is recommended to use the try_publish() method instead.")]]
   MessageT msg_;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
   /**
    * \brief Constructor for the realtime publisher that creates the publisher internally
    *
@@ -100,13 +107,6 @@ public:
    *
    * \param publisher the ROS publisher to wrap
    */
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4996)
-#else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
   explicit RealtimePublisher(PublisherSharedPtr publisher)
   {
     initialize([&]() { return publisher; });
