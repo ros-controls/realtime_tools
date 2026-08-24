@@ -54,7 +54,6 @@ struct StringCallback
   }
 };
 
-<<<<<<< HEAD
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -138,12 +137,9 @@ TEST(RealtimePublisher, rt_try_publish_legacy)
 }
 #pragma GCC diagnostic pop
 
-TEST(RealtimePublisher, rt_can_try_publish)
-=======
 void verify_publisher(
   RealtimePublisher<StringMsg> & rt_pub, const std::shared_ptr<rclcpp::Node> & node,
   const rclcpp::QoS & qos, const std::string & topic)
->>>>>>> f237866 (feat: create publisher internally in RealtimePublisher (#573))
 {
   const char * expected_msg = "Hello World";
   ASSERT_TRUE(rt_pub.can_publish());
