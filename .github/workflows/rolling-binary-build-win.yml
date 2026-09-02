@@ -29,9 +29,5 @@ jobs:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@master
     with:
       ros_distro: rolling
-<<<<<<< HEAD
       ref_for_scheduled_build: master
-      pixi_dependencies: boost compilers
-=======
       pixi_dependencies: libboost-devel compilers
->>>>>>> e951e10 (Install libboost-devel instead of boost with python support (#582))
