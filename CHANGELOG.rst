@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.1 (2026-09-03)
+-------------------
 * package.xml: correct license to a valid SPDX (backport `#552 <https://github.com/ros-controls/realtime_tools/issues/552>`_) (`#553 <https://github.com/ros-controls/realtime_tools/issues/553>`_)
 * Contributors: dependabot[bot], mergify[bot]
 
