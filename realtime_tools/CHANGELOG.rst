@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.3.0 (2026-09-03)
+------------------
 * feat: create publisher internally in RealtimePublisher (`#573 <https://github.com/ros-controls/realtime_tools/issues/573>`_)
 * print async thread pinned cores (`#551 <https://github.com/ros-controls/realtime_tools/issues/551>`_)
 * Add configure_sched_rr() for SCHED_RR scheduling policy (`#513 <https://github.com/ros-controls/realtime_tools/issues/513>`_)
