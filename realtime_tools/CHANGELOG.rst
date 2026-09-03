@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.12.0 (2026-09-03)
+-------------------
 * feat: create publisher internally in RealtimePublisher (backport `#573 <https://github.com/ros-controls/realtime_tools/issues/573>`_) (`#574 <https://github.com/ros-controls/realtime_tools/issues/574>`_)
 * print async thread pinned cores (backport `#551 <https://github.com/ros-controls/realtime_tools/issues/551>`_) (`#567 <https://github.com/ros-controls/realtime_tools/issues/567>`_)
   print async thread pinned cores (`#551 <https://github.com/ros-controls/realtime_tools/issues/551>`_)
