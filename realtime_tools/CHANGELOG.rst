@@ -2,6 +2,18 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* feat: create publisher internally in RealtimePublisher (`#573 <https://github.com/ros-controls/realtime_tools/issues/573>`_)
+* print async thread pinned cores (`#551 <https://github.com/ros-controls/realtime_tools/issues/551>`_)
+* Add configure_sched_rr() for SCHED_RR scheduling policy (`#513 <https://github.com/ros-controls/realtime_tools/issues/513>`_)
+* package.xml: correct license to a valid SPDX (`#552 <https://github.com/ros-controls/realtime_tools/issues/552>`_)
+* Add thread naming in async function handler (`#550 <https://github.com/ros-controls/realtime_tools/issues/550>`_)
+* Apply CMP0167 also for exported dependencies (`#539 <https://github.com/ros-controls/realtime_tools/issues/539>`_)
+* Fix CMP0167 and remove FindBoost (`#531 <https://github.com/ros-controls/realtime_tools/issues/531>`_)
+* Bump C++ version to C++20 (`#520 <https://github.com/ros-controls/realtime_tools/issues/520>`_)
+* Contributors: Christoph Fröhlich, Jan Vermaete, Nikola Banović, Souri Rishik, Suresh Kondepudi
+
 5.2.0 (2026-04-02)
 ------------------
 * Use realtime mutex and also try-lock while setting feedback (`#490 <https://github.com/ros-controls/realtime_tools/issues/490>`_)
