@@ -73,7 +73,7 @@ private:
 public:
   std::shared_ptr<GoalHandle> gh_;
   ResultSharedPtr preallocated_result_;      // Preallocated so it can be used in realtime
-  FeedbackSharedPtr preallocated_feedback_;  // Preallocated so it can be used in realtime
+  FeedbackSharedPtr preallocated_feedback_;  // Preallocated for trySetFeedback()
 
   explicit RealtimeServerGoalHandle(
     std::shared_ptr<GoalHandle> & gh, const ResultSharedPtr & preallocated_result = nullptr,
@@ -153,11 +153,10 @@ public:
    * The feedback pointer is stored and the non-RT thread will publish it on the next
    * runNonRealtime() call, provided the goal handle is in executing state.
    *
-   * @param feedback Shared pointer to feedback message. Can be nullptr to clear pending
-   *        feedback. If a valid pointer is provided, the caller must ensure the feedback
-   *        object remains valid until runNonRealtime() processes it. Using a
-   *        preallocated feedback message (stored in preallocated_feedback_) is
-   *        recommended to avoid dynamic allocations in the real-time thread.
+    * @param feedback Shared pointer to feedback message. Can be nullptr to clear pending
+    *        feedback. If a valid pointer is provided, the caller must not modify it while
+    *        this handle may publish it. Use trySetFeedback() to safely reuse the handle's
+    *        preallocated feedback message.
    *
    * @return true if the lock was acquired and feedback was successfully set,
    *         false if the lock could not be acquired (feedback update was dropped).
@@ -170,13 +169,36 @@ public:
    *       is set after the goal transitions out of executing state, it will be discarded.
    *
    * @see runNonRealtime() for the counterpart that publishes the feedback.
-   * @see preallocated_feedback_ for recommended pre-allocated feedback usage.
+    * @see trySetFeedback() for safe preallocated feedback reuse.
    */
   bool setFeedback(FeedbackSharedPtr feedback = nullptr)
   {
     std::unique_lock<rt_server_goal_handle_mutex> lock(mutex_, std::try_to_lock);
     if (lock.owns_lock()) {
       req_feedback_ = feedback;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @brief Update preallocated feedback to be published by runNonRealtime().
+   *
+   * The callback runs while holding the same mutex used by runNonRealtime(), ensuring
+   * that the feedback cannot be modified while it is being published. The lock is
+   * acquired without blocking and the callback is not invoked if it cannot be acquired.
+   *
+   * @param update_feedback Callback receiving a mutable reference to the preallocated
+   *        feedback message.
+   * @return true if the feedback was updated, false if the lock could not be acquired.
+   */
+  template <typename FeedbackUpdateCallback>
+  bool trySetFeedback(FeedbackUpdateCallback && update_feedback)
+  {
+    std::unique_lock<rt_server_goal_handle_mutex> lock(mutex_, std::try_to_lock);
+    if (lock.owns_lock()) {
+      update_feedback(*preallocated_feedback_);
+      req_feedback_ = preallocated_feedback_;
       return true;
     }
     return false;
