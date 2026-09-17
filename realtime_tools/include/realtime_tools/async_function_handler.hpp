@@ -717,6 +717,14 @@ private:
               next_iteration_time += (overrun_count * period);
             }
             std::this_thread::sleep_until(next_iteration_time);
+          } else if (params_.scheduling_policy == AsyncSchedulingPolicy::HARDWARE_DRIVEN) {
+            // Safety net: If the hardware interface does not block and returned instantly,
+            // fallback to 10% of the nominal execution rate period to prevent CPU burning.
+            const auto last_period = last_execution_time_.load(std::memory_order_relaxed);
+            const auto minimum_expected_period = period / 10;
+            if (last_period < minimum_expected_period) {
+              std::this_thread::sleep_for(period - last_period);
+            }
           }
         }
         trigger_in_progress_ = false;
