@@ -46,18 +46,18 @@ namespace realtime_tools
  * thread will be triggering the async callback method.
  * DETACHED: The async worker thread will be detached from the main thread and will have its own
  * execution cycle.
- * SLAVE: The async worker thread will be a slave to the hardware execution and will be blocked
- * by it - usually when waiting for data in the read() method.
+ * HARDWARE_DRIVEN: The async worker thread will be scheduled by the hardware, by blocking at start of read()
+ * until a UDP packet arrives. Then the control cycle is started.
  * UNKNOWN: The scheduling policy is unknown.
  */
 class AsyncSchedulingPolicy
 {
 public:
   enum Value : int8_t {
-    UNKNOWN = -1,  /// Unknown scheduling policy
-    SYNCHRONIZED,  /// Synchronized scheduling policy
-    DETACHED,      /// Detached scheduling policy
-    SLAVE,         /// Slave scheduling policy
+    UNKNOWN = -1,     /// Unknown scheduling policy
+    SYNCHRONIZED,     /// Synchronized scheduling policy
+    DETACHED,         /// Detached scheduling policy
+    HARDWARE_DRIVEN,  /// Hardware driven scheduling policy
   };
 
   AsyncSchedulingPolicy() = default;
@@ -68,8 +68,8 @@ public:
       value_ = SYNCHRONIZED;
     } else if (data_type == "detached") {
       value_ = DETACHED;
-    } else if (data_type == "slave") {
-      value_ = SLAVE;
+    } else if (data_type == "hardware_driven") {
+      value_ = HARDWARE_DRIVEN;
     } else {
       value_ = UNKNOWN;
     }
@@ -92,8 +92,8 @@ public:
         return "synchronized";
       case DETACHED:
         return "detached";
-      case SLAVE:
-        return "slave";
+      case HARDWARE_DRIVEN:
+        return "hardware_driven";
       default:
         return "unknown";
     }
@@ -114,24 +114,23 @@ private:
  * thread, as the main thread will be triggering the async callback method.
  * If the type is DETACHED, the async worker thread will be detached from the main thread and
  * will have its own execution cycle.
- * If the type is SLAVE, the async worker thread will be a slave to the hardware execution and
- * will be not sleep but it is expected to be blocked by the hardware interface itself.
- *
+ * If the type is HARDWARE_DRIVEN, the async worker thread will be driven by hardware execution and
+ * will not sleep but it is expected to be blocked by the hardware interface itself.
  * @param thread_priority Priority of the async worker thread. Should be between 0 and 99.
  * @param cpu_affinity_cores CPU cores to which the async worker thread should be pinned.
  * If empty, the thread will not be pinned to any CPU core.
  * @param scheduling_policy Scheduling policy for the async worker thread. Can be either
- * SYNCHRONIZED, DETACHED, or SLAVE.
+ * SYNCHRONIZED, DETACHED, or HARDWARE_DRIVEN.
  * @param exec_rate Execution rate of the async worker thread in Hz. Only used if the
- * scheduling_policy is DETACHED or SLAVE. Must be a positive integer.
+ * scheduling_policy is DETACHED or HARDWARE_DRIVEN. Must be a positive integer.
  * @param clock Clock to be used for the async worker thread. Only used if the scheduling_policy
- * is DETACHED or SLAVE.
+ * is DETACHED or HARDWARE_DRIVEN.
  * @param logger Logger to be used for the async worker thread. If not set, a default logger will be used.
  * @param trigger_predicate Predicate function to check if the async callback method should be triggered or not.
  * If not set, the async callback method will be triggered every time.
  * @param wait_until_initial_trigger Whether to wait until the initial trigger predicate is true before starting
  * the async callback method. If true, the async callback method will not be called until the trigger predicate
- * returns true for the first time. Very useful when the type is DETACHED or SLAVE.
+ * returns true for the first time. Very useful when the type is DETACHED or HARDWARE_DRIVEN.
  * @param print_warnings Whether to print warnings when the async callback method is not triggered due to any reason.
  * @param thread_name The custom name for the async thread. Defaults to the component name. Will be truncated to 15 characters.
  */
@@ -151,21 +150,23 @@ struct AsyncFunctionHandlerParams
     }
     if (
       scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
-      scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
+      scheduling_policy == AsyncSchedulingPolicy::HARDWARE_DRIVEN) {
       if (!clock) {
-        RCLCPP_ERROR(logger, "Clock must be set when using DETACHED or SLAVE scheduling policy.");
+        RCLCPP_ERROR(
+          logger, "Clock must be set when using DETACHED or HARDWARE_DRIVEN scheduling policy.");
         return false;
       }
       if (exec_rate == 0u) {
         RCLCPP_ERROR(
-          logger, "Execution rate must be set when using DETACHED or SLAVE scheduling policy.");
+          logger,
+          "Execution rate must be set when using DETACHED or HARDWARE_DRIVEN scheduling policy.");
         return false;
       }
     }
     if (scheduling_policy == AsyncSchedulingPolicy::UNKNOWN) {
       throw std::runtime_error(
         "AsyncFunctionHandlerParams: scheduling policy is unknown. "
-        "Please set it to either 'synchronized', 'detached' or 'slave'.");
+        "Please set it to either 'synchronized', 'detached' or 'hardware_driven'.");
     }
     if (trigger_predicate == nullptr) {
       RCLCPP_ERROR(logger, "The parsed trigger predicate is not valid!");
@@ -187,7 +188,7 @@ struct AsyncFunctionHandlerParams
    * - cpu_affinity (int[]): CPU cores to which the async worker thread should be pinned.
    *   Default is empty, which means the thread will not be pinned to any CPU core.
    * - scheduling_policy (string): Scheduling policy for the async worker thread. Can be either
-   *   "synchronized", "detached", or "slave". Default is "synchronized".
+   *   "synchronized", "detached", or "hardware_driven". Default is "synchronized".
    * - execution_rate (int): Execution rate of the async worker thread in Hz.
    * - wait_until_initial_trigger (bool): Whether to wait until the initial trigger predicate is true
    *   before starting the async callback method. Default is true.
@@ -216,7 +217,7 @@ struct AsyncFunctionHandlerParams
     }
     if (
       (scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
-       scheduling_policy == AsyncSchedulingPolicy::SLAVE) &&
+       scheduling_policy == AsyncSchedulingPolicy::HARDWARE_DRIVEN) &&
       node->has_parameter(prefix + "execution_rate")) {
       const int execution_rate =
         static_cast<int>(node->get_parameter(prefix + "execution_rate").as_int());
@@ -355,10 +356,10 @@ public:
     }
     if (
       params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
-      params_.scheduling_policy == AsyncSchedulingPolicy::SLAVE) {
+      params_.scheduling_policy == AsyncSchedulingPolicy::HARDWARE_DRIVEN) {
       RCLCPP_WARN_ONCE(
         params_.logger,
-        "AsyncFunctionHandler is configured with DETACHED or SLAVE scheduling policy. "
+        "AsyncFunctionHandler is configured with DETACHED or HARDWARE_DRIVEN scheduling policy. "
         "This means that the async callback may not be synchronized with the main thread.");
       if (pause_thread_.load(std::memory_order_relaxed)) {
         {
@@ -610,7 +611,7 @@ public:
             execute_synchronized_callback();
             break;
           case AsyncSchedulingPolicy::DETACHED:
-          case AsyncSchedulingPolicy::SLAVE:
+          case AsyncSchedulingPolicy::HARDWARE_DRIVEN:
             execute_detached_callback();
             break;
           default:
@@ -653,11 +654,13 @@ private:
   {
     if (!params_.clock) {
       throw std::runtime_error(
-        "AsyncFunctionHandler: Clock must be set when using DETACHED or SLAVE scheduling policy.");
+        "AsyncFunctionHandler: Clock must be set when using DETACHED or HARDWARE_DRIVEN scheduling "
+        "policy.");
     }
     if (params_.exec_rate == 0u) {
       throw std::runtime_error(
-        "AsyncFunctionHandler: Execution rate must be set when using DETACHED or SLAVE scheduling "
+        "AsyncFunctionHandler: Execution rate must be set when using DETACHED or HARDWARE_DRIVEN "
+        "scheduling "
         "policy.");
     }
 
