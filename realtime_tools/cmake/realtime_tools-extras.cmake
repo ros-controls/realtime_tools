@@ -1,0 +1,6 @@
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+  find_package(Boost REQUIRED CONFIG)
+else()
+  find_package(Boost REQUIRED)
+endif()

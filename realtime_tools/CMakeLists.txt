@@ -21,6 +21,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp_action
   Threads
   rcpputils
+  fmt
 )
 
 find_package(ament_cmake REQUIRED)
@@ -30,21 +31,25 @@ endforeach()
 
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
-endif()
-find_package(Boost COMPONENTS headers)
-if(NOT Boost_headers_FOUND)
+  find_package(Boost REQUIRED CONFIG)
+else()
   find_package(Boost REQUIRED)
 endif()
 
 add_library(realtime_tools SHARED
   src/realtime_helpers.cpp
 )
-target_compile_features(realtime_tools PUBLIC cxx_std_17)
 target_include_directories(realtime_tools PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/realtime_tools>
 )
-target_link_libraries(realtime_tools PUBLIC rclcpp::rclcpp rclcpp_action::rclcpp_action rcpputils::rcpputils Threads::Threads Boost::boost)
+target_link_libraries(realtime_tools PUBLIC
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  rcpputils::rcpputils
+  Threads::Threads
+  Boost::boost
+  fmt::fmt)
 if(UNIX AND NOT APPLE)
   target_link_libraries(realtime_tools PUBLIC cap)
 endif()
@@ -53,7 +58,6 @@ endif()
 add_library(thread_priority SHARED
   src/realtime_helpers.cpp
 )
-target_compile_features(thread_priority PUBLIC cxx_std_17)
 target_include_directories(thread_priority PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/realtime_tools>
@@ -69,6 +73,7 @@ if(BUILD_TESTING)
   find_package(lifecycle_msgs REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
   find_package(test_msgs REQUIRED)
+  find_package(fmt REQUIRED)
 
   ament_add_gmock(thread_priority_tests test/thread_priority_tests.cpp)
   target_link_libraries(thread_priority_tests thread_priority)
@@ -101,7 +106,8 @@ if(BUILD_TESTING)
                         realtime_tools
                         thread_priority
                         ${lifecycle_msgs_TARGETS}
-                        rclcpp_lifecycle::rclcpp_lifecycle)
+                        rclcpp_lifecycle::rclcpp_lifecycle
+                        fmt::fmt)
 
   if(NOT WIN32)
     ament_add_gmock(realtime_mutex_tests test/realtime_mutex_tests.cpp)
@@ -122,5 +128,5 @@ install(TARGETS realtime_tools thread_priority
 )
 
 ament_export_targets(export_realtime_tools HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
-ament_package()
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_package(CONFIG_EXTRAS cmake/realtime_tools-extras.cmake)
