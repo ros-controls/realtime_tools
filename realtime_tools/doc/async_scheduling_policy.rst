@@ -13,7 +13,7 @@ In ``SYNCHRONIZED`` mode, the async worker thread does not govern its own timing
 Used when the asynchronous task must run in lockstep with the main control loop, but needs to be offloaded to a separate thread to prevent blocking the real-time path. Used with slow hardware interfaces doing heavy processing.
 
 * **Scheduling Control:** ``controller_manager`` main thread.
-* **Sleep Mechanism:** Waits on a ``contition_variable`` from the main thread.
+* **Sleep Mechanism:** Waits on a ``condition_variable`` from the main thread.
 
 DETACHED
 --------
