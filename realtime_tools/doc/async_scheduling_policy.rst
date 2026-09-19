@@ -26,7 +26,7 @@ Hardware interfaces that need to poll or update at a fixed, independent frequenc
 
 HARDWARE_DRIVEN
 ---------------
-In ``HARDWARE_DRIVEN`` mode, the async worker thread runs independently of the main thread, but *without any software rate-limiting or sleeping*. The handler continuously loops and immediately restarts the callback, expecting the callback function itself to block execution.
+In ``HARDWARE_DRIVEN`` mode, the async worker thread runs independently of the main thread and normally relies on the callback (for example, a blocking ``read()``) to pace execution. If the callback returns faster than 10% of the configured ``exec_rate`` period, the handler applies a fallback delay to prevent a busy loop.
 
 Used when hardware interfaces must synchronize directly with an external hardware clock. Avoids drift between control loops of manipulator controllers and ``controller_manager`` thread. This requires the hardware interface to wait on a heartbeat/sync signal from hardware that a new control cycle can start.
 
