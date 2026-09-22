@@ -2,6 +2,13 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.4.0 (2026-09-22)
+------------------
+* Silence the deprecation warning from test library (`#592 <https://github.com/ros-controls/realtime_tools/issues/592>`_)
+* Add trySetFeedback for rt access (`#586 <https://github.com/ros-controls/realtime_tools/issues/586>`_)
+* refactor: deprecate RealtimeBuffer and its headerfile (`#560 <https://github.com/ros-controls/realtime_tools/issues/560>`_)
+* Contributors: Christoph Fröhlich, Souri Rishik
+
 5.3.0 (2026-09-03)
 ------------------
 * feat: create publisher internally in RealtimePublisher (`#573 <https://github.com/ros-controls/realtime_tools/issues/573>`_)

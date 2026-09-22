@@ -83,6 +83,13 @@ if(BUILD_TESTING)
 
   ament_add_gmock(realtime_buffer_tests test/realtime_buffer_tests.cpp)
   target_link_libraries(realtime_buffer_tests realtime_tools)
+  target_compile_definitions(realtime_buffer_tests PRIVATE SILENCE_DEPRECATION_WARNINGS)
+  target_compile_options(
+    realtime_buffer_tests
+    PRIVATE
+      "$<$<CXX_COMPILER_ID:MSVC>:/wd4996>"
+      "$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wno-deprecated-declarations>"
+  )
 
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
 
