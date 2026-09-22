@@ -539,7 +539,7 @@ TEST_F(AsyncFunctionHandlerTest, hardware_driven_scheduling_policy_respects_exec
   async_class.get_handler().stop_thread();
 
   // Allow a small upper bound to avoid flakiness. If it is free-spinning, we'd get 10k+ cycles
-  const int expected_max_cycles = params.exec_rate + 200;
+  const unsigned int expected_max_cycles = params.exec_rate + 200u;
   EXPECT_GT(counter_after_1s, 0);
   EXPECT_LT(counter_after_1s, expected_max_cycles)
     << "HARDWARE_DRIVEN scheduling policy should fallback to the full exec_rate period "
