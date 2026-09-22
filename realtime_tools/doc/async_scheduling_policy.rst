@@ -30,5 +30,7 @@ In ``HARDWARE_DRIVEN`` mode, the async worker thread runs independently of the m
 
 Used when hardware interfaces must synchronize directly with an external hardware clock. Avoids drift between control loops of manipulator controllers and ``controller_manager`` thread. This requires the hardware interface to wait on a heartbeat/sync signal from hardware that a new control cycle can start.
 
+Note that while the hardware interface is synchronized to the external hardware, controllers might still experience drift, as their ``update()`` is still called in the main ``controller_manager`` thread.
+
 * **Scheduling Control:** Blocking in hardware interface ``read()`` function.
 * **Sleep Mechanism:** None. Relies on a blocking hardware ``read()`` to pace the thread.
