@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.10.0 (2026-09-22)
+-------------------
 * Add trySetFeedback for rt access (backport `#586 <https://github.com/ros-controls/realtime_tools/issues/586>`_) (`#589 <https://github.com/ros-controls/realtime_tools/issues/589>`_)
 * Contributors: Christoph Froehlich, mergify[bot]
 
