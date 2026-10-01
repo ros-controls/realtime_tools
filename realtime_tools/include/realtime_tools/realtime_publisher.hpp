@@ -40,6 +40,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -200,15 +201,12 @@ private:
     keep_running_ = true;
     turn_ = State::LOOP_NOT_STARTED;
 
-    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
+    std::promise<void> started_promise;
+    auto started_future = started_promise.get_future();
 
-    // Wait for the thread to be ready before proceeding
-    // This is important to ensure that the thread is properly initialized and ready to handle
-    // messages before any other operations are performed on the RealtimePublisher instance.
-    while (!thread_.joinable() ||
-           turn_.load(std::memory_order_acquire) == State::LOOP_NOT_STARTED) {
-      std::this_thread::sleep_for(std::chrono::microseconds(100));
-    }
+    thread_ = std::thread(&RealtimePublisher::publishingLoop, this, std::move(started_promise));
+
+    started_future.wait();
   }
 
   /**
@@ -238,15 +236,16 @@ private:
    *
    * The loop continues until keep_running_ is set to false.
    */
-  void publishingLoop()
+  void publishingLoop(std::promise<void> started_promise)
   {
     is_running_ = true;
+    turn_.store(State::REALTIME, std::memory_order_release);
+    started_promise.set_value();
 
     while (keep_running_) {
       MessageT outgoing;
 
       {
-        turn_.store(State::REALTIME, std::memory_order_release);
         // Locks msg_ and copies it to outgoing
         std::unique_lock<std::mutex> lock_(msg_mutex_);
         updated_cond_.wait(lock_, [&] { return turn_ == State::NON_REALTIME || !keep_running_; });
@@ -257,6 +256,7 @@ private:
       if (keep_running_) {
         publisher_->publish(outgoing);
       }
+      turn_.store(State::REALTIME, std::memory_order_release);
     }
     is_running_ = false;
   }
