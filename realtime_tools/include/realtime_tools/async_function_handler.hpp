@@ -169,25 +169,33 @@ struct AsyncFunctionHandlerParams
   }
 
   /**
-   * @brief Initialize the parameters from a node's parameters.
-   * The node should have the following parameters:
-   * - thread_priority (int): Priority of the async worker thread. Default is 50.
-   * - cpu_affinity (int[]): CPU cores to which the async worker thread should be pinned.
-   *   Default is empty, which means the thread will not be pinned to any CPU core.
-   * - scheduling_policy (string): Scheduling policy for the async worker thread. Can be either
-   *   "synchronized" or "detached". Default is "synchronized".
-   * - execution_rate (int): Execution rate of the async worker thread in Hz.
-   * - wait_until_initial_trigger (bool): Whether to wait until the initial trigger predicate is true
-   *   before starting the async callback method. Default is true.
-   * - print_warnings (bool): Whether to print warnings when the async callback method is not triggered
-   *   due to any reason. Default is true.
-   * - thread_name (string): Name applied to the async thread. Defaults to component name. Truncated to 15 chars.
+   * @brief Declares and initialize the parameters from a node's parameters.
    * @param node The node that is used to get the parameters.
    * @param prefix Parameter prefix to use when accessing node parameters.
    */
   template <typename NodeT>
   void initialize(NodeT & node, const std::string & prefix)
   {
+    if (!node->has_parameter(prefix + "thread_priority")) {
+      node->template declare_parameter<int>(prefix + "thread_priority", 50);
+    }
+    if (!node->has_parameter(prefix + "cpu_affinity")) {
+      node->template declare_parameter<std::vector<int64_t>>(
+        prefix + "cpu_affinity", std::vector<int64_t>());
+    }
+    if (!node->has_parameter(prefix + "scheduling_policy")) {
+      node->template declare_parameter<std::string>(prefix + "scheduling_policy", "synchronized");
+    }
+    if (!node->has_parameter(prefix + "wait_until_initial_trigger")) {
+      node->template declare_parameter<bool>(prefix + "wait_until_initial_trigger", true);
+    }
+    if (!node->has_parameter(prefix + "print_warnings")) {
+      node->template declare_parameter<bool>(prefix + "print_warnings", true);
+    }
+    if (!node->has_parameter(prefix + "thread_name")) {
+      node->template declare_parameter<std::string>(prefix + "thread_name", "");
+    }
+
     if (node->has_parameter(prefix + "thread_priority")) {
       thread_priority = static_cast<int>(node->get_parameter(prefix + "thread_priority").as_int());
     }
@@ -201,17 +209,6 @@ struct AsyncFunctionHandlerParams
     if (node->has_parameter(prefix + "scheduling_policy")) {
       scheduling_policy =
         AsyncSchedulingPolicy(node->get_parameter(prefix + "scheduling_policy").as_string());
-    }
-    if (
-      scheduling_policy == AsyncSchedulingPolicy::DETACHED &&
-      node->has_parameter(prefix + "execution_rate")) {
-      const int execution_rate =
-        static_cast<int>(node->get_parameter(prefix + "execution_rate").as_int());
-      if (execution_rate <= 0) {
-        throw std::runtime_error(
-          "AsyncFunctionHandler: execution_rate parameter must be positive.");
-      }
-      exec_rate = static_cast<unsigned int>(execution_rate);
     }
     if (node->has_parameter(prefix + "wait_until_initial_trigger")) {
       wait_until_initial_trigger =
