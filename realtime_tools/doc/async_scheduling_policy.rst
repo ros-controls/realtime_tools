@@ -1,0 +1,36 @@
+Async Scheduling Policies
+=========================
+``realtime_tools`` allows hardware interfaces to be run in a thread separate from the main ``controller_manager`` thread.
+
+The ``AsyncFunctionHandler`` supports three distinct scheduling policies as to how the asynchronous worker thread executes its callback.
+
+.. _scheduling-policies:
+
+SYNCHRONIZED
+------------
+In ``SYNCHRONIZED`` mode, the async worker thread does not govern its own timing. Instead, it waits on a condition variable and is explicitly triggered by the main thread.
+
+Used when the asynchronous task must run in lockstep with the main control loop, but needs to be offloaded to a separate thread to prevent blocking the real-time path. Used with slow hardware interfaces doing heavy processing.
+
+* **Scheduling Control:** ``controller_manager`` main thread.
+* **Sleep Mechanism:** Waits on a ``condition_variable`` from the main thread.
+
+DETACHED
+--------
+In ``DETACHED`` mode, the async worker thread runs completely independently of the main ``controller_manager`` thread clock. It acts similarly to a standalone ROS 2 node, maintaining its own execution cycle based on a target ``exec_rate``.
+
+Hardware interfaces that need to poll or update at a fixed, independent frequency.
+
+* **Scheduling Control:** Internal software clock.
+* **Sleep Mechanism:** Calculates the elapsed time and explicitly calls ``std::this_thread::sleep_until()``, same as ``ros2_control_node`` executable.
+
+HARDWARE_DRIVEN
+---------------
+In ``HARDWARE_DRIVEN`` mode, the async worker thread runs independently of the main thread and normally relies on the callback (for example, a blocking ``read()``) to pace execution. If the callback returns faster than 10% of the configured ``exec_rate`` period, the handler applies a fallback delay to prevent a busy loop.
+
+Used when hardware interfaces must synchronize directly with an external hardware clock. Avoids drift between control loops of manipulator controllers and ``controller_manager`` thread. This requires the hardware interface to wait on a heartbeat/sync signal from hardware that a new control cycle can start.
+
+Note that while the hardware interface is synchronized to the external hardware, controllers might still experience drift, as their ``update()`` is still called in the main ``controller_manager`` thread.
+
+* **Scheduling Control:** Blocking in hardware interface ``read()`` function.
+* **Sleep Mechanism:** None. Relies on a blocking hardware ``read()`` to pace the thread.

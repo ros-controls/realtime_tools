@@ -6,6 +6,7 @@ Contains a set of tools that can be used from a hard realtime thread, without br
 For more information of the ros2_control framework see `control.ros.org <https://control.ros.org/>`__.
 
 .. include:: realtime_publisher.rst
+.. include:: async_scheduling_policy.rst
 
 API documentation
 ------------------
