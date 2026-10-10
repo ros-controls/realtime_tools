@@ -48,6 +48,7 @@
 
 #include "rclcpp/create_publisher.hpp"
 #include "rclcpp/publisher.hpp"
+#include "rclcpp/node.hpp"
 
 namespace realtime_tools
 {
@@ -100,6 +101,24 @@ public:
   explicit RealtimePublisher(PublisherSharedPtr publisher)
   {
     initialize([&]() { return publisher; });
+  }
+
+  explicit RealtimePublisher(std::shared_ptr<rclcpp::Node> node, const std::string & topic_name,
+    const rclcpp::QoS & qos = rclcpp::SystemDefaultsQoS())
+  : is_running_(false), keep_running_(true), turn_(State::LOOP_NOT_STARTED)
+  {
+    publisher_= node->create_publisher<MessageT>(
+      topic_name,
+      qos);
+    thread_ = std::thread(&RealtimePublisher::publishingLoop, this);
+
+    // Wait for the thread to be ready before proceeding
+    // This is important to ensure that the thread is properly initialized and ready to handle
+    // messages before any other operations are performed on the RealtimePublisher instance.
+    while (!thread_.joinable() ||
+           turn_.load(std::memory_order_acquire) == State::LOOP_NOT_STARTED) {
+      std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
   }
 
   /// Destructor
