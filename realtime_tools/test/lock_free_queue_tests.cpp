@@ -13,8 +13,10 @@
 // limitations under the License.
 
 #include <gmock/gmock.h>
+#include <memory>
 #include <thread>
 
+#include <realtime_tools/lock_free_pooled_queue.hpp>
 #include <realtime_tools/lock_free_queue.hpp>
 
 using realtime_tools::LockFreeMPMCQueue;
@@ -529,4 +531,67 @@ TEST(LockFreeSPSCQueue, get_latest_does_not_copy_the_skipped_elements)
   EXPECT_EQ(4, latest.value);
   EXPECT_TRUE(queue.empty());
   EXPECT_LE(AssignCounter::copy_assignments, 1) << "Only the latest element should be copied out";
+}
+
+using realtime_tools::LockFreePooledSPSCQueue;
+
+TEST(LockFreePooledSPSCQueue, push_and_pop_a_move_only_type)
+{
+  LockFreePooledSPSCQueue<std::unique_ptr<int>, 4> queue;
+  ASSERT_TRUE(queue.empty());
+  ASSERT_TRUE(queue.push(std::make_unique<int>(7)));
+  ASSERT_FALSE(queue.empty());
+  std::unique_ptr<int> out;
+  ASSERT_TRUE(queue.pop(out));
+  ASSERT_NE(nullptr, out);
+  EXPECT_EQ(7, *out);
+  EXPECT_FALSE(queue.pop(out)) << "Queue should be empty";
+}
+
+TEST(LockFreePooledSPSCQueue, push_fails_when_all_slots_are_in_use_and_slots_are_recycled)
+{
+  LockFreePooledSPSCQueue<int, 3> queue;
+  for (int round = 0; round < 3; round++) {
+    for (int i = 0; i < 3; i++) {
+      ASSERT_TRUE(queue.push(10 * round + i));
+    }
+    ASSERT_FALSE(queue.push(99)) << "Pool is exhausted";
+    for (int i = 0; i < 3; i++) {
+      int out = -1;
+      ASSERT_TRUE(queue.pop(out));
+      EXPECT_EQ(10 * round + i, out) << "FIFO order must be kept";
+    }
+  }
+}
+
+TEST(LockFreePooledSPSCQueue, produce_and_consume_work_in_place)
+{
+  LockFreePooledSPSCQueue<std::array<int, 3>, 2> queue;
+  ASSERT_TRUE(queue.produce([](auto & slot) { slot = {{1, 2, 3}}; }));
+  int sum = 0;
+  ASSERT_TRUE(queue.consume([&sum](auto & slot) { sum = slot[0] + slot[1] + slot[2]; }));
+  EXPECT_EQ(6, sum);
+  EXPECT_FALSE(queue.consume([](auto &) { FAIL() << "Queue is empty"; }));
+}
+
+TEST(LockFreePooledSPSCQueue, producer_and_consumer_threads)
+{
+  LockFreePooledSPSCQueue<std::unique_ptr<int>, 8> queue;
+  constexpr int count = 100000;
+  std::thread producer([&]() {
+    for (int i = 0; i < count; i++) {
+      while (!queue.push(std::make_unique<int>(i))) {
+        std::this_thread::yield();
+      }
+    }
+  });
+  int expected = 0;
+  while (expected < count) {
+    std::unique_ptr<int> out;
+    if (queue.pop(out)) {
+      ASSERT_EQ(expected, *out);
+      expected++;
+    }
+  }
+  producer.join();
 }
