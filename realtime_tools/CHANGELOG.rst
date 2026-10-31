@@ -2,6 +2,10 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Improve lock free queue and add pooled SPSC queue (`#606 <https://github.com/ros-controls/realtime_tools/pull/606>`_)
+
 5.4.0 (2026-09-22)
 ------------------
 * Silence the deprecation warning from test library (`#592 <https://github.com/ros-controls/realtime_tools/issues/592>`_)
