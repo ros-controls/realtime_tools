@@ -589,9 +589,64 @@ TEST(LockFreePooledSPSCQueue, producer_and_consumer_threads)
   while (expected < count) {
     std::unique_ptr<int> out;
     if (queue.pop(out)) {
-      ASSERT_EQ(expected, *out);
+      EXPECT_EQ(expected, *out) << "FIFO order must be kept";
       expected++;
     }
   }
   producer.join();
+}
+
+namespace
+{
+struct OnlyRvalueConvertible
+{
+  operator int() && { return 1; }
+};
+
+struct ThrowingMove
+{
+  ThrowingMove() = default;
+  ThrowingMove(ThrowingMove &&) noexcept(false) = default;
+  ThrowingMove & operator=(ThrowingMove &&) noexcept(false) { return *this; }
+};
+
+template <typename Queue, typename Elem, typename = void>
+struct can_push_rvalue : std::false_type
+{
+};
+template <typename Queue, typename Elem>
+struct can_push_rvalue<
+  Queue, Elem, std::void_t<decltype(std::declval<Queue &>().push(std::declval<Elem &&>()))>>
+: std::true_type
+{
+};
+
+template <typename Queue, typename Elem, typename = void>
+struct can_pop : std::false_type
+{
+};
+template <typename Queue, typename Elem>
+struct can_pop<
+  Queue, Elem, std::void_t<decltype(std::declval<Queue &>().pop(std::declval<Elem &>()))>>
+: std::true_type
+{
+};
+}  // namespace
+
+TEST(LockFreeQueue, push_is_rejected_for_types_only_convertible_from_an_rvalue)
+{
+  // push() takes a const U &, so a type that converts only as an rvalue cannot be pushed
+  static_assert(!can_push<LockFreeSPSCQueue<int, 10>, OnlyRvalueConvertible>::value);
+  static_assert(!can_push<LockFreeMPMCQueue<int, 10>, OnlyRvalueConvertible>::value);
+  SUCCEED();
+}
+
+TEST(LockFreePooledSPSCQueue, push_and_pop_require_nothrow_move_assignment)
+{
+  // A throwing move assignment would lose the slot from the pool
+  static_assert(can_push_rvalue<LockFreePooledSPSCQueue<int, 2>, int>::value);
+  static_assert(can_pop<LockFreePooledSPSCQueue<int, 2>, int>::value);
+  static_assert(!can_push_rvalue<LockFreePooledSPSCQueue<ThrowingMove, 2>, ThrowingMove>::value);
+  static_assert(!can_pop<LockFreePooledSPSCQueue<ThrowingMove, 2>, ThrowingMove>::value);
+  SUCCEED();
 }

@@ -186,10 +186,10 @@ public:
    * @param data Data to be pushed
    * @return true If the data is pushed successfully
    * @return false If the queue is full or the data could not be pushed
-   * @note This function is enabled only if the data type is convertible to the template type of the queue (U -> T)
+   * @note This function is enabled only if the data type is convertible to the template type of the queue (const U & -> T)
    */
   template <typename U>
-  [[nodiscard]] std::enable_if_t<std::is_convertible_v<U, T>, bool> push(const U & data)
+  [[nodiscard]] std::enable_if_t<std::is_convertible_v<const U &, T>, bool> push(const U & data)
   {
     if constexpr (detail::is_spsc_queue<LockFreeContainer>::value) {
       return data_queue_.push(data);
@@ -204,7 +204,7 @@ public:
    * @return true If the data is pushed successfully
    * @return false If the data could not be pushed
    * @note This function is enabled only if the data type is convertible to the template type of the
-   * queue (U -> T)
+   * queue (const U & -> T)
    * @note For a SPSC Queue, to be used in single-threaded applications only (see the warning below)
    * @warning For a SPSC Queue, NEVER call this from the producer thread while another thread pops.
    * To make room it calls pop(), which only the consumer is allowed to call, so the two threads
@@ -219,7 +219,8 @@ public:
    *   false under contention.
    */
   template <typename U>
-  [[nodiscard]] std::enable_if_t<std::is_convertible_v<U, T>, bool> bounded_push(const U & data)
+  [[nodiscard]] std::enable_if_t<std::is_convertible_v<const U &, T>, bool> bounded_push(
+    const U & data)
   {
     if (!push(data)) {
       T dummy;

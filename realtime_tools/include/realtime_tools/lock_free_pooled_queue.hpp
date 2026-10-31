@@ -17,6 +17,7 @@
 
 #include <array>
 #include <cstddef>
+#include <type_traits>
 #include <utility>
 
 #include "realtime_tools/lock_free_queue.hpp"
@@ -74,10 +75,13 @@ public:
   /**
    * @brief Move the value into a free slot and publish it to the consumer.
    * @return true If pushed, false if all slots are in use.
+   * @note Only available if T is nothrow move assignable, a throwing assignment would lose the slot
+   * from the pool.
    * @note Producer thread only. Uses T's move assignment into the preallocated slot, so use
    * produce() instead if that assignment can allocate or deallocate.
    */
   [[nodiscard]] bool push(T && value)
+    requires std::is_nothrow_move_assignable_v<T>
   {
     return produce([&value](T & slot) { slot = std::move(value); });
   }
@@ -102,9 +106,12 @@ public:
   /**
    * @brief Move the oldest element out of the queue.
    * @return true If an element was popped, false if the queue is empty.
+   * @note Only available if T is nothrow move assignable, a throwing assignment would lose the slot
+   * from the pool.
    * @note Consumer thread only.
    */
   [[nodiscard]] bool pop(T & out)
+    requires std::is_nothrow_move_assignable_v<T>
   {
     return consume([&out](T & slot) { out = std::move(slot); });
   }
