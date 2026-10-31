@@ -237,15 +237,19 @@ public:
    * @return false If the queue is empty
    * @note This function consumes all the data in the queue until the last data and returns the last element of the queue
    * @note For a SPSC Queue, it must be called from the consumer thread. The older elements are
-   * discarded without being copied, so only the latest element is copied out.
+   * discarded without being copied, so only the latest element is copied out. Only the elements
+   * available when the call starts are considered, so the call is bounded even if the producer
+   * keeps pushing.
    * For other queues, every element is copied into data, the last one wins.
    */
   [[nodiscard]] bool get_latest(T & data)
   {
     if constexpr (detail::is_spsc_queue<LockFreeContainer>::value) {
-      // read_available() can only grow while we run (the producer only adds), so skipping while
-      // more than one element is available never drops the element that is popped below
-      while (data_queue_.read_available() > 1) {
+      // Snapshot the count so the work is bounded even if the producer keeps pushing meanwhile.
+      // The snapshot is a lower bound (the producer only adds), so the last element of the
+      // snapshot is still there to be popped below.
+      const std::size_t available = data_queue_.read_available();
+      for (std::size_t i = 1; i < available; ++i) {
         data_queue_.consume_one([](const T &) {});
       }
       return data_queue_.pop(data);
