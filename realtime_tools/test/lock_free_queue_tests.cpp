@@ -451,3 +451,20 @@ TEST(LockFreeMPMCQueue, test_lockfree_queue_bounded_push)
   bounded_push_test(queue_1);
   bounded_push_test(queue_2);
 }
+
+TEST(LockFreeQueue, no_virtual_destructor)
+{
+  // The queue has no virtual functions, a vtable pointer is pure overhead
+  static_assert(!std::has_virtual_destructor_v<LockFreeSPSCQueue<int, 10>>);
+  static_assert(!std::has_virtual_destructor_v<LockFreeMPMCQueue<int, 10>>);
+  SUCCEED();
+}
+
+TEST(LockFreeQueue, traits_are_not_in_the_anonymous_namespace)
+{
+  // Reachable by name only if they live in a named namespace (not leaked per translation unit)
+  static_assert(
+    realtime_tools::detail::is_spsc_queue<boost::lockfree::spsc_queue<int>>::value,
+    "trait must be in realtime_tools::detail");
+  SUCCEED();
+}
