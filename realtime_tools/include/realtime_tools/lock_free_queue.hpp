@@ -127,7 +127,8 @@ public:
   template <
     bool HasCapacity = detail::has_capacity<LockFreeContainer>::value,
     typename std::enable_if_t<HasCapacity, int> = 0>
-  LockFreeQueueBase() : capacity_(detail::get_boost_lockfree_queue_capacity<LockFreeContainer>::value)
+  LockFreeQueueBase()
+  : capacity_(detail::get_boost_lockfree_queue_capacity<LockFreeContainer>::value)
   {
   }
 
