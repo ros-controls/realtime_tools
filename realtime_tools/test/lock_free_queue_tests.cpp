@@ -498,3 +498,35 @@ TEST(LockFreeQueue, traits_are_not_in_the_anonymous_namespace)
     "trait must be in realtime_tools::detail");
   SUCCEED();
 }
+
+namespace
+{
+struct AssignCounter
+{
+  static inline int copy_assignments = 0;
+  AssignCounter() = default;
+  explicit AssignCounter(int v) : value(v) {}
+  AssignCounter(const AssignCounter &) = default;
+  AssignCounter & operator=(const AssignCounter & other)
+  {
+    ++copy_assignments;
+    value = other.value;
+    return *this;
+  }
+  int value = 0;
+};
+}  // namespace
+
+TEST(LockFreeSPSCQueue, get_latest_does_not_copy_the_skipped_elements)
+{
+  LockFreeSPSCQueue<AssignCounter, 10> queue;
+  for (int i = 0; i < 5; i++) {
+    ASSERT_TRUE(queue.push(AssignCounter(i)));
+  }
+  AssignCounter latest;
+  AssignCounter::copy_assignments = 0;
+  ASSERT_TRUE(queue.get_latest(latest));
+  EXPECT_EQ(4, latest.value);
+  EXPECT_TRUE(queue.empty());
+  EXPECT_LE(AssignCounter::copy_assignments, 1) << "Only the latest element should be copied out";
+}
