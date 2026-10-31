@@ -213,7 +213,7 @@ public:
    * Alternatives for that case:
    * - Use push() and handle the failure (e.g. count the dropped elements and report them
    *   from the non-RT side).
-   * - If only the most recent value matters, use RealtimeThreadsafeBox or RealtimeBuffer.
+   * - If only the most recent value matters, use RealtimeThreadsafeBox.
    * - If dropping the oldest element across threads is required, use LockFreeMPMCQueue. Its
    *   bounded_push is thread-safe, but pop and push are separate steps, so it can still return
    *   false under contention.
