@@ -204,10 +204,18 @@ public:
    * @return false If the data could not be pushed
    * @note This function is enabled only if the data type is convertible to the template type of the
    * queue (U -> T)
-   * @note For a SPSC Queue, to be used in single-threaded applications only (see warning below)
-   * @warning For a SPSC Queue, this method might not work as expected when used in multi-threaded applications
-   * if it is used with two different threads, one doing bounded_push and the other doing pop. In this case, the
-   * queue is no longer a single producer single consumer queue. So, the behavior might not be as expected.
+   * @note For a SPSC Queue, to be used in single-threaded applications only (see the warning below)
+   * @warning For a SPSC Queue, NEVER call this from the producer thread while another thread pops.
+   * To make room it calls pop(), which only the consumer is allowed to call, so the two threads
+   * race on the read index (undefined behavior: lost or duplicated elements). It is only safe when
+   * one thread does all the pushing and popping, so it is not suitable for RT <-> non-RT exchange.
+   * Alternatives for that case:
+   * - Use push() and handle the failure (e.g. count the dropped elements and report them
+   *   from the non-RT side).
+   * - If only the most recent value matters, use RealtimeThreadsafeBox or RealtimeBuffer.
+   * - If dropping the oldest element across threads is required, use LockFreeMPMCQueue. Its
+   *   bounded_push is thread-safe, but pop and push are separate steps, so it can still return
+   *   false under contention.
    */
   template <typename U>
   [[nodiscard]] std::enable_if_t<std::is_convertible_v<U, T>, bool> bounded_push(const U & data)
