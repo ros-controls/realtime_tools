@@ -188,7 +188,7 @@ public:
    * @note This function is enabled only if the data type is convertible to the template type of the queue (U -> T)
    */
   template <typename U>
-  [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> push(const U & data)
+  [[nodiscard]] std::enable_if_t<std::is_convertible_v<U, T>, bool> push(const U & data)
   {
     if constexpr (detail::is_spsc_queue<LockFreeContainer>::value) {
       return data_queue_.push(data);
@@ -210,7 +210,7 @@ public:
    * queue is no longer a single producer single consumer queue. So, the behavior might not be as expected.
    */
   template <typename U>
-  [[nodiscard]] std::enable_if_t<std::is_convertible_v<T, U>, bool> bounded_push(const U & data)
+  [[nodiscard]] std::enable_if_t<std::is_convertible_v<U, T>, bool> bounded_push(const U & data)
   {
     if (!push(data)) {
       T dummy;

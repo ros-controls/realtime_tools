@@ -452,6 +452,36 @@ TEST(LockFreeMPMCQueue, test_lockfree_queue_bounded_push)
   bounded_push_test(queue_2);
 }
 
+namespace
+{
+struct Base
+{
+};
+struct Derived : Base
+{
+};
+
+template <typename Queue, typename U, typename = void>
+struct can_push : std::false_type
+{
+};
+template <typename Queue, typename U>
+struct can_push<
+  Queue, U, std::void_t<decltype(std::declval<Queue &>().push(std::declval<const U &>()))>>
+: std::true_type
+{
+};
+}  // namespace
+
+TEST(LockFreeQueue, push_accepts_only_types_convertible_to_the_stored_type)
+{
+  using Queue = LockFreeSPSCQueue<Derived, 10>;
+  // Derived -> Base is convertible, but Base -> Derived is not, so pushing a Base must be rejected
+  static_assert(!can_push<Queue, Base>::value, "Base must not be pushable into a Derived queue");
+  static_assert(can_push<LockFreeSPSCQueue<Base, 10>, Derived>::value, "Derived is a Base");
+  SUCCEED();
+}
+
 TEST(LockFreeQueue, no_virtual_destructor)
 {
   // The queue has no virtual functions, a vtable pointer is pure overhead
