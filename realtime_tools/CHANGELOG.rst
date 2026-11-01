@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.11.0 (2026-11-01)
+-------------------
 * Improve lock free queue and add pooled SPSC queue (backport `#606 <https://github.com/ros-controls/realtime_tools/issues/606>`_) (`#608 <https://github.com/ros-controls/realtime_tools/issues/608>`_)
 * Contributors: mergify[bot]
 
