@@ -29,6 +29,7 @@
 #ifndef REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 #define REALTIME_TOOLS__REALTIME_HELPERS_HPP_
 
+#include <cstddef>
 #include <string>
 #include <thread>
 #include <utility>
@@ -79,6 +80,35 @@ bool configure_sched_rr(int priority);
  * and a message describing the result of the operation
 */
 std::pair<bool, std::string> lock_memory();
+
+/**
+ * Lock the memory like lock_memory() and additionally make sure the realtime loop does not page
+ * fault on its first stack usage and heap allocations.
+ *
+ * Steps, in this order:
+ * 1. With glibc, disable returning memory to the OS (mallopt(M_TRIM_THRESHOLD, -1)) and serving
+ *    large allocations with mmap (mallopt(M_MMAP_MAX, 0)), so freed memory stays in the process
+ *    heap and is reused by later allocations. This affects the whole process.
+ * 2. Lock the memory with lock_memory().
+ * 3. Allocate \p prefault_heap_size bytes, touch every page and free them again, so that later
+ *    allocations up to that size are served from already mapped memory.
+ * 4. Touch \p prefault_stack_size bytes of the calling thread's stack. Only the calling thread is
+ *    prefaulted, so call it from the realtime thread (or again from each realtime thread).
+ *
+ * Steps 1, 3 and 4 are done even if locking fails, as they still avoid most page faults.
+ * \note Once locked, all memory the process maps later on counts against RLIMIT_MEMLOCK (unless the
+ * process has CAP_IPC_LOCK), so with a finite limit the prefaulted heap must fit into it as well,
+ * otherwise the prefault allocation, and any later one beyond the limit, fails.
+ * lock_memory() without arguments keeps its previous behavior and does none of this.
+ * \param[in] prefault_stack_size bytes of the calling thread's stack to prefault, 0 to skip. Must
+ * be at most half of RLIMIT_STACK to leave room for the stack already in use.
+ * \param[in] prefault_heap_size bytes of heap to prefault, 0 to skip.
+ * \returns a pair of a boolean that is true if the memory was locked and all prefaulting steps
+ * succeeded, and a message describing the result. Returns false without changing anything if
+ * \p prefault_stack_size is too large. On Windows and macOS returns false (not supported).
+ */
+std::pair<bool, std::string> lock_memory(
+  std::size_t prefault_stack_size, std::size_t prefault_heap_size);
 
 /**
  * Configure the caller thread affinity - Tell the scheduler to prefer a certain

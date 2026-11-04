@@ -35,17 +35,40 @@
 #if defined(__unix__)
 #include <sys/capability.h>
 #endif
+#include <alloca.h>
 #include <sys/mman.h>
+#include <sys/resource.h>
 #include <sys/utsname.h>
 #include <unistd.h>
+#if defined(__GLIBC__)
+#include <malloc.h>
+#endif
 #endif
 
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 
 namespace realtime_tools
 {
+#if !defined(_WIN32) && !defined(__APPLE__)
+namespace
+{
+// noinline so the alloca'd memory is a fresh part of the stack below the caller, and volatile
+// writes so the compiler cannot drop the otherwise unused stores.
+__attribute__((noinline)) void prefault_stack(std::size_t size, std::size_t page_size)
+{
+  auto * stack = static_cast<volatile unsigned char *>(alloca(size));
+  // The stack grows downwards: touch from the highest address down to grow it page by page
+  for (std::size_t offset = 0; offset < size; offset += page_size) {
+    stack[size - 1 - offset] = 0;
+  }
+  stack[0] = 0;
+}
+}  // namespace
+#endif
+
 bool has_realtime_kernel()
 {
 #ifdef _WIN32
@@ -169,6 +192,64 @@ std::pair<bool, std::string> lock_memory()
     message = "Memory locked successfully!";
     return {true, message};
   }
+#endif
+}
+
+std::pair<bool, std::string> lock_memory(
+  std::size_t prefault_stack_size, std::size_t prefault_heap_size)
+{
+#if defined(_WIN32) || defined(__APPLE__)
+  (void)prefault_stack_size;
+  (void)prefault_heap_size;
+  return lock_memory();
+#else
+  rlimit stack_limit{};
+  if (
+    prefault_stack_size > 0 && getrlimit(RLIMIT_STACK, &stack_limit) == 0 &&
+    stack_limit.rlim_cur != RLIM_INFINITY && prefault_stack_size > stack_limit.rlim_cur / 2) {
+    return {
+      false, "Stack prefault size of " + std::to_string(prefault_stack_size) +
+               " bytes is larger than half of RLIMIT_STACK (" +
+               std::to_string(stack_limit.rlim_cur) + " bytes), nothing was done."};
+  }
+
+  bool ok = true;
+  std::string message;
+#if defined(__GLIBC__)
+  // Must happen before prefaulting the heap: otherwise the large prefault allocation is served by
+  // mmap and handed straight back to the OS on free(), so nothing would stay prefaulted.
+  if (mallopt(M_TRIM_THRESHOLD, -1) != 1 || mallopt(M_MMAP_MAX, 0) != 1) {
+    ok = false;
+    message += " Failed to configure malloc to keep freed memory.";
+  }
+#else
+  message += " Not using glibc, freed heap memory may be returned to the OS.";
+#endif
+
+  const auto [locked, lock_message] = lock_memory();
+  ok = ok && locked;
+  message = lock_message + message;
+
+  const auto page_size = static_cast<std::size_t>(sysconf(_SC_PAGESIZE));
+  if (prefault_heap_size > 0) {
+    auto * heap = static_cast<volatile unsigned char *>(std::malloc(prefault_heap_size));
+    if (heap == nullptr) {
+      ok = false;
+      message += " Failed to allocate " + std::to_string(prefault_heap_size) +
+                 " bytes to prefault the heap.";
+    } else {
+      for (std::size_t offset = 0; offset < prefault_heap_size; offset += page_size) {
+        heap[offset] = 0;
+      }
+      std::free(const_cast<unsigned char *>(heap));
+      message += " Prefaulted " + std::to_string(prefault_heap_size) + " bytes of heap.";
+    }
+  }
+  if (prefault_stack_size > 0) {
+    prefault_stack(prefault_stack_size, page_size);
+    message += " Prefaulted " + std::to_string(prefault_stack_size) + " bytes of stack.";
+  }
+  return {ok, message};
 #endif
 }
 
