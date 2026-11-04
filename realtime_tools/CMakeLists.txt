@@ -91,6 +91,9 @@ if(BUILD_TESTING)
       "$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wno-deprecated-declarations>"
   )
 
+  ament_add_gmock(realtime_triple_buffer_tests test/realtime_triple_buffer_tests.cpp)
+  target_link_libraries(realtime_triple_buffer_tests realtime_tools)
+
   ament_add_gmock(lock_free_queue_tests test/lock_free_queue_tests.cpp)
 
   target_link_libraries(lock_free_queue_tests realtime_tools Boost::boost)
