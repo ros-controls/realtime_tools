@@ -46,4 +46,27 @@ There exist the following typical use-cases for ros2_controllers:
 Other classes and helper methods
 ***************************************
 
-Tba.
+Locking and prefaulting memory
+==============================
+``realtime_tools::lock_memory()`` locks all current and future pages of the process into RAM with ``mlockall``, so they are never swapped out.
+
+Locking alone does not avoid page faults on the first use of stack and heap memory, and glibc returns freed memory to the OS by default. ``realtime_tools::lock_memory(prefault_stack_size, prefault_heap_size)`` additionally:
+
+* configures glibc's malloc to keep freed memory in the process (``M_TRIM_THRESHOLD = -1``) and to not use ``mmap`` for large allocations (``M_MMAP_MAX = 0``). This affects the whole process;
+* touches ``prefault_heap_size`` bytes of heap, so later allocations up to that size don't page fault;
+* touches ``prefault_stack_size`` bytes of the **calling thread's** stack, so call it from the realtime thread.
+
+The prefaulting is done even if locking fails. The variant without arguments keeps its previous behavior.
+
+.. code-block:: cpp
+
+   #include <realtime_tools/realtime_helpers.hpp>
+
+   // In the realtime thread, before entering the control loop
+   const auto [ok, message] = realtime_tools::lock_memory(512 * 1024, 64 * 1024 * 1024);
+   if (!ok) {
+     RCLCPP_WARN(logger, "%s", message.c_str());
+   }
+
+.. note::
+   Once the memory is locked, everything the process maps later on counts against ``RLIMIT_MEMLOCK`` (unless it has ``CAP_IPC_LOCK``), so with a finite limit the prefaulted heap has to fit into it as well.
