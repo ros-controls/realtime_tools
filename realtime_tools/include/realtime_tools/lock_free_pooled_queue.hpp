@@ -80,8 +80,12 @@ public:
    * @note Producer thread only. Uses T's move assignment into the preallocated slot, so use
    * produce() instead if that assignment can allocate or deallocate.
    */
+  // SFINAE instead of a C++20 requires-clause so the header stays usable from C++17 code. U must be
+  // T, otherwise an explicit push<U>() / pop<U>() would bypass the nothrow check on T.
+  template <
+    typename U = T,
+    std::enable_if_t<std::is_same_v<U, T> && std::is_nothrow_move_assignable_v<U>, int> = 0>
   [[nodiscard]] bool push(T && value)
-    requires std::is_nothrow_move_assignable_v<T>
   {
     return produce([&value](T & slot) { slot = std::move(value); });
   }
@@ -110,8 +114,10 @@ public:
    * from the pool.
    * @note Consumer thread only.
    */
+  template <
+    typename U = T,
+    std::enable_if_t<std::is_same_v<U, T> && std::is_nothrow_move_assignable_v<U>, int> = 0>
   [[nodiscard]] bool pop(T & out)
-    requires std::is_nothrow_move_assignable_v<T>
   {
     return consume([&out](T & slot) { out = std::move(slot); });
   }
