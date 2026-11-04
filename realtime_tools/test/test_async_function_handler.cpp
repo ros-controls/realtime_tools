@@ -503,3 +503,45 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles_in_detached_scheduli
   ASSERT_FALSE(async_class.get_handler().is_running());
   ASSERT_TRUE(async_class.get_handler().is_stopped());
 }
+
+TEST_F(AsyncFunctionHandlerTest, hardware_driven_scheduling_policy_respects_execution_rate_floor)
+{
+  realtime_tools::TestAsyncFunctionHandler async_class;
+
+  rclcpp::NodeOptions node_options;
+  // execution_rate:=200 implies a 5ms period.
+  // The minimum expected period to trigger the fallback is 0.5ms.
+  node_options.arguments(
+    {"--ros-args", "-p", "scheduling_policy:=hardware_driven", "-p",
+     "wait_until_initial_trigger:=false", "-p", "execution_rate:=200"});
+  node_options.allow_undeclared_parameters(true);
+  node_options.automatically_declare_parameters_from_overrides(true);
+  rclcpp::Node::SharedPtr node =
+    std::make_shared<rclcpp::Node>("test_node_hardware_driven", node_options);
+  realtime_tools::AsyncFunctionHandlerParams params;
+  params.clock = node->get_clock();
+  params.initialize(node, "");
+  async_class.initialize(params);
+  ASSERT_EQ(
+    async_class.get_handler().get_params().scheduling_policy,
+    realtime_tools::AsyncSchedulingPolicy::HARDWARE_DRIVEN);
+
+  async_class.get_handler().start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  EXPECT_EQ(async_class.get_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE);
+
+  // The mock callback only sleeps for 10us (which is < 0.5ms), triggering the fallback.
+  // It will sleep for the remainder of the 5ms period.
+  // Thus, we expect roughly 200 cycles per second, not a free-spinning CPU loop.
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  const int counter_after_1s = async_class.get_counter();
+
+  async_class.get_handler().stop_thread();
+
+  // Allow a small upper bound to avoid flakiness. If it is free-spinning, we'd get 10k+ cycles
+  const unsigned int expected_max_cycles = params.exec_rate + 200u;
+  EXPECT_GT(counter_after_1s, 0);
+  EXPECT_LT(counter_after_1s, expected_max_cycles)
+    << "HARDWARE_DRIVEN scheduling policy should fallback to the full exec_rate period "
+       "and not free-spin when the callback does not block.";
+}
