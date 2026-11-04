@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.11.1 (2026-11-04)
+-------------------
 * Fix C++17 build of LockFreePooledSPSCQueue (backport `#615 <https://github.com/ros-controls/realtime_tools/issues/615>`_) (`#621 <https://github.com/ros-controls/realtime_tools/issues/621>`_)
 * Contributors: mergify[bot]
 
