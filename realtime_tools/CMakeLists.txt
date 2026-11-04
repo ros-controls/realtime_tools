@@ -108,6 +108,9 @@ if(BUILD_TESTING)
                   test/realtime_server_goal_handle_tests.cpp)
   target_link_libraries(realtime_server_goal_handle_tests realtime_tools ${test_msgs_TARGETS})
 
+  ament_add_gmock(slew_free_steady_clock_tests test/slew_free_steady_clock_tests.cpp)
+  target_link_libraries(slew_free_steady_clock_tests realtime_tools)
+
   ament_add_gmock(test_async_function_handler test/test_async_function_handler.cpp)
   target_link_libraries(test_async_function_handler
                         realtime_tools
