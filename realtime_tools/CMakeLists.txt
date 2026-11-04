@@ -120,6 +120,12 @@ if(BUILD_TESTING)
     ament_add_gmock(realtime_mutex_tests test/realtime_mutex_tests.cpp)
     target_link_libraries(realtime_mutex_tests realtime_tools)
   endif()
+
+  if(UNIX AND NOT APPLE)
+    # Separate executable: prefaulting changes process-wide malloc settings
+    ament_add_gmock(lock_memory_tests test/lock_memory_tests.cpp)
+    target_link_libraries(lock_memory_tests thread_priority)
+  endif()
 endif()
 
 # Install
