@@ -65,3 +65,37 @@ TEST(SlewFreeSteadyClockTest, ReadsMonotonicRawSource)
   EXPECT_LE(now, after);
 }
 #endif
+
+TEST(SlewFreeSteadyClockTest, SleepForNeverReturnsEarly)
+{
+  const auto start = SlewFreeSteadyClock::now();
+  SlewFreeSteadyClock::sleep_for(std::chrono::milliseconds(10));
+  const auto elapsed = SlewFreeSteadyClock::now() - start;
+  EXPECT_GE(elapsed, std::chrono::milliseconds(10));
+  EXPECT_LT(elapsed, std::chrono::seconds(1));
+}
+
+TEST(SlewFreeSteadyClockTest, SleepUntilNeverReturnsEarly)
+{
+  const auto target = SlewFreeSteadyClock::now() + std::chrono::milliseconds(10);
+  SlewFreeSteadyClock::sleep_until(target);
+  const auto now = SlewFreeSteadyClock::now();
+  EXPECT_GE(now, target);
+  EXPECT_LT(now - target, std::chrono::seconds(1));
+}
+
+TEST(SlewFreeSteadyClockTest, SleepReturnsImmediatelyForPastOrNonPositive)
+{
+  const auto start = SlewFreeSteadyClock::now();
+  SlewFreeSteadyClock::sleep_until(start - std::chrono::seconds(1));
+  SlewFreeSteadyClock::sleep_for(std::chrono::nanoseconds(0));
+  SlewFreeSteadyClock::sleep_for(std::chrono::milliseconds(-10));
+  EXPECT_LT(SlewFreeSteadyClock::now() - start, std::chrono::milliseconds(5));
+}
+
+TEST(SlewFreeSteadyClockTest, SleepAcceptsAnyDurationType)
+{
+  const auto start = SlewFreeSteadyClock::now();
+  SlewFreeSteadyClock::sleep_for(std::chrono::duration<double, std::milli>(2.5));
+  EXPECT_GE(SlewFreeSteadyClock::now() - start, std::chrono::microseconds(2500));
+}

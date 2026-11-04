@@ -19,6 +19,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <thread>
 
 namespace realtime_tools
 {
@@ -35,8 +36,8 @@ namespace realtime_tools
  *
  * @note The epoch is unspecified (boot time on Linux) and differs from CLOCK_MONOTONIC, so do
  * not mix its time points with std::chrono::steady_clock or ROS time.
- * @note clock_nanosleep() does not accept CLOCK_MONOTONIC_RAW; use this clock to measure time,
- * not to schedule absolute wake-ups.
+ * @note Use the static sleep_for()/sleep_until() members to sleep against this clock, not the
+ * std::this_thread ones (see sleep_until()).
  * @note On platforms without CLOCK_MONOTONIC_RAW (e.g. Windows, whose QueryPerformanceCounter
  * is not slewed), this falls back to std::chrono::steady_clock.
  */
@@ -62,6 +63,40 @@ public:
     return time_point(
       std::chrono::duration_cast<duration>(std::chrono::steady_clock::now().time_since_epoch()));
 #endif
+  }
+
+  /**
+   * @brief Block the calling thread until this clock reaches @p abs_time.
+   *
+   * Never returns before @p abs_time as measured by this clock; returns immediately if it is
+   * already in the past. Wake-up latency is that of std::this_thread::sleep_for.
+   *
+   * @note Do not use std::this_thread::sleep_until with this clock: for steady clocks libstdc++
+   * sleeps once on CLOCK_MONOTONIC and never re-checks, so it can return early by the NTP slew.
+   */
+  template <class Duration>
+  static void sleep_until(const std::chrono::time_point<SlewFreeSteadyClock, Duration> & abs_time)
+  {
+    // clock_nanosleep() rejects CLOCK_MONOTONIC_RAW, so sleep relative on the OS clock and
+    // re-check against the raw clock. Slew is bounded (<= 500 ppm), so the residual after each
+    // pass shrinks by >= 2000x and this converges in one or two extra iterations.
+    for (auto t = now(); t < abs_time; t = now()) {
+      std::this_thread::sleep_for(abs_time - t);
+    }
+  }
+
+  /**
+   * @brief Block the calling thread for at least @p rel_time as measured by this clock.
+   *
+   * Equivalent to sleep_until(now() + rel_time), with rel_time rounded up to nanoseconds.
+   * Returns immediately for zero or negative durations.
+   */
+  template <class Rep, class Period>
+  static void sleep_for(const std::chrono::duration<Rep, Period> & rel_time)
+  {
+    if (rel_time > rel_time.zero()) {
+      sleep_until(now() + std::chrono::ceil<duration>(rel_time));
+    }
   }
 };
 }  // namespace realtime_tools
