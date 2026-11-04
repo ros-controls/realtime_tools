@@ -2,6 +2,11 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix C++17 build of LockFreePooledSPSCQueue (`#615 <https://github.com/ros-controls/realtime_tools/issues/615>`_)
+* Contributors: Sai Kishor Kothakota
+
 5.5.0 (2026-11-01)
 ------------------
 * Improve lock free queue and add pooled SPSC queue (`#606 <https://github.com/ros-controls/realtime_tools/issues/606>`_)
