@@ -7,7 +7,7 @@ This list summarizes important changes between Kilted Kaiju (previous) and Lyric
 
 SlewFreeSteadyClock
 *******************************
-* Added ``SlewFreeSteadyClock``, a ``std::chrono`` clock based on ``CLOCK_MONOTONIC_RAW`` that is not affected by NTP/PTP frequency slewing.
+* Added ``SlewFreeSteadyClock``, a ``std::chrono`` clock based on ``CLOCK_MONOTONIC_RAW`` that is not affected by NTP/PTP frequency slewing, with ``sleep_for()`` and ``sleep_until()`` that never wake early on the raw clock.
 
 LockFreeQueue
 *******************************
