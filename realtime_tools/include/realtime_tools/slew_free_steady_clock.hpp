@@ -27,7 +27,8 @@ namespace realtime_tools
  * @brief A steady clock whose rate is never adjusted (slewed) by NTP/PTP/adjtime().
  *
  * std::chrono::steady_clock maps to CLOCK_MONOTONIC on Linux, which never jumps but whose
- * frequency is continuously corrected by time daemons. On an RT loop this shows up as period
+ * rate is continuously corrected by time daemons (up to +-500 ppm via frequency adjustment and
+ * up to +-10% via tick adjustment, e.g. chrony fast slewing). On an RT loop this shows up as period
  * and dt jitter that does not come from the hardware. This clock reads CLOCK_MONOTONIC_RAW,
  * the undisciplined hardware counter, so measured durations reflect the local oscillator only.
  *
@@ -38,6 +39,7 @@ namespace realtime_tools
  * not mix its time points with std::chrono::steady_clock or ROS time.
  * @note Use the static sleep_for()/sleep_until() members to sleep against this clock, not the
  * std::this_thread ones (see sleep_until()).
+ * @see doc/slew_free_steady_clock.rst for slew magnitudes and loop-frequency guidance.
  * @note On platforms without CLOCK_MONOTONIC_RAW (e.g. Windows, whose QueryPerformanceCounter
  * is not slewed), this falls back to std::chrono::steady_clock.
  */
@@ -78,8 +80,9 @@ public:
   static void sleep_until(const std::chrono::time_point<SlewFreeSteadyClock, Duration> & abs_time)
   {
     // clock_nanosleep() rejects CLOCK_MONOTONIC_RAW, so sleep relative on the OS clock and
-    // re-check against the raw clock. Slew is bounded (<= 500 ppm), so the residual after each
-    // pass shrinks by >= 2000x and this converges in one or two extra iterations.
+    // re-check against the raw clock. The kernel bounds slew to +-10% (ADJ_TICK; ADJ_FREQUENCY is
+    // limited to 500 ppm), so the residual shrinks by >= 10x per pass. In steady state the first
+    // wake-up latency already exceeds the slew error and no extra pass runs.
     for (auto t = now(); t < abs_time; t = now()) {
       std::this_thread::sleep_for(abs_time - t);
     }
