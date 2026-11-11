@@ -718,8 +718,9 @@ private:
             }
             std::this_thread::sleep_until(next_iteration_time);
           } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
+            const auto minimum_period = period / 10;
             const auto last_period = last_execution_time_.load(std::memory_order_relaxed);
-            if (last_period < period / 10) {
+            if (last_period < minimum_period) {
               if (params_.print_warnings) {
                 RCLCPP_WARN_THROTTLE(
                   params_.logger, *params_.clock, 1000,
