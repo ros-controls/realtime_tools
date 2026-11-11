@@ -718,17 +718,15 @@ private:
             }
             std::this_thread::sleep_until(next_iteration_time);
           } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
-            // Minimum sleep. It protects the CPU if the callback does not block.
-            constexpr auto minimum_period = std::chrono::microseconds(100);
             const auto last_period = last_execution_time_.load(std::memory_order_relaxed);
-            if (last_period < minimum_period) {
+            if (last_period < period / 10) {
               if (params_.print_warnings) {
                 RCLCPP_WARN_THROTTLE(
                   params_.logger, *params_.clock, 1000,
-                  "The SELF_PACED callback took less than 100 us. A SELF_PACED callback must block "
-                  "until the next cycle. The handler sleeps to protect the CPU.");
+                  "The SELF_PACED callback took less than 10%% of the cycle period. Check whether "
+                  "your read() blocks. The handler sleeps for 100 us to protect the CPU.");
               }
-              std::this_thread::sleep_for(minimum_period - last_period);
+              std::this_thread::sleep_for(std::chrono::microseconds(100));
             }
           }
         }
