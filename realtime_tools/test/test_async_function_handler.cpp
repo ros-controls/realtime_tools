@@ -531,9 +531,8 @@ TEST_F(AsyncFunctionHandlerTest, self_paced_scheduling_policy_respects_minimum_p
   // The mock callback sleeps for 10 us. This is less than 100 us, so the handler sleeps.
   // The test expects at most 10000 cycles in one second.
   std::this_thread::sleep_for(std::chrono::seconds(1));
-  const int counter_after_1s = async_class.get_counter();
-
   async_class.get_handler().stop_thread();
+  const int counter_after_1s = async_class.get_counter();
 
   // A loop without sleep gives more than 50000 cycles.
   EXPECT_GT(counter_after_1s, 0);
