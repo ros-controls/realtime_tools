@@ -26,11 +26,11 @@ Hardware interfaces that need to poll or update at a fixed, independent frequenc
 
 SELF_PACED
 ----------
-In ``SELF_PACED`` mode, the async worker thread runs independently of the main thread and normally relies on the callback (for example, a blocking ``read()``) to pace execution. If the callback returns faster than 10% of the configured ``exec_rate`` period, the handler applies a fallback delay to prevent a busy loop.
+In ``SELF_PACED`` mode, the async worker thread runs independently of the main thread and normally relies on the callback (for example, a blocking ``read()``) to pace execution. If the callback returns in less than 100 us, the handler sleeps for the remaining time to protect the CPU. It also prints a warning, limited to one per second.
 
 Used when hardware interfaces must synchronize directly with an external hardware clock. Avoids drift between control loops of manipulator controllers and ``controller_manager`` thread. This requires the hardware interface to wait on a heartbeat/sync signal from hardware that a new control cycle can start.
 
 Note that while the hardware interface is synchronized to the external hardware, controllers might still experience drift, as their ``update()`` is still called in the main ``controller_manager`` thread.
 
 * **Scheduling Control:** Blocking in hardware interface ``read()`` function.
-* **Sleep Mechanism:** None. Relies on a blocking hardware ``read()`` to pace the thread.
+* **Sleep Mechanism:** None. Relies on a blocking hardware ``read()`` to pace the thread. The handler sleeps only if the callback returns in less than 100 us.

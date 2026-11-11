@@ -718,12 +718,17 @@ private:
             }
             std::this_thread::sleep_until(next_iteration_time);
           } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
-            // Safety net: If the hardware interface does not block and returned instantly,
-            // fallback to 10% of the nominal execution rate period to prevent CPU burning.
+            // Minimum sleep. It protects the CPU if the callback does not block.
+            constexpr auto minimum_period = std::chrono::microseconds(100);
             const auto last_period = last_execution_time_.load(std::memory_order_relaxed);
-            const auto minimum_expected_period = period / 10;
-            if (last_period < minimum_expected_period) {
-              std::this_thread::sleep_for(period - last_period);
+            if (last_period < minimum_period) {
+              if (params_.print_warnings) {
+                RCLCPP_WARN_THROTTLE(
+                  params_.logger, *params_.clock, 1000,
+                  "The SELF_PACED callback took less than 100 us. A SELF_PACED callback must block "
+                  "until the next cycle. The handler sleeps to protect the CPU.");
+              }
+              std::this_thread::sleep_for(minimum_period - last_period);
             }
           }
         }
