@@ -675,6 +675,8 @@ private:
     previous_time_ = params_.clock->now();
     if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
       std::this_thread::sleep_for(period);
+    } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
+      previous_time_ = params_.clock->now() - rclcpp::Duration(period);
     }
     std::chrono::steady_clock::time_point next_iteration_time{std::chrono::steady_clock::now()};
     while (!stop_async_callback_.load(std::memory_order_relaxed)) {
