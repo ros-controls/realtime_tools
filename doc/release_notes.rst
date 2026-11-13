@@ -11,6 +11,7 @@ This list summarizes the changes between Humble (previous) and Jazzy (current) r
 AsyncFunctionHandler
 *******************************
 * Add DETACHED scheduling policy for Async function handler (`#383 <https://github.com/ros-controls/realtime_tools/pull/383>`__).
+* Added the ``SELF_PACED`` scheduling policy. The worker thread does not sleep. The callback (a blocking hardware ``read()``), sets the cycle time. If the callback returns in less than 10% of the ``exec_rate`` period, the handler sleeps for 100 us and prints a warning (`#473 <https://github.com/ros-controls/realtime_tools/pull/473>`__).
 
 RealtimeBox
 *******************************
