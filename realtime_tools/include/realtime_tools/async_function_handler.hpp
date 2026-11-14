@@ -606,7 +606,7 @@ public:
           }
         }
 
-        switch (params_.scheduling_policy) {
+        switch (static_cast<AsyncSchedulingPolicy::Value>(params_.scheduling_policy)) {
           case AsyncSchedulingPolicy::SYNCHRONIZED:
             execute_synchronized_callback();
             break;
