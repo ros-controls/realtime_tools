@@ -2,8 +2,8 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.6.0 (2026-11-18)
+------------------
 * Relax counter tolerance in flaky detached scheduling policy test (`#633 <https://github.com/ros-controls/realtime_tools/issues/633>`_)
 * Fix AsyncFunctionHandler build with Apple clang (`#629 <https://github.com/ros-controls/realtime_tools/issues/629>`_)
 * Add ``SELF_PACED`` scheduling policy to AsyncFunctionHandler (`#473 <https://github.com/ros-controls/realtime_tools/issues/473>`_)
