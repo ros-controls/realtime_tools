@@ -631,6 +631,31 @@ struct can_pop<
 : std::true_type
 {
 };
+
+// Same as above but with an explicit template argument, which must not bypass the T constraint
+template <typename Queue, typename Elem, typename U, typename = void>
+struct can_push_rvalue_as : std::false_type
+{
+};
+template <typename Queue, typename Elem, typename U>
+struct can_push_rvalue_as<
+  Queue, Elem, U,
+  std::void_t<decltype(std::declval<Queue &>().template push<U>(std::declval<Elem &&>()))>>
+: std::true_type
+{
+};
+
+template <typename Queue, typename Elem, typename U, typename = void>
+struct can_pop_as : std::false_type
+{
+};
+template <typename Queue, typename Elem, typename U>
+struct can_pop_as<
+  Queue, Elem, U,
+  std::void_t<decltype(std::declval<Queue &>().template pop<U>(std::declval<Elem &>()))>>
+: std::true_type
+{
+};
 }  // namespace
 
 TEST(LockFreeQueue, push_is_rejected_for_types_only_convertible_from_an_rvalue)
@@ -648,5 +673,13 @@ TEST(LockFreePooledSPSCQueue, push_and_pop_require_nothrow_move_assignment)
   static_assert(can_pop<LockFreePooledSPSCQueue<int, 2>, int>::value);
   static_assert(!can_push_rvalue<LockFreePooledSPSCQueue<ThrowingMove, 2>, ThrowingMove>::value);
   static_assert(!can_pop<LockFreePooledSPSCQueue<ThrowingMove, 2>, ThrowingMove>::value);
+  SUCCEED();
+}
+
+TEST(LockFreePooledSPSCQueue, explicit_template_argument_does_not_bypass_nothrow_requirement)
+{
+  using Queue = LockFreePooledSPSCQueue<ThrowingMove, 2>;
+  static_assert(!can_push_rvalue_as<Queue, ThrowingMove, int>::value);
+  static_assert(!can_pop_as<Queue, ThrowingMove, int>::value);
   SUCCEED();
 }
