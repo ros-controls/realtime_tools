@@ -2,6 +2,13 @@
 Changelog for package realtime_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Relax counter tolerance in flaky detached scheduling policy test (backport `#633 <https://github.com/ros-controls/realtime_tools/issues/633>`_) (`#634 <https://github.com/ros-controls/realtime_tools/issues/634>`_)
+* Fix AsyncFunctionHandler build with Apple clang (backport `#629 <https://github.com/ros-controls/realtime_tools/issues/629>`_) (`#630 <https://github.com/ros-controls/realtime_tools/issues/630>`_)
+* Add ``SELF_PACED`` scheduling policy to AsyncFunctionHandler (backport `#473 <https://github.com/ros-controls/realtime_tools/issues/473>`_) (`#623 <https://github.com/ros-controls/realtime_tools/issues/623>`_)
+* Contributors: mergify[bot]
+
 3.14.1 (2026-11-04)
 -------------------
 * Fix C++17 build of LockFreePooledSPSCQueue (backport `#615 <https://github.com/ros-controls/realtime_tools/issues/615>`_) (`#620 <https://github.com/ros-controls/realtime_tools/issues/620>`_)
