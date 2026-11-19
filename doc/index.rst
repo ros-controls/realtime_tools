@@ -27,7 +27,7 @@ A wait-free single-producer single-consumer channel that always holds the latest
    #include <realtime_tools/realtime_triple_buffer.hpp>
 
    // Preallocate every slot, e.g. with one entry per joint
-   realtime_tools::RealtimeTripleBuffer<std::vector<double>> positions(std::vector<double>(n_joints));
+   realtime_tools::RealtimeTripleBuffer<std::vector<double>> positions{std::vector<double>(n_joints)};
 
    // Driver thread (single writer): fill the slot in place, then publish it
    auto & slot = positions.write_buffer();
