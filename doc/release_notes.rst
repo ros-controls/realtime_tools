@@ -12,3 +12,7 @@ AsyncFunctionHandler
 LockFreeQueue
 *******************************
 * Added ``LockFreePooledSPSCQueue`` for large or move-only types, backed by a preallocated pool (`#606 <https://github.com/ros-controls/realtime_tools/pull/606>`__, `#615 <https://github.com/ros-controls/realtime_tools/pull/615>`__).
+
+Realtime helpers
+*******************************
+* Added ``check_realtime_environment()``, which reports the realtime kernel, RT priority and memlock limits/capabilities, CPU governor and isolated CPUs with hints on how to fix each issue, and ``parse_cpu_list()`` to parse Linux sysfs CPU lists such as ``0,2-3`` (`#617 <https://github.com/ros-controls/realtime_tools/pull/617>`__).

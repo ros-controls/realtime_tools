@@ -36,13 +36,16 @@
 #include <sys/capability.h>
 #endif
 #include <sys/mman.h>
+#include <sys/resource.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 #endif
 
+#include <charconv>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace realtime_tools
 {
@@ -319,6 +322,153 @@ int64_t get_number_of_available_processors()
   return static_cast<int64_t>(sysinfo.dwNumberOfProcessors);
 #else
   return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+}
+
+std::vector<int> parse_cpu_list(const std::string & cpu_list)
+{
+  // Rejects empty strings, signs, trailing characters and overflow, unlike std::stoi
+  auto to_int = [](const std::string & text, int & value) -> bool {
+    const char * end = text.data() + text.size();
+    const auto result = std::from_chars(text.data(), end, value);
+    return !text.empty() && result.ec == std::errc() && result.ptr == end;
+  };
+
+  std::vector<int> cpus;
+  // sysfs files end with a newline
+  std::istringstream list(cpu_list.substr(0, cpu_list.find_last_not_of(" \n") + 1));
+  std::string range;
+  while (std::getline(list, range, ',')) {
+    const auto dash = range.find('-');
+    int first = 0;
+    int last = 0;
+    if (
+      !to_int(range.substr(0, dash), first) ||
+      !to_int(dash == std::string::npos ? range : range.substr(dash + 1), last) || first > last) {
+      return {};
+    }
+    for (int cpu = first; cpu <= last; ++cpu) {
+      cpus.push_back(cpu);
+    }
+  }
+  return cpus;
+}
+
+std::pair<bool, std::string> check_realtime_environment(int priority)
+{
+#if defined(_WIN32) || defined(__APPLE__)
+  (void)priority;
+  return {false, "Checking the realtime environment is not supported on Windows or macOS."};
+#else
+  // Only reads the effective set, unlike the capability check in lock_memory() which also sets it
+  auto has_capability = [](cap_value_t capability) -> bool {
+    cap_t caps = cap_get_proc();
+    if (caps == nullptr) {
+      return false;
+    }
+    cap_flag_value_t value = CAP_CLEAR;
+    const bool ok = cap_get_flag(caps, capability, CAP_EFFECTIVE, &value) == 0;
+    cap_free(caps);
+    return ok && value == CAP_SET;
+  };
+  auto read_first_line = [](const std::string & path, std::string & line) -> bool {
+    std::ifstream file(path);
+    return file.is_open() && static_cast<bool>(std::getline(file, line));
+  };
+
+  bool ok = true;
+  std::ostringstream report;
+  auto warn = [&ok, &report](const std::string & line) {
+    ok = false;
+    report << "[WARN] " << line << "\n";
+  };
+
+  if (has_realtime_kernel()) {
+    report << "[OK] Realtime kernel: PREEMPT_RT kernel detected\n";
+  } else {
+    warn(
+      "Realtime kernel: no PREEMPT_RT kernel detected, expect high latencies. Install a realtime "
+      "kernel (e.g. Ubuntu Pro 'realtime-kernel' or a PREEMPT_RT patched kernel).");
+  }
+
+  rlimit rtprio{};
+  const int min_priority = sched_get_priority_min(SCHED_FIFO);
+  const int max_priority = sched_get_priority_max(SCHED_FIFO);
+  // Checked first because sched_setscheduler() rejects it with EINVAL even with CAP_SYS_NICE
+  if (priority < min_priority || priority > max_priority) {
+    warn(
+      "RT priority: priority " + std::to_string(priority) + " is outside the SCHED_FIFO range [" +
+      std::to_string(min_priority) + ", " + std::to_string(max_priority) +
+      "], setting SCHED_FIFO will fail.");
+  } else if (has_capability(CAP_SYS_NICE)) {
+    report << "[OK] RT priority: process has CAP_SYS_NICE, priority " << priority
+           << " is allowed\n";
+  } else if (getrlimit(RLIMIT_RTPRIO, &rtprio) != 0) {
+    warn("RT priority: could not read RLIMIT_RTPRIO: " + std::string(std::strerror(errno)));
+  } else if (rtprio.rlim_cur == RLIM_INFINITY || rtprio.rlim_cur >= static_cast<rlim_t>(priority)) {
+    report << "[OK] RT priority: RLIMIT_RTPRIO allows priority " << priority << "\n";
+  } else {
+    warn(
+      "RT priority: RLIMIT_RTPRIO is " + std::to_string(rtprio.rlim_cur) + " but priority " +
+      std::to_string(priority) +
+      " was requested, setting SCHED_FIFO will fail. Add the user to a group with an 'rtprio' "
+      "limit in /etc/security/limits.conf (e.g. '@realtime - rtprio 99') and log in again.");
+  }
+
+  rlimit memlock{};
+  if (has_capability(CAP_IPC_LOCK)) {
+    report << "[OK] Memory locking: process has CAP_IPC_LOCK\n";
+  } else if (getrlimit(RLIMIT_MEMLOCK, &memlock) != 0) {
+    warn("Memory locking: could not read RLIMIT_MEMLOCK: " + std::string(std::strerror(errno)));
+  } else if (memlock.rlim_cur == RLIM_INFINITY) {
+    report << "[OK] Memory locking: RLIMIT_MEMLOCK is unlimited\n";
+  } else {
+    // mlockall(MCL_CURRENT | MCL_FUTURE) of a ROS process needs far more than any typical limit
+    warn(
+      "Memory locking: RLIMIT_MEMLOCK is " + std::to_string(memlock.rlim_cur / 1024) +
+      " KiB, lock_memory() will most likely fail. Add a 'memlock' limit to "
+      "/etc/security/limits.conf (e.g. '@realtime - memlock unlimited') and log in again.");
+  }
+
+  std::string slow_cpus;
+  bool governor_known = false;
+  // Online CPU IDs can have gaps (CPU hotplug), so get_number_of_available_processors() is not
+  // enough to enumerate them
+  std::string online;
+  read_first_line("/sys/devices/system/cpu/online", online);
+  for (const int cpu : parse_cpu_list(online)) {
+    std::string governor;
+    if (
+      read_first_line(
+        "/sys/devices/system/cpu/cpu" + std::to_string(cpu) + "/cpufreq/scaling_governor",
+        governor)) {
+      governor_known = true;
+      if (governor != "performance") {
+        slow_cpus += " cpu" + std::to_string(cpu) + "=" + governor;
+      }
+    }
+  }
+  if (!governor_known) {
+    report << "[INFO] CPU governor: unknown, cpufreq is not available\n";
+  } else if (slow_cpus.empty()) {
+    report << "[OK] CPU governor: all CPUs use 'performance'\n";
+  } else {
+    warn(
+      "CPU governor: frequency scaling adds latency, use the 'performance' governor (e.g. "
+      "'cpupower frequency-set -g performance'). Not using it:" +
+      slow_cpus);
+  }
+
+  std::string isolated;
+  if (read_first_line("/sys/devices/system/cpu/isolated", isolated) && !isolated.empty()) {
+    report << "[INFO] Isolated CPUs: " << isolated
+           << " (use set_thread_affinity() to run realtime threads there)\n";
+  } else {
+    report << "[INFO] Isolated CPUs: none (optionally isolate cores with the 'isolcpus' kernel "
+              "parameter for realtime threads)\n";
+  }
+
+  return {ok, report.str()};
 #endif
 }
 

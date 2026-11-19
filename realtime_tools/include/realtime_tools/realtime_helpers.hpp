@@ -156,6 +156,39 @@ std::pair<bool, std::string> set_current_thread_name(const std::string & name);
 */
 int64_t get_number_of_available_processors();
 
+/**
+ * Parse a Linux CPU list, as found in /sys/devices/system/cpu/online or isolated, into CPU IDs.
+ * The IDs may have gaps (e.g. after CPU hotplug), so the number of online CPUs is not enough to
+ * enumerate them.
+ * \param[in] cpu_list comma separated IDs and inclusive ranges, e.g. "0,2-3" -> {0, 2, 3}
+ * \returns the CPU IDs in the order listed, or an empty vector if \p cpu_list is empty or
+ * malformed
+ */
+std::vector<int> parse_cpu_list(const std::string & cpu_list);
+
+/**
+ * Check how well the system is set up to run a realtime application and explain how to fix it.
+ * Nothing is changed on the system, the function only reads limits, capabilities and sysfs.
+ *
+ * The following checks are reported, one per line, prefixed with [OK], [WARN] or [INFO]:
+ * - "Realtime kernel": whether a PREEMPT_RT kernel is running (see has_realtime_kernel()).
+ * - "RT priority": whether configure_sched_fifo(priority) is allowed, i.e. \p priority is within
+ *   the SCHED_FIFO range (1-99 on Linux) and the soft RLIMIT_RTPRIO is >= \p priority or the
+ *   process has CAP_SYS_NICE.
+ * - "Memory locking": whether lock_memory() can lock all memory, i.e. RLIMIT_MEMLOCK is unlimited
+ *   or the process has CAP_IPC_LOCK.
+ * - "CPU governor": whether all online CPUs use the "performance" cpufreq governor. Reported as
+ *   [INFO] if cpufreq is not available (e.g. in VMs or containers).
+ * - "Isolated CPUs": the CPUs isolated from the scheduler (isolcpus), always [INFO].
+ *
+ * Meant to be logged once at startup, e.g. by a hardware component or ros2_control_node, so that
+ * integrators get an actionable hint instead of a silently failing configure_sched_fifo().
+ * \param[in] priority the SCHED_FIFO/SCHED_RR priority the application intends to use
+ * \returns a pair of a boolean that is true if no check reported [WARN], and the report with one
+ * line per check. On Windows and macOS returns false with a "not supported" message.
+ */
+std::pair<bool, std::string> check_realtime_environment(int priority);
+
 }  // namespace realtime_tools
 
 #endif  // REALTIME_TOOLS__REALTIME_HELPERS_HPP_
