@@ -48,7 +48,7 @@ Other classes and helper methods
 
 Checking the realtime environment
 =================================
-``realtime_tools::check_realtime_environment(priority)`` reads the system configuration (it changes nothing) and returns a report with one line per check, prefixed with ``[OK]``, ``[WARN]`` or ``[INFO]``, plus a boolean that is ``false`` if any check warned. Each warning includes how to fix it. It checks for a PREEMPT_RT kernel, whether ``RLIMIT_RTPRIO``/``CAP_SYS_NICE`` allow the requested SCHED_FIFO priority, whether ``RLIMIT_MEMLOCK``/``CAP_IPC_LOCK`` allow ``lock_memory()``, whether the CPUs use the ``performance`` cpufreq governor, and which CPUs are isolated.
+``realtime_tools::check_realtime_environment(priority)`` reads the system configuration (it changes nothing) and returns a report with one line per check, prefixed with ``[OK]``, ``[WARN]`` or ``[INFO]``, plus a boolean that is ``false`` if any check warned. Each warning includes how to fix it. It checks for a PREEMPT_RT kernel, whether the requested SCHED_FIFO priority is within the valid range (1-99 on Linux) and allowed by ``RLIMIT_RTPRIO``/``CAP_SYS_NICE``, whether ``RLIMIT_MEMLOCK``/``CAP_IPC_LOCK`` allow ``lock_memory()``, whether the CPUs use the ``performance`` cpufreq governor, and which CPUs are isolated.
 
 .. code-block:: cpp
 

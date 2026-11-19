@@ -162,8 +162,9 @@ int64_t get_number_of_available_processors();
  *
  * The following checks are reported, one per line, prefixed with [OK], [WARN] or [INFO]:
  * - "Realtime kernel": whether a PREEMPT_RT kernel is running (see has_realtime_kernel()).
- * - "RT priority": whether configure_sched_fifo(priority) is allowed, i.e. the soft
- *   RLIMIT_RTPRIO is >= \p priority or the process has CAP_SYS_NICE.
+ * - "RT priority": whether configure_sched_fifo(priority) is allowed, i.e. \p priority is within
+ *   the SCHED_FIFO range (1-99 on Linux) and the soft RLIMIT_RTPRIO is >= \p priority or the
+ *   process has CAP_SYS_NICE.
  * - "Memory locking": whether lock_memory() can lock all memory, i.e. RLIMIT_MEMLOCK is unlimited
  *   or the process has CAP_IPC_LOCK.
  * - "CPU governor": whether all online CPUs use the "performance" cpufreq governor. Reported as
