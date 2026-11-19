@@ -52,13 +52,13 @@ On Linux, ``std::chrono::steady_clock`` reads ``CLOCK_MONOTONIC``. That clock ne
      - vDSO call, tens of ns
      - vDSO call, tens of ns
    * - Sleeping can return early on its own clock
-     - Yes (see below)
      - No
+     - No, when using its own ``sleep_for()`` / ``sleep_until()`` (see below)
    * - Tracks wall-clock time over the long run
      - Yes
      - No, drifts with the crystal (typically ±20–50 ppm)
 
-Use ``SlewFreeSteadyClock`` to time control loops, measure ``dt`` and benchmark code. Keep ``std::chrono::steady_clock`` or ROS time when timestamps must agree with other machines or with the system time.
+Use ``SlewFreeSteadyClock`` to time control loops, measure ``dt`` and benchmark code. Keep ``std::chrono::steady_clock`` when durations should follow the NTP/PTP-disciplined rate. Use ``std::chrono::system_clock`` or ROS time for timestamps compared across machines or with the system time; neither steady clock's epoch is shared (on Linux both count from boot).
 
 Sleeping
 ^^^^^^^^
