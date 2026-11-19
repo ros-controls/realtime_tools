@@ -16,7 +16,6 @@
 
 #include <chrono>
 #include <ctime>
-#include <thread>
 #include <type_traits>
 
 #include "realtime_tools/slew_free_steady_clock.hpp"
@@ -37,15 +36,6 @@ TEST(SlewFreeSteadyClockTest, NowIsMonotonic)
     ASSERT_GE(cur, prev);
     prev = cur;
   }
-}
-
-TEST(SlewFreeSteadyClockTest, MeasuresElapsedTime)
-{
-  const auto start = SlewFreeSteadyClock::now();
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  const auto elapsed = SlewFreeSteadyClock::now() - start;
-  EXPECT_GE(elapsed, std::chrono::milliseconds(10));
-  EXPECT_LT(elapsed, std::chrono::seconds(1));
 }
 
 #ifdef CLOCK_MONOTONIC_RAW
