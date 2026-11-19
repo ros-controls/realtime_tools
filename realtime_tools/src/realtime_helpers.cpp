@@ -432,8 +432,11 @@ std::pair<bool, std::string> check_realtime_environment(int priority)
 
   std::string slow_cpus;
   bool governor_known = false;
-  const auto number_of_cpus = get_number_of_available_processors();
-  for (int64_t cpu = 0; cpu < number_of_cpus; ++cpu) {
+  // Online CPU IDs can have gaps (CPU hotplug), so get_number_of_available_processors() is not
+  // enough to enumerate them
+  std::string online;
+  read_first_line("/sys/devices/system/cpu/online", online);
+  for (const int cpu : parse_cpu_list(online)) {
     std::string governor;
     if (
       read_first_line(
