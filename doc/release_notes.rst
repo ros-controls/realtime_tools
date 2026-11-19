@@ -15,4 +15,4 @@ LockFreeQueue
 
 Realtime helpers
 *******************************
-* Added ``check_realtime_environment()``, which reports the realtime kernel, RT priority and memlock limits/capabilities, CPU governor and isolated CPUs with hints on how to fix each issue (`#617 <https://github.com/ros-controls/realtime_tools/pull/617>`__).
+* Added ``check_realtime_environment()``, which reports the realtime kernel, RT priority and memlock limits/capabilities, CPU governor and isolated CPUs with hints on how to fix each issue, and ``parse_cpu_list()`` to parse Linux sysfs CPU lists such as ``0,2-3`` (`#617 <https://github.com/ros-controls/realtime_tools/pull/617>`__).
