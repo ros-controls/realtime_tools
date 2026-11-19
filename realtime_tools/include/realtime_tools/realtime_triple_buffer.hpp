@@ -23,13 +23,17 @@
 namespace realtime_tools
 {
 /**
- * @brief Wait-free single-producer single-consumer channel that always holds the latest value.
+ * @brief Lock-free single-producer single-consumer channel that always holds the latest value.
  *
  * Three slots of T are preallocated: one owned by the writer, one owned by the reader and one
  * "middle" slot holding the latest published value. publish() and read() only swap slot indices
  * with a single atomic exchange, so neither side ever blocks, fails or allocates, independently of
  * what the other side is doing. Intermediate values are dropped: the reader always gets the most
  * recently published one.
+ *
+ * The exchange is wait-free where std::atomic::exchange compiles to a single instruction (e.g.
+ * x86-64, ARMv8.1+ with LSE atomics). On load-linked/store-conditional targets (e.g. ARMv7) it is a
+ * retry loop, so the portable guarantee is lock-free only.
  *
  * Typical use: a hardware driver thread publishes the latest sensor sample and the control loop
  * picks it up in read(), or a non-realtime callback publishes the latest command for update().
@@ -76,7 +80,7 @@ public:
   T & write_buffer() { return slots_[back_]; }
 
   /**
-   * @brief Writer side: make the content of write_buffer() the latest value. Wait-free.
+   * @brief Writer side: make the content of write_buffer() the latest value. Lock-free.
    *
    * If the reader did not consume the previously published value, that value is dropped.
    */
@@ -90,7 +94,7 @@ public:
   }
 
   /**
-   * @brief Writer side: copy @p value into write_buffer() and publish() it. Wait-free.
+   * @brief Writer side: copy @p value into write_buffer() and publish() it. Lock-free.
    *
    * Allocation-free as long as the assignment of T is (e.g. a vector of equal or smaller size).
    */
@@ -113,7 +117,7 @@ public:
   bool has_new_data() const { return (state_.load(std::memory_order_acquire) & kNewDataFlag) != 0; }
 
   /**
-   * @brief Reader side: get the latest published value. Wait-free.
+   * @brief Reader side: get the latest published value. Lock-free.
    *
    * If a new value was published, the reader's slot is swapped with it; otherwise the value from the
    * previous read() (or the initial value) is returned again.
@@ -144,7 +148,7 @@ private:
 #if defined(__cpp_lib_atomic_is_always_lock_free)
   static_assert(
     std::atomic<uint8_t>::is_always_lock_free,
-    "RealtimeTripleBuffer requires a lock-free std::atomic<uint8_t> to be wait-free");
+    "RealtimeTripleBuffer requires a lock-free std::atomic<uint8_t> to be lock-free");
 #endif
 };
 

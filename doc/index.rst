@@ -20,7 +20,7 @@ A Box that ensures thread-safe access to the boxed contents. Access is best effo
 
 RealtimeTripleBuffer
 ---------------------
-A wait-free single-producer single-consumer channel that always holds the latest value. Three slots are preallocated and the writer and reader only swap slot indices with one atomic exchange, so neither side ever blocks, fails or allocates. Intermediate values are dropped.
+A lock-free single-producer single-consumer channel that always holds the latest value. Three slots are preallocated and the writer and reader only swap slot indices with one atomic exchange, so neither side ever blocks, fails or allocates. It is wait-free on targets where that exchange is a single instruction (e.g. x86-64, ARMv8.1+ with LSE atomics). Intermediate values are dropped.
 
 .. code-block:: cpp
 
