@@ -8,6 +8,8 @@ For more information of the ros2_control framework see `control.ros.org <https:/
 .. include:: realtime_publisher.rst
 .. include:: async_scheduling_policy.rst
 
+.. include:: slew_free_steady_clock.rst
+
 API documentation
 ------------------
 
