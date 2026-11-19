@@ -41,6 +41,7 @@
 #include <unistd.h>
 #endif
 
+#include <charconv>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -322,6 +323,35 @@ int64_t get_number_of_available_processors()
 #else
   return sysconf(_SC_NPROCESSORS_ONLN);
 #endif
+}
+
+std::vector<int> parse_cpu_list(const std::string & cpu_list)
+{
+  // Rejects empty strings, signs, trailing characters and overflow, unlike std::stoi
+  auto to_int = [](const std::string & text, int & value) -> bool {
+    const char * end = text.data() + text.size();
+    const auto result = std::from_chars(text.data(), end, value);
+    return !text.empty() && result.ec == std::errc() && result.ptr == end;
+  };
+
+  std::vector<int> cpus;
+  // sysfs files end with a newline
+  std::istringstream list(cpu_list.substr(0, cpu_list.find_last_not_of(" \n") + 1));
+  std::string range;
+  while (std::getline(list, range, ',')) {
+    const auto dash = range.find('-');
+    int first = 0;
+    int last = 0;
+    if (
+      !to_int(range.substr(0, dash), first) ||
+      !to_int(dash == std::string::npos ? range : range.substr(dash + 1), last) || first > last) {
+      return {};
+    }
+    for (int cpu = first; cpu <= last; ++cpu) {
+      cpus.push_back(cpu);
+    }
+  }
+  return cpus;
 }
 
 std::pair<bool, std::string> check_realtime_environment(int priority)

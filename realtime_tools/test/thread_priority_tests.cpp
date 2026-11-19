@@ -106,6 +106,23 @@ TEST(thread_priority, set_current_thread_affinity_valid)
   EXPECT_TRUE(realtime_tools::set_current_thread_affinity({0, count - 1}).first);
 }
 
+TEST(parse_cpu_list, parses_ids_and_ranges_with_gaps)
+{
+  using ::testing::ElementsAre;
+  EXPECT_THAT(realtime_tools::parse_cpu_list("0"), ElementsAre(0));
+  EXPECT_THAT(realtime_tools::parse_cpu_list("0-3"), ElementsAre(0, 1, 2, 3));
+  // CPU 1 offline: the online count (3) would wrongly suggest IDs 0, 1, 2
+  EXPECT_THAT(realtime_tools::parse_cpu_list("0,2-3"), ElementsAre(0, 2, 3));
+  EXPECT_THAT(realtime_tools::parse_cpu_list("0-1,4-5,7\n"), ElementsAre(0, 1, 4, 5, 7));
+}
+
+TEST(parse_cpu_list, returns_empty_for_empty_or_malformed)
+{
+  for (const auto * list : {"", "\n", "a", "1-", "-1", "3-1", "0,,2", "0-2x"}) {
+    EXPECT_TRUE(realtime_tools::parse_cpu_list(list).empty()) << "'" << list << "'";
+  }
+}
+
 #ifdef __linux__
 namespace
 {

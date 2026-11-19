@@ -157,6 +157,16 @@ std::pair<bool, std::string> set_current_thread_name(const std::string & name);
 int64_t get_number_of_available_processors();
 
 /**
+ * Parse a Linux CPU list, as found in /sys/devices/system/cpu/online or isolated, into CPU IDs.
+ * The IDs may have gaps (e.g. after CPU hotplug), so the number of online CPUs is not enough to
+ * enumerate them.
+ * \param[in] cpu_list comma separated IDs and inclusive ranges, e.g. "0,2-3" -> {0, 2, 3}
+ * \returns the CPU IDs in the order listed, or an empty vector if \p cpu_list is empty or
+ * malformed
+ */
+std::vector<int> parse_cpu_list(const std::string & cpu_list);
+
+/**
  * Check how well the system is set up to run a realtime application and explain how to fix it.
  * Nothing is changed on the system, the function only reads limits, capabilities and sysfs.
  *
