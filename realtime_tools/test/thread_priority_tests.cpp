@@ -161,10 +161,15 @@ TEST(realtime_environment, reports_every_check_once)
   EXPECT_EQ(ok, report.find("[WARN]") == std::string::npos) << report;
 }
 
-TEST(realtime_environment, priority_zero_is_always_allowed)
+TEST(realtime_environment, warns_for_priority_outside_sched_fifo_range)
 {
-  const auto report = realtime_tools::check_realtime_environment(0).second;
-  EXPECT_THAT(report, ::testing::HasSubstr("[OK] RT priority")) << report;
+  // configure_sched_fifo() fails with EINVAL outside [min, max], even with CAP_SYS_NICE
+  for (const int priority :
+       {sched_get_priority_min(SCHED_FIFO) - 1, sched_get_priority_max(SCHED_FIFO) + 1}) {
+    const auto [ok, report] = realtime_tools::check_realtime_environment(priority);
+    EXPECT_FALSE(ok) << report;
+    EXPECT_THAT(report, ::testing::HasSubstr("[WARN] RT priority")) << report;
+  }
 }
 
 TEST(realtime_environment, warns_when_rtprio_limit_too_low)

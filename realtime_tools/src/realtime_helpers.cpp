@@ -362,7 +362,15 @@ std::pair<bool, std::string> check_realtime_environment(int priority)
   }
 
   rlimit rtprio{};
-  if (has_capability(CAP_SYS_NICE)) {
+  const int min_priority = sched_get_priority_min(SCHED_FIFO);
+  const int max_priority = sched_get_priority_max(SCHED_FIFO);
+  // Checked first because sched_setscheduler() rejects it with EINVAL even with CAP_SYS_NICE
+  if (priority < min_priority || priority > max_priority) {
+    warn(
+      "RT priority: priority " + std::to_string(priority) + " is outside the SCHED_FIFO range [" +
+      std::to_string(min_priority) + ", " + std::to_string(max_priority) +
+      "], setting SCHED_FIFO will fail.");
+  } else if (has_capability(CAP_SYS_NICE)) {
     report << "[OK] RT priority: process has CAP_SYS_NICE, priority " << priority
            << " is allowed\n";
   } else if (getrlimit(RLIMIT_RTPRIO, &rtprio) != 0) {
