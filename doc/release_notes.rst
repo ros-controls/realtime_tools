@@ -12,3 +12,7 @@ AsyncFunctionHandler
 LockFreeQueue
 *******************************
 * Added ``LockFreePooledSPSCQueue`` for large or move-only types, backed by a preallocated pool (`#606 <https://github.com/ros-controls/realtime_tools/pull/606>`__, `#615 <https://github.com/ros-controls/realtime_tools/pull/615>`__).
+
+RealtimeLogger
+*******************************
+* Added ``RealtimeLogger``, a realtime-safe logger that forwards to an ``rclcpp::Logger`` from a background thread. It comes with ``RT_LOG_*`` macros that mirror the ``RCLCPP_*`` ones, including the ``_ONCE``, ``_SKIPFIRST``, ``_EXPRESSION``, ``_FUNCTION``, ``_THROTTLE`` and ``_SKIPFIRST_THROTTLE`` variants (`#639 <https://github.com/ros-controls/realtime_tools/pull/639>`__).
