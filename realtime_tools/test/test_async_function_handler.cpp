@@ -199,9 +199,9 @@ TEST_F(AsyncFunctionHandlerTest, trigger_for_several_cycles)
       missed_triggers++;
     }
   }
-  // Make sure that the failed triggers are less than 3% (see tolerance above)
+  // Make sure that the failed triggers are less than 0.5%
   ASSERT_LT(missed_triggers, static_cast<int>(0.005 * total_cycles))
-    << "The missed triggers cannot be more than 0.1%!";
+    << "The missed triggers cannot be more than 0.5%!";
   async_class.get_handler().stop_thread();
 
   // now the async update should be preempted
