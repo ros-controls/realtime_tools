@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <atomic>
+#include <chrono>
 #include <limits>
 #include <memory>
 
@@ -541,4 +543,54 @@ TEST_F(AsyncFunctionHandlerTest, self_paced_scheduling_policy_respects_minimum_p
   EXPECT_GT(counter_after_1s, 0);
   EXPECT_LE(counter_after_1s, 10000) << "The SELF_PACED policy must sleep for at least 100 us "
                                         "when the callback does not block.";
+}
+
+TEST_F(AsyncFunctionHandlerTest, self_paced_loop_does_not_block_other_threads)
+{
+  // The callback blocks for most of the period, like a callback that waits for the hardware.
+  // Other threads must get the mutex of the handler in short time.
+  realtime_tools::AsyncFunctionHandler<int> handler;
+  std::atomic_int counter{0};
+  realtime_tools::AsyncFunctionHandlerParams params;
+  params.scheduling_policy = realtime_tools::AsyncSchedulingPolicy::SELF_PACED;
+  params.exec_rate = 500;
+  params.clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
+  params.wait_until_initial_trigger = false;
+  handler.init(
+    [&counter](const rclcpp::Time &, const rclcpp::Duration &) {
+      std::this_thread::sleep_for(std::chrono::microseconds(1800));
+      counter++;
+      return 0;
+    },
+    params);
+  handler.start_thread();
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  ASSERT_GT(counter.load(), 0);
+
+  const auto max_duration = std::chrono::milliseconds(20);
+  for (int i = 0; i < 20; i++) {
+    const auto start = std::chrono::steady_clock::now();
+    handler.reset_variables();
+    EXPECT_LT(std::chrono::steady_clock::now() - start, max_duration) << "reset_variables()";
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+
+  // pause_execution() returns after the running callback finished
+  auto start = std::chrono::steady_clock::now();
+  ASSERT_TRUE(handler.pause_execution());
+  EXPECT_LT(std::chrono::steady_clock::now() - start, max_duration) << "pause_execution()";
+  const int counter_post_pause = counter.load();
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  EXPECT_EQ(counter_post_pause, counter.load());
+
+  // resume
+  const auto now = params.clock->now();
+  ASSERT_TRUE(handler.trigger_async_callback(now, rclcpp::Duration(0, 2'000'000)).first);
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  EXPECT_GT(counter.load(), counter_post_pause);
+
+  start = std::chrono::steady_clock::now();
+  handler.stop_thread();
+  EXPECT_LT(std::chrono::steady_clock::now() - start, max_duration) << "stop_thread()";
+  EXPECT_FALSE(handler.is_running());
 }

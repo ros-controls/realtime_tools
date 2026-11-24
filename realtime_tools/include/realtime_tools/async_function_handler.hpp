@@ -464,7 +464,9 @@ public:
     } else {
       if (is_running()) {
         pause_thread_.store(true, std::memory_order_relaxed);
+        // The own loop does not hold the lock in the callback. Wait for the running callback.
         std::unique_lock<std::mutex> lock(async_mtx_);
+        cycle_end_condition_.wait(lock, [this] { return !trigger_in_progress_; });
         return true;
       }
     }
@@ -679,64 +681,79 @@ private:
       previous_time_ = params_.clock->now() - rclcpp::Duration(period);
     }
     std::chrono::steady_clock::time_point next_iteration_time{std::chrono::steady_clock::now()};
+    // The loop locks async_mtx_ only to read and write the shared state. It does not hold the lock
+    // in the callback and in the sleep: the callback can block (SELF_PACED), and other threads
+    // (stop_thread(), pause_execution(), reset_variables()) must get the lock in short time.
     while (!stop_async_callback_.load(std::memory_order_relaxed)) {
+      rclcpp::Time current_time;
+      rclcpp::Duration measured_period{0, 0};
       {
         std::unique_lock<std::mutex> lock(async_mtx_);
         async_callback_condition_.wait(
           lock, [this] { return !pause_thread_ || stop_async_callback_; });
-        if (!stop_async_callback_) {
-          // calculate measured period
-          auto const current_time = params_.clock->now();
-          auto const measured_period = current_time - previous_time_;
-          previous_time_ = current_time;
-          current_callback_time_ = current_time;
-          current_callback_period_ = measured_period;
-
-          const auto start_time = std::chrono::steady_clock::now();
-          try {
-            async_callback_return_ = async_function_(current_time, measured_period);
-          } catch (...) {
-            async_exception_ptr_ = std::current_exception();
-          }
-          last_execution_time_ = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::steady_clock::now() - start_time);
-
-          if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
-            next_iteration_time += period;
-            const auto time_now = std::chrono::steady_clock::now();
-            if (next_iteration_time < time_now) {
-              const double time_diff =
-                std::chrono::duration<double, std::milli>(time_now - next_iteration_time).count();
-              const double cm_period = 1.e3 / static_cast<double>(params_.exec_rate);
-              const int overrun_count = static_cast<int>(std::ceil(time_diff / cm_period));
-              if (params_.print_warnings) {
-                RCLCPP_WARN_THROTTLE(
-                  params_.logger, *params_.clock, 1000,
-                  "Overrun detected! The async callback missed its desired rate of %d Hz. The loop "
-                  "took %f ms (missed cycles : %d).",
-                  params_.exec_rate, time_diff + cm_period, overrun_count + 1);
-              }
-              next_iteration_time += (overrun_count * period);
-            }
-            std::this_thread::sleep_until(next_iteration_time);
-          } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
-            const auto minimum_period = period / 10;
-            const auto last_period = last_execution_time_.load(std::memory_order_relaxed);
-            if (last_period < minimum_period) {
-              if (params_.print_warnings) {
-                RCLCPP_WARN_THROTTLE(
-                  params_.logger, *params_.clock, 1000,
-                  "The SELF_PACED callback took less than 10%% of the cycle period. Check whether "
-                  "your read() blocks. The handler sleeps for 100 us to protect the CPU.");
-              }
-              std::this_thread::sleep_for(std::chrono::microseconds(100));
-            }
-          }
+        if (stop_async_callback_) {
+          trigger_in_progress_ = false;
+          break;
         }
+        // calculate measured period
+        current_time = params_.clock->now();
+        measured_period = current_time - previous_time_;
+        previous_time_ = current_time;
+        current_callback_time_ = current_time;
+        current_callback_period_ = measured_period;
+        // pause_execution() and wait_for_trigger_cycle_to_finish() wait for the callback to finish
+        trigger_in_progress_ = true;
+      }
+
+      const auto start_time = std::chrono::steady_clock::now();
+      try {
+        async_callback_return_ = async_function_(current_time, measured_period);
+      } catch (...) {
+        std::unique_lock<std::mutex> lock(async_mtx_);
+        async_exception_ptr_ = std::current_exception();
+      }
+      last_execution_time_ = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now() - start_time);
+
+      {
+        std::unique_lock<std::mutex> lock(async_mtx_);
         trigger_in_progress_ = false;
       }
       cycle_end_condition_.notify_all();
+
+      if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+        next_iteration_time += period;
+        const auto time_now = std::chrono::steady_clock::now();
+        if (next_iteration_time < time_now) {
+          const double time_diff =
+            std::chrono::duration<double, std::milli>(time_now - next_iteration_time).count();
+          const double cm_period = 1.e3 / static_cast<double>(params_.exec_rate);
+          const int overrun_count = static_cast<int>(std::ceil(time_diff / cm_period));
+          if (params_.print_warnings) {
+            RCLCPP_WARN_THROTTLE(
+              params_.logger, *params_.clock, 1000,
+              "Overrun detected! The async callback missed its desired rate of %d Hz. The loop "
+              "took %f ms (missed cycles : %d).",
+              params_.exec_rate, time_diff + cm_period, overrun_count + 1);
+          }
+          next_iteration_time += (overrun_count * period);
+        }
+        std::this_thread::sleep_until(next_iteration_time);
+      } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
+        const auto minimum_period = period / 10;
+        const auto last_period = last_execution_time_.load(std::memory_order_relaxed);
+        if (last_period < minimum_period) {
+          if (params_.print_warnings) {
+            RCLCPP_WARN_THROTTLE(
+              params_.logger, *params_.clock, 1000,
+              "The SELF_PACED callback took less than 10%% of the cycle period. Check whether "
+              "your read() blocks. The handler sleeps for 100 us to protect the CPU.");
+          }
+          std::this_thread::sleep_for(std::chrono::microseconds(100));
+        }
+      }
     }
+    cycle_end_condition_.notify_all();
   }
 
   rclcpp::Time current_callback_time_ = rclcpp::Time(0, 0, RCL_CLOCK_UNINITIALIZED);
