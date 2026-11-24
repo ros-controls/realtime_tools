@@ -5,6 +5,8 @@ realtime_tools
 
 Contains a set of tools that can be used from a hard realtime thread, without breaking the realtime behavior.
 
+This includes, among others, the realtime publisher, lock-free queues, realtime mutexes and `SlewFreeSteadyClock`, a `std::chrono` clock that is immune to NTP/PTP frequency slewing (`CLOCK_MONOTONIC_RAW`), with its own `sleep_for()`/`sleep_until()`.
+
 Further documentation can be found at [docs.ros.org](https://control.ros.org/rolling/doc/realtime_tools/doc/index.html).
 
 ## Contributing

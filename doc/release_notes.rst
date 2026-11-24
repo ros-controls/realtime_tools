@@ -5,6 +5,10 @@ Release Notes: Kilted Kaiju to Lyrical Luth
 
 This list summarizes important changes between Kilted Kaiju (previous) and Lyrical Luth (current) releases.
 
+SlewFreeSteadyClock
+*******************************
+* Added ``SlewFreeSteadyClock``, a ``std::chrono`` clock based on ``CLOCK_MONOTONIC_RAW`` that is not affected by NTP/PTP frequency slewing, with ``sleep_for()`` and ``sleep_until()`` that never wake early on the raw clock (`#619 <https://github.com/ros-controls/realtime_tools/pull/619>`__).
+
 AsyncFunctionHandler
 *******************************
 * Added the ``SELF_PACED`` scheduling policy. The worker thread does not sleep. The callback (a blocking hardware ``read()``), sets the cycle time. If the callback returns in less than 10% of the ``exec_rate`` period, the handler sleeps for 100 us and prints a warning (`#473 <https://github.com/ros-controls/realtime_tools/pull/473>`__).
