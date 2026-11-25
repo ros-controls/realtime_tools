@@ -21,6 +21,7 @@
 
   <build_depend>ros2_control_cmake</build_depend>
 
+  <depend>google_benchmark_vendor</depend>
   <depend>libboost-dev</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>

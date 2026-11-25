@@ -48,6 +48,7 @@
 
 #include "rclcpp/create_publisher.hpp"
 #include "rclcpp/publisher.hpp"
+#include "realtime_tools/utils/publisher_interface.hpp"
 
 namespace realtime_tools
 {
@@ -98,6 +99,18 @@ public:
    */
   [[deprecated("Use the constructor that creates the publisher internally instead.")]]
   explicit RealtimePublisher(PublisherSharedPtr publisher)
+  {
+    initialize([&]() { return publisher; });
+  }
+
+  /**
+   * \brief Constructor for the realtime publisher wrapping a generic publisher interface
+   *
+   * Starts a dedicated thread for message publishing. Mainly intended for tests and benchmarks.
+   *
+   * \param publisher the publisher interface to wrap
+   */
+  explicit RealtimePublisher(std::shared_ptr<utils::PublisherInterface<MessageT>> publisher)
   {
     initialize([&]() { return publisher; });
   }
@@ -195,7 +208,7 @@ private:
   template <typename PublisherCreator>
   void initialize(PublisherCreator && creator)
   {
-    publisher_ = creator();
+    publisher_ = wrap(creator());
     is_running_ = false;
     keep_running_ = true;
     turn_ = State::LOOP_NOT_STARTED;
@@ -209,6 +222,17 @@ private:
            turn_.load(std::memory_order_acquire) == State::LOOP_NOT_STARTED) {
       std::this_thread::sleep_for(std::chrono::microseconds(100));
     }
+  }
+
+  static std::shared_ptr<utils::PublisherInterface<MessageT>> wrap(PublisherSharedPtr publisher)
+  {
+    return std::make_shared<utils::ROSPublisherWrapper<MessageT>>(publisher);
+  }
+
+  static std::shared_ptr<utils::PublisherInterface<MessageT>> wrap(
+    std::shared_ptr<utils::PublisherInterface<MessageT>> publisher)
+  {
+    return publisher;
   }
 
   /**
@@ -261,7 +285,7 @@ private:
     is_running_ = false;
   }
 
-  PublisherSharedPtr publisher_;
+  std::shared_ptr<utils::PublisherInterface<MessageT>> publisher_;
   std::atomic<bool> is_running_;
   std::atomic<bool> keep_running_;
 
