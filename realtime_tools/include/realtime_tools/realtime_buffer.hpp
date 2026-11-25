@@ -37,10 +37,23 @@
 #include <mutex>
 #include <thread>
 
+#ifndef SILENCE_DEPRECATION_WARNINGS
+#ifdef _MSC_VER
+#pragma message(                                                                      \
+  "This header is obsolete, please refer to the guidelines for replacement options: " \
+  "control.ros.org/rolling/doc/realtime_tools/doc/index.html#guidelines")
+#else
+#warning This header is obsolete, please refer to the guidelines for replacement options: \
+control.ros.org/rolling/doc/realtime_tools/doc/index.html#guidelines
+#endif
+#endif
+
 namespace realtime_tools
 {
 template <class T>
-class RealtimeBuffer
+class [[deprecated(
+  "refer to the guidelines for replacement options: "
+  "control.ros.org/rolling/doc/realtime_tools/doc/index.html#guidelines")]] RealtimeBuffer
 {
 public:
   RealtimeBuffer() : new_data_available_(false)

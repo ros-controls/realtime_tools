@@ -17,6 +17,8 @@
 #ifndef REALTIME_TOOLS__ASYNC_FUNCTION_HANDLER_HPP_
 #define REALTIME_TOOLS__ASYNC_FUNCTION_HANDLER_HPP_
 
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <atomic>
 #include <cmath>
 #include <condition_variable>
@@ -44,6 +46,8 @@ namespace realtime_tools
  * thread will be triggering the async callback method.
  * DETACHED: The async worker thread will be detached from the main thread and will have its own
  * execution cycle.
+ * SELF_PACED: The async worker thread will be scheduled by the hardware, by blocking at start of read()
+ * until a UDP packet arrives. Then the control cycle is started.
  * UNKNOWN: The scheduling policy is unknown.
  */
 class AsyncSchedulingPolicy
@@ -53,6 +57,7 @@ public:
     UNKNOWN = -1,  /// Unknown scheduling policy
     SYNCHRONIZED,  /// Synchronized scheduling policy
     DETACHED,      /// Detached scheduling policy
+    SELF_PACED,    /// Self-paced scheduling policy
   };
 
   AsyncSchedulingPolicy() = default;
@@ -63,6 +68,8 @@ public:
       value_ = SYNCHRONIZED;
     } else if (data_type == "detached") {
       value_ = DETACHED;
+    } else if (data_type == "self_paced") {
+      value_ = SELF_PACED;
     } else {
       value_ = UNKNOWN;
     }
@@ -85,6 +92,8 @@ public:
         return "synchronized";
       case DETACHED:
         return "detached";
+      case SELF_PACED:
+        return "self_paced";
       default:
         return "unknown";
     }
@@ -105,23 +114,25 @@ private:
  * thread, as the main thread will be triggering the async callback method.
  * If the type is DETACHED, the async worker thread will be detached from the main thread and
  * will have its own execution cycle.
- *
+ * If the type is SELF_PACED, the async worker thread paces itself. The callback must block, for
+ * example in a hardware read().
  * @param thread_priority Priority of the async worker thread. Should be between 0 and 99.
  * @param cpu_affinity_cores CPU cores to which the async worker thread should be pinned.
  * If empty, the thread will not be pinned to any CPU core.
  * @param scheduling_policy Scheduling policy for the async worker thread. Can be either
- * SYNCHRONIZED or DETACHED.
+ * SYNCHRONIZED, DETACHED, or SELF_PACED.
  * @param exec_rate Execution rate of the async worker thread in Hz. Only used if the
- * scheduling_policy is DETACHED. Must be a positive integer.
+ * scheduling_policy is DETACHED or SELF_PACED. Must be a positive integer.
  * @param clock Clock to be used for the async worker thread. Only used if the scheduling_policy
- * is DETACHED.
+ * is DETACHED or SELF_PACED.
  * @param logger Logger to be used for the async worker thread. If not set, a default logger will be used.
  * @param trigger_predicate Predicate function to check if the async callback method should be triggered or not.
  * If not set, the async callback method will be triggered every time.
  * @param wait_until_initial_trigger Whether to wait until the initial trigger predicate is true before starting
  * the async callback method. If true, the async callback method will not be called until the trigger predicate
- * returns true for the first time. Very useful when the type is DETACHED.
+ * returns true for the first time. Very useful when the type is DETACHED or SELF_PACED.
  * @param print_warnings Whether to print warnings when the async callback method is not triggered due to any reason.
+ * @param thread_name The custom name for the async thread. Defaults to the component name. Will be truncated to 15 characters.
  */
 struct AsyncFunctionHandlerParams
 {
@@ -137,20 +148,25 @@ struct AsyncFunctionHandlerParams
         logger, "Invalid thread priority: %d. It should be between 0 and 99.", thread_priority);
       return false;
     }
-    if (scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+    if (
+      scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
+      scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
       if (!clock) {
-        RCLCPP_ERROR(logger, "Clock must be set when using DETACHED scheduling policy.");
+        RCLCPP_ERROR(
+          logger, "Clock must be set when using DETACHED or SELF_PACED scheduling policy.");
         return false;
       }
       if (exec_rate == 0u) {
-        RCLCPP_ERROR(logger, "Execution rate must be set when using DETACHED scheduling policy.");
+        RCLCPP_ERROR(
+          logger,
+          "Execution rate must be set when using DETACHED or SELF_PACED scheduling policy.");
         return false;
       }
     }
     if (scheduling_policy == AsyncSchedulingPolicy::UNKNOWN) {
       throw std::runtime_error(
         "AsyncFunctionHandlerParams: scheduling policy is unknown. "
-        "Please set it to either 'synchronized' or 'detached'.");
+        "Please set it to either 'synchronized', 'detached' or 'self_paced'.");
     }
     if (trigger_predicate == nullptr) {
       RCLCPP_ERROR(logger, "The parsed trigger predicate is not valid!");
@@ -172,12 +188,13 @@ struct AsyncFunctionHandlerParams
    * - cpu_affinity (int[]): CPU cores to which the async worker thread should be pinned.
    *   Default is empty, which means the thread will not be pinned to any CPU core.
    * - scheduling_policy (string): Scheduling policy for the async worker thread. Can be either
-   *   "synchronized" or "detached". Default is "synchronized".
+   *   "synchronized", "detached", or "self_paced". Default is "synchronized".
    * - execution_rate (int): Execution rate of the async worker thread in Hz.
    * - wait_until_initial_trigger (bool): Whether to wait until the initial trigger predicate is true
    *   before starting the async callback method. Default is true.
    * - print_warnings (bool): Whether to print warnings when the async callback method is not triggered
    *   due to any reason. Default is true.
+   * - thread_name (string): Name applied to the async thread. Defaults to component name. Truncated to 15 chars.
    * @param node The node that is used to get the parameters.
    * @param prefix Parameter prefix to use when accessing node parameters.
    */
@@ -199,7 +216,8 @@ struct AsyncFunctionHandlerParams
         AsyncSchedulingPolicy(node->get_parameter(prefix + "scheduling_policy").as_string());
     }
     if (
-      scheduling_policy == AsyncSchedulingPolicy::DETACHED &&
+      (scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
+       scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) &&
       node->has_parameter(prefix + "execution_rate")) {
       const int execution_rate =
         static_cast<int>(node->get_parameter(prefix + "execution_rate").as_int());
@@ -216,6 +234,9 @@ struct AsyncFunctionHandlerParams
     if (node->has_parameter(prefix + "print_warnings")) {
       print_warnings = node->get_parameter(prefix + "print_warnings").as_bool();
     }
+    if (node->has_parameter(prefix + "thread_name")) {
+      thread_name = node->get_parameter(prefix + "thread_name").as_string();
+    }
   }
 
   int thread_priority = 50;
@@ -227,6 +248,7 @@ struct AsyncFunctionHandlerParams
   std::function<bool()> trigger_predicate = []() { return true; };
   bool wait_until_initial_trigger = true;
   bool print_warnings = true;
+  std::string thread_name = "";
 };
 
 /**
@@ -332,11 +354,13 @@ public:
         params_.logger, "AsyncFunctionHandler: Exception caught in the async callback thread!");
       std::rethrow_exception(async_exception_ptr_);
     }
-    if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+    if (
+      params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED ||
+      params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
       RCLCPP_WARN_ONCE(
         params_.logger,
-        "AsyncFunctionHandler is configured with DETACHED scheduling policy. "
-        "This means that the async callback may not be synchronized with the main thread. ");
+        "AsyncFunctionHandler is configured with DETACHED or SELF_PACED scheduling policy. "
+        "This means that the async callback may not be synchronized with the main thread.");
       if (pause_thread_.load(std::memory_order_relaxed)) {
         {
           std::unique_lock<std::mutex> lock(async_mtx_);
@@ -562,14 +586,39 @@ public:
             params_.logger, !affinity_result.first,
             "Could not set CPU affinity for the async worker thread. Error: %s",
             affinity_result.second.c_str());
+
+          std::string cores_list_print =
+            fmt::format("[{}]", fmt::join(params_.cpu_affinity_cores, ", "));
+
           RCLCPP_WARN_EXPRESSION(
             params_.logger, affinity_result.first,
-            "Async worker thread is successfully pinned to the requested CPU cores!");
+            "Async worker thread successfully pinned to Cores: %s", cores_list_print.c_str());
         }
-        if (params_.scheduling_policy == AsyncSchedulingPolicy::SYNCHRONIZED) {
-          execute_synchronized_callback();
-        } else {
-          execute_detached_callback();
+        if (!params_.thread_name.empty()) {
+          const auto rename_result = realtime_tools::set_current_thread_name(params_.thread_name);
+
+          if (!rename_result.first) {
+            RCLCPP_WARN(
+              params_.logger, "Could not set thread name for the async worker thread. Error: %s",
+              rename_result.second.c_str());
+          } else {
+            RCLCPP_INFO(params_.logger, "%s", rename_result.second.c_str());
+          }
+        }
+
+        switch (static_cast<AsyncSchedulingPolicy::Value>(params_.scheduling_policy)) {
+          case AsyncSchedulingPolicy::SYNCHRONIZED:
+            execute_synchronized_callback();
+            break;
+          case AsyncSchedulingPolicy::DETACHED:
+          case AsyncSchedulingPolicy::SELF_PACED:
+            execute_detached_callback();
+            break;
+          default:
+            throw std::runtime_error(
+              "AsyncFunctionHandler: start_thread(): Not a valid scheduling policy, this should "
+              "never happen!");
+            break;
         }
       });
     }
@@ -605,11 +654,14 @@ private:
   {
     if (!params_.clock) {
       throw std::runtime_error(
-        "AsyncFunctionHandler: Clock must be set when using DETACHED scheduling policy.");
+        "AsyncFunctionHandler: Clock must be set when using DETACHED or SELF_PACED scheduling "
+        "policy.");
     }
     if (params_.exec_rate == 0u) {
       throw std::runtime_error(
-        "AsyncFunctionHandler: Execution rate must be set when using DETACHED scheduling policy.");
+        "AsyncFunctionHandler: Execution rate must be set when using DETACHED or SELF_PACED "
+        "scheduling "
+        "policy.");
     }
 
     auto const period = std::chrono::nanoseconds(1'000'000'000 / params_.exec_rate);
@@ -621,7 +673,11 @@ private:
     }
     // for calculating the measured period of the loop
     previous_time_ = params_.clock->now();
-    std::this_thread::sleep_for(period);
+    if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+      std::this_thread::sleep_for(period);
+    } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
+      previous_time_ = params_.clock->now() - rclcpp::Duration(period);
+    }
     std::chrono::steady_clock::time_point next_iteration_time{std::chrono::steady_clock::now()};
     while (!stop_async_callback_.load(std::memory_order_relaxed)) {
       {
@@ -645,23 +701,37 @@ private:
           last_execution_time_ = std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now() - start_time);
 
-          next_iteration_time += period;
-          const auto time_now = std::chrono::steady_clock::now();
-          if (next_iteration_time < time_now) {
-            const double time_diff =
-              std::chrono::duration<double, std::milli>(time_now - next_iteration_time).count();
-            const double cm_period = 1.e3 / static_cast<double>(params_.exec_rate);
-            const int overrun_count = static_cast<int>(std::ceil(time_diff / cm_period));
-            if (params_.print_warnings) {
-              RCLCPP_WARN_THROTTLE(
-                params_.logger, *params_.clock, 1000,
-                "Overrun detected! The async callback missed its desired rate of %d Hz. The loop "
-                "took %f ms (missed cycles : %d).",
-                params_.exec_rate, time_diff + cm_period, overrun_count + 1);
+          if (params_.scheduling_policy == AsyncSchedulingPolicy::DETACHED) {
+            next_iteration_time += period;
+            const auto time_now = std::chrono::steady_clock::now();
+            if (next_iteration_time < time_now) {
+              const double time_diff =
+                std::chrono::duration<double, std::milli>(time_now - next_iteration_time).count();
+              const double cm_period = 1.e3 / static_cast<double>(params_.exec_rate);
+              const int overrun_count = static_cast<int>(std::ceil(time_diff / cm_period));
+              if (params_.print_warnings) {
+                RCLCPP_WARN_THROTTLE(
+                  params_.logger, *params_.clock, 1000,
+                  "Overrun detected! The async callback missed its desired rate of %d Hz. The loop "
+                  "took %f ms (missed cycles : %d).",
+                  params_.exec_rate, time_diff + cm_period, overrun_count + 1);
+              }
+              next_iteration_time += (overrun_count * period);
             }
-            next_iteration_time += (overrun_count * period);
+            std::this_thread::sleep_until(next_iteration_time);
+          } else if (params_.scheduling_policy == AsyncSchedulingPolicy::SELF_PACED) {
+            const auto minimum_period = period / 10;
+            const auto last_period = last_execution_time_.load(std::memory_order_relaxed);
+            if (last_period < minimum_period) {
+              if (params_.print_warnings) {
+                RCLCPP_WARN_THROTTLE(
+                  params_.logger, *params_.clock, 1000,
+                  "The SELF_PACED callback took less than 10%% of the cycle period. Check whether "
+                  "your read() blocks. The handler sleeps for 100 us to protect the CPU.");
+              }
+              std::this_thread::sleep_for(std::chrono::microseconds(100));
+            }
           }
-          std::this_thread::sleep_until(next_iteration_time);
         }
         trigger_in_progress_ = false;
       }

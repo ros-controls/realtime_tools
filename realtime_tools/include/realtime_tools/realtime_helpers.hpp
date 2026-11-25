@@ -60,6 +60,15 @@ bool has_realtime_kernel();
 bool configure_sched_fifo(int priority);
 
 /**
+ * Configure SCHED_RR thread priority for the thread that calls this function.
+ * SCHED_RR threads of the same priority are time-sliced (round-robin)
+ * Useful on PREEMPT_RT kernels with multiple RT-priority threads.
+ * \param[in] priority scheduling priority (platform-dependent; on Linux typically 1-99)
+ * \returns true if configuring scheduler succeeded
+ */
+bool configure_sched_rr(int priority);
+
+/**
  * Locks the memory pages of the calling thread to prevent page faults.
  * By calling this method, the programs locks all pages mapped into the address
  * space of the calling process and future mappings. This means that the kernel
@@ -129,6 +138,15 @@ std::pair<bool, std::string> set_current_thread_affinity(int core);
  * and a message describing the result of the operation
 */
 std::pair<bool, std::string> set_current_thread_affinity(const std::vector<int> & cores);
+
+/**
+ * Configure the current thread name.
+ * \param[in] name The name for the thread.
+ * On Linux, it will be automatically truncated to 15 characters.
+ * \returns a pair of a boolean indicating whether the operation succeeded or not
+ * and a message describing the result of the operation
+*/
+std::pair<bool, std::string> set_current_thread_name(const std::string & name);
 
 /**
  * Method to get the amount of available cpu cores
